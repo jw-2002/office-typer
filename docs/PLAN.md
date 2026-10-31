@@ -2,7 +2,8 @@
 
 Build a playable prototype first, then layer on. Each phase should leave the game runnable.
 
-## Phase 0 - Foundations
+## Phase 0 - Foundations (done)
+
 - `git init`, `.gitignore` check, commit the current keyboard demo.
 - Add ESLint rules already in the Vite template, Prettier, Vitest, and a `@/` path alias.
 - Folder structure:
@@ -18,18 +19,21 @@ Build a playable prototype first, then layer on. Each phase should leave the gam
 - Decide world scale (see Decisions). Move the current keyboard under `scene/`.
 
 ## Phase 1 - Typing core (no 3D needed to test)
+
 - Pure `src/game/typing.ts`: an assignment state machine (position, mistakes, finished),
   accuracy, and rolling WPM. Unit-tested.
 - Assignment data file with a handful per length.
 - Global keydown feeds the engine (reuse the existing key listener rather than a second one).
 
 ## Phase 2 - Economy and saving
+
 - Game store: currency, owned upgrades, job level, stats (best WPM, total typed).
 - Upgrades and jobs as data. One generic `buy(upgradeId)` action, one generic `UpgradeCard`.
 - Payout formula in `src/game/economy.ts`, unit-tested.
 - Save/load to localStorage as one versioned JSON object with a migration function.
 
 ## Phase 3 - Office scene prototype
+
 - Room, desk, chair, computer and monitor built from primitives.
 - Monitor shows the assignment UI using drei `<Html transform>` (real DOM on the 3D screen,
   so text and tabs are normal React and CSS).
@@ -37,29 +41,37 @@ Build a playable prototype first, then layer on. Each phase should leave the gam
 - HUD overlay: WPM, currency, job.
 
 ## Phase 4 - Upgrades you can see and hear
+
 - Computer tiers change the monitor model and stats.
 - Switch types change key sound and feel (Web Audio, one sample per switch type, pitch jitter).
 - Shop UI (decide: a tab on the monitor, or clickable objects in the room).
 
 ## Phase 5 - Jobs and promotions
+
 - Promotion thresholds, new assignment tiers, title shown in HUD, a small promotion moment.
 - Length choice (Short/Standard/Long) on assignment select.
 
 ## Phase 6 - AI assistant tab
+
 - Tab on the monitor, auto-worker driven by a fixed-step game tick, tier upgrades.
 - Offline progress: on load, credit capped idle earnings from time since last save.
 
 ## Phase 7 - Scenery shop and polish
+
 - Buyable decor, replace primitives with real models, lighting pass, sound pass, balance pass.
 
 ## Phase 8 - Backend (later)
+
 - Auth, cloud save, leaderboard. See hosting notes below.
 
 ## Phase 9 - Monetisation (last)
+
 - Optional rewarded ad. Only after there are real players.
 
 ## Feasibility
+
 Yes, this is feasible, and none of it needs exotic tech. Rough risk ranking:
+
 1. **3D assets** are the biggest time sink, not the code. Mitigation: ship with primitive
    shapes (a stylised low-poly look from boxes/cylinders is a legitimate art style), then swap
    in free CC0 models (Kenney, Quaternius, Poly Pizza) or make a few in Blender and export as
@@ -75,6 +87,7 @@ Yes, this is feasible, and none of it needs exotic tech. Rough risk ranking:
 5. Scope. Phases 0-5 are a complete, fun game on their own.
 
 ## Hosting and database (free or cheap)
+
 Re-check free-tier limits when you get there, since they change.
 
 - **Frontend hosting**: Cloudflare Pages, Vercel or Netlify. All have free tiers and deploy
@@ -92,6 +105,7 @@ Re-check free-tier limits when you get there, since they change.
   localStorage now and Supabase later is a swap, not a rewrite.
 
 ## Decisions still open
+
 - Currency name (Credits vs Billable Hours vs other).
 - State library: plan is Zustand for game state (fine-grained subscriptions, readable from
   inside `useFrame`), with React context providers for audio, settings and auth.

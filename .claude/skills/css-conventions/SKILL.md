@@ -9,6 +9,7 @@ description: CSS conventions for the 2D UI of this project (HUD, shop, monitor s
 and the content shown on the in-world monitor via `<Html>`.
 
 ## Structure
+
 - **CSS Modules** per component (`Hud.module.css` beside `Hud.tsx`). No global class names
   except in `index.css`.
 - `src/index.css` holds the reset, base styles and **design tokens** as custom properties on
@@ -19,7 +20,10 @@ and the content shown on the in-world monitor via `<Html>`.
     --color-surface: #1f2937;
     --color-text: #e5e7eb;
     --color-accent: #f59e0b;
-    --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 1rem; --space-4: 1.5rem;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 1rem;
+    --space-4: 1.5rem;
     --radius: 0.5rem;
     --font-ui: system-ui, sans-serif;
     --font-mono: ui-monospace, monospace;
@@ -30,6 +34,7 @@ and the content shown on the in-world monitor via `<Html>`.
 - No duplicated declarations. Shared looks (panel, button) become a shared module or a token.
 
 ## Layout
+
 - The canvas fills the viewport. HUD is a sibling positioned over it. Set
   `pointer-events: none` on the HUD container and `pointer-events: auto` only on interactive
   children, so the 3D scene stays clickable underneath.
@@ -39,12 +44,14 @@ and the content shown on the in-world monitor via `<Html>`.
   should show a clear message on touch-only devices.
 
 ## The monitor screen
+
 - Content inside `<Html transform>` is scaled by the 3D transform. Size it with a fixed
   design resolution (for example 640x400) via CSS, and let `distanceFactor`/`scale` fit it to
   the monitor. Do not rely on viewport units there.
 - Match the screen's look to the computer tier (a theme class per tier that only swaps tokens).
 
 ## Accessibility
+
 - Visible `:focus-visible` outlines. Real `<button>` elements for actions.
 - Respect `prefers-reduced-motion` for UI animation.
 - Sufficient contrast. Do not convey state by colour alone (for example mistyped characters
@@ -52,5 +59,6 @@ and the content shown on the in-world monitor via `<Html>`.
 - Typing UI: mark the current character, typed-correct, and mistyped text distinctly.
 
 ## Before finishing
+
 No hard-coded colours or magic spacing outside tokens, no unused classes, and the 3D scene
 still receives pointer events through the HUD.
