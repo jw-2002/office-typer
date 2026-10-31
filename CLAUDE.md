@@ -1,4 +1,4 @@
-# Office Typist (working title)
+# Office Typer
 
 A 3D browser idle/grind game about typing. The player sits at an office desk, completes typing
 assignments shown on an in-world monitor, earns currency, and spends it on upgrades (computer,

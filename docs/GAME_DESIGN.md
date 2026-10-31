@@ -1,6 +1,6 @@
 # Game Design
 
-Working title: **Office Typist**. Tone: light, silly corporate satire.
+Title: **Office Typer**. Tone: light, silly corporate satire.
 
 ## Core loop
 1. An assignment appears on the in-world monitor (an email, memo, report, spreadsheet note...).
