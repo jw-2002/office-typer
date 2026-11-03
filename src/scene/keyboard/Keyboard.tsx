@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox, Text } from "@react-three/drei";
 import { Color, MathUtils, type Group, type MeshStandardMaterial } from "three";
+import { useKeyInput } from "@/state/useKeyInput";
 import { keys, layoutDepth, layoutWidth, type KeyDef } from "./layout";
 
 const KEY_HEIGHT = 0.6;
@@ -50,28 +51,8 @@ function Key({ def, pressed }: { def: KeyDef; pressed: Pressed }) {
 }
 
 export default function Keyboard() {
-  // A stable Set that is mutated in place: useFrame reads it, so pressing a key never re-renders React.
-  const [pressed] = useState<Pressed>(() => new Set());
-
-  useEffect(() => {
-    // event.code is the physical key, so this works regardless of keyboard layout.
-    const down = (e: KeyboardEvent) => {
-      pressed.add(e.code);
-      // Stop Space/Tab/arrows etc. from scrolling or moving focus, but leave browser shortcuts alone.
-      if (!e.ctrlKey && !e.metaKey && !["F5", "F11", "F12"].includes(e.code)) e.preventDefault();
-    };
-    const up = (e: KeyboardEvent) => pressed.delete(e.code);
-    const clear = () => pressed.clear();
-
-    window.addEventListener("keydown", down);
-    window.addEventListener("keyup", up);
-    window.addEventListener("blur", clear); // otherwise keys stick if you alt-tab while holding one
-    return () => {
-      window.removeEventListener("keydown", down);
-      window.removeEventListener("keyup", up);
-      window.removeEventListener("blur", clear);
-    };
-  }, [pressed]);
+  // A Set mutated in place by the key input provider: useFrame reads it, so pressing a key never re-renders React.
+  const { pressed } = useKeyInput();
 
   return (
     // Centre the board on the origin.

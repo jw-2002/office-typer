@@ -1,0 +1,30 @@
+.text {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.done {
+  color: var(--color-correct);
+}
+
+.todo {
+  color: var(--color-muted);
+}
+
+.current,
+.error {
+  border-radius: 0.2rem;
+  color: var(--color-bg);
+}
+
+.current {
+  background: var(--color-accent);
+}
+
+.error {
+  background: var(--color-error);
+  text-decoration: underline;
+}

@@ -18,7 +18,7 @@ Build a playable prototype first, then layer on. Each phase should leave the gam
   ```
 - Decide world scale (see Decisions). Move the current keyboard under `scene/`.
 
-## Phase 1 - Typing core (no 3D needed to test)
+## Phase 1 - Typing core (done)
 
 Done:
 
@@ -29,8 +29,11 @@ Done:
   behind an API. Sentence pools per tier plus `{slot}` fill-ins (`src/game/data/`), assembled
   to a target length (Short 120, Standard 300, Long 600 characters). Seeded rng, so it is
   repeatable and testable. About 3 KB gzipped for 90 sentences, about 5 microseconds to generate.
-- Still to do: connect the global keydown listener to the engine, then a plain 2D overlay to
-  play it (reuse the keyboard's existing listener rather than adding a second one).
+- `src/state/keyInput.ts` plus `KeyInputProvider`: one window key listener shared by the 3D keyboard
+  (held keys) and the typing game (typed characters). Ignores auto-repeat and Ctrl/Meta shortcuts.
+- `src/hooks/useAssignment.ts` and `src/ui/Hud.tsx`: a plain 2D overlay with live WPM, accuracy,
+  time, Short/Standard/Long buttons, and Enter for the next assignment. This moves onto the
+  in-world monitor in Phase 3.
 
 Content notes: all text must be typeable ASCII (tests enforce it). More sentences per tier are
 cheap to add. If content grows large, load tiers with dynamic `import()` so only the current
