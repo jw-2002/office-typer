@@ -1,13 +1,12 @@
-import { sentencePools } from "./data/sentences";
+import { scenarioPools, type DocumentKind } from "./data/scenarios";
 import { slots } from "./data/slots";
-import { titleTemplates } from "./data/titles";
 import { pick, shuffled, type Rng } from "./random";
 
+export type { DocumentKind };
 export type AssignmentLength = "short" | "standard" | "long";
-export type DocumentKind = keyof typeof titleTemplates;
 
 /** Target character counts. An assignment runs up to one sentence over its target. */
-export const LENGTH_TARGETS = { short: 120, standard: 300, long: 600 } as const satisfies Record<
+export const LENGTH_TARGETS = { short: 120, standard: 250, long: 450 } as const satisfies Record<
   AssignmentLength,
   number
 >;
@@ -20,33 +19,55 @@ export type Assignment = {
   text: string;
 };
 
-/** Replaces every {slot} with a random value from slots.ts. Unknown slots throw, so data typos surface early. */
-export function fillSlots(template: string, rng: Rng): string {
-  return template.replace(/\{(\w+)\}/g, (_match, name: string) => {
-    const options: readonly string[] | undefined = slots[name];
-    if (!options) throw new Error(`Unknown slot {${name}} in "${template}"`);
-    return pick(rng, options);
+/** {name2} and {name} are separate slots that draw from the same list ("name"). */
+export const slotBase = (slotName: string): string => slotName.replace(/\d+$/, "");
+
+/**
+ * Replaces every {slot} with a value from slots.ts. `chosen` remembers each slot's value, so reusing
+ * the same map keeps a name or day consistent across a whole assignment. Slots that share a list
+ * ({name}, {name2}) never get the same value. Unknown slots throw, so data typos surface early.
+ */
+export function fillSlots(template: string, rng: Rng, chosen = new Map<string, string>()): string {
+  return template.replace(/\{(\w+)\}/g, (_match, slotName: string) => {
+    const existing = chosen.get(slotName);
+    if (existing !== undefined) return existing;
+
+    const base = slotBase(slotName);
+    const options: readonly string[] | undefined = slots[base];
+    if (!options) throw new Error(`Unknown slot {${slotName}} in "${template}"`);
+
+    const taken = new Set([...chosen].filter(([name]) => slotBase(name) === base).map(([, value]) => value));
+    const free = options.filter((option) => !taken.has(option));
+    const value = pick(rng, free.length > 0 ? free : options);
+    chosen.set(slotName, value);
+    return value;
   });
 }
 
 /**
- * Builds an assignment from the sentence pool for `tier` (0 is easiest). Tiers beyond the available
+ * Builds one coherent document: a scenario from the pool for `tier` (0 is easiest), then its opening,
+ * shuffled body sentences up to the length target, and its closing. Tiers beyond the available
  * content reuse the hardest pool. Pass a seeded rng for repeatable output.
  */
 export function generateAssignment(tier: number, length: AssignmentLength, rng: Rng): Assignment {
-  const pool = sentencePools[Math.min(Math.max(tier, 0), sentencePools.length - 1)];
-  const target = LENGTH_TARGETS[length];
+  const scenarios = scenarioPools[Math.min(Math.max(tier, 0), scenarioPools.length - 1)];
+  const scenario = pick(rng, scenarios);
+  const chosen = new Map<string, string>();
+  const fill = (template: string) => fillSlots(template, rng, chosen);
 
-  // Shuffling first means no sentence repeats inside one assignment.
-  const sentences: string[] = [];
-  let size = 0;
-  for (const template of shuffled(rng, pool)) {
-    const sentence = fillSlots(template, rng);
+  const opening = fill(pick(rng, scenario.opening));
+  const closing = fill(pick(rng, scenario.closing));
+
+  // Fill the body until the text, including the closing line, reaches the target.
+  const sentences = [opening];
+  let size = opening.length + closing.length + 1;
+  for (const template of shuffled(rng, scenario.body)) {
+    if (size >= LENGTH_TARGETS[length]) break;
+    const sentence = fill(template);
     sentences.push(sentence);
     size += sentence.length + 1;
-    if (size > target) break;
   }
+  sentences.push(closing);
 
-  const kind = pick(rng, Object.keys(titleTemplates) as DocumentKind[]);
-  return { kind, title: fillSlots(pick(rng, titleTemplates[kind]), rng), text: sentences.join(" ") };
+  return { kind: scenario.kind, title: fill(scenario.title), text: sentences.join(" ") };
 }

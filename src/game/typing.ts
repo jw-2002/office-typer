@@ -1,15 +1,21 @@
 import { ROLLING_WINDOW_MS, rollingWpm, wpm } from "./wpm";
 
-// Rules: a wrong key is shown as a mistake and blocks progress until Backspace clears it.
-// Backspace cannot undo correct characters. Time is passed in so this stays pure and testable.
+// Rules (TypeRacer style): keys keep being accepted after a mistake, but everything typed from the
+// first mistake onward is wrong and must be removed with Backspace before progress continues.
+// Backspace never removes correct characters. Time is passed in so this stays pure and testable.
+
+/** How many wrong characters can pile up before further keys are ignored. */
+export const MAX_WRONG_CHARS = 10;
+
 export type TypingState = {
   readonly target: string;
   /** Number of characters typed correctly so far. */
   readonly cursor: number;
-  /** The mistyped key currently blocking progress, or null. */
-  readonly wrongKey: string | null;
+  /** Characters typed since the first mistake, in order. Empty when on track. */
+  readonly wrong: string;
+  /** Wrong keystrokes so far, including ones later erased. */
   readonly mistakes: number;
-  /** Keystrokes that counted (correct or wrong). Keys ignored while blocked are excluded. */
+  /** Keystrokes that counted (correct or wrong). Keys ignored at the wrong-character limit are excluded. */
   readonly keystrokes: number;
   readonly startedAt: number | null;
   readonly finishedAt: number | null;
@@ -21,7 +27,7 @@ export function createTyping(target: string): TypingState {
   return {
     target,
     cursor: 0,
-    wrongKey: null,
+    wrong: "",
     mistakes: 0,
     keystrokes: 0,
     startedAt: null,
@@ -34,23 +40,31 @@ export function isFinished(state: TypingState): boolean {
   return state.finishedAt !== null;
 }
 
+/** Everything the player has typed so far, correct and wrong. */
+export function typedText(state: TypingState): string {
+  return state.target.slice(0, state.cursor) + state.wrong;
+}
+
 /** `key` is a KeyboardEvent.key value. Callers should drop events with Ctrl or Meta held. */
 export function applyKey(state: TypingState, key: string, now: number): TypingState {
   if (isFinished(state)) return state;
 
   if (key === "Backspace") {
-    return state.wrongKey === null ? state : { ...state, wrongKey: null };
+    return state.wrong === "" ? state : { ...state, wrong: state.wrong.slice(0, -1) };
   }
 
   // Printable keys are a single character; "Shift", "Enter", "Dead" and friends are longer.
   if (key.length !== 1) return state;
-  if (state.wrongKey !== null) return state;
 
   const startedAt = state.startedAt ?? now;
   const keystrokes = state.keystrokes + 1;
 
-  if (key !== state.target[state.cursor]) {
-    return { ...state, startedAt, keystrokes, mistakes: state.mistakes + 1, wrongKey: key };
+  const onTrack = state.wrong === "" && key === state.target[state.cursor];
+  if (!onTrack) {
+    // Piling up errors past the limit, or past the end of the text, does nothing useful.
+    const wrongRoom = Math.min(MAX_WRONG_CHARS, state.target.length - state.cursor);
+    if (state.wrong.length >= wrongRoom) return state;
+    return { ...state, startedAt, keystrokes, mistakes: state.mistakes + 1, wrong: state.wrong + key };
   }
 
   const cursor = state.cursor + 1;

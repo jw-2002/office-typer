@@ -23,20 +23,27 @@ Build a playable prototype first, then layer on. Each phase should leave the gam
 Done:
 
 - `src/game/typing.ts`: pure typing state machine (`applyKey`), accuracy, final and live WPM.
-  Rule: a wrong key blocks progress until Backspace; Backspace cannot undo correct characters.
+  Rule (TypeRacer style): keys keep being accepted after a mistake, but everything typed from
+  the first mistake is wrong (shown red) and must be removed with Backspace. Backspace cannot
+  undo correct characters. At most 10 wrong characters pile up.
 - `src/game/wpm.ts`: WPM maths and the rolling window.
 - `src/game/assignments.ts`: `generateAssignment(tier, length, rng)`. Text lives in the app, not
-  behind an API. Sentence pools per tier plus `{slot}` fill-ins (`src/game/data/`), assembled
-  to a target length (Short 120, Standard 300, Long 600 characters). Seeded rng, so it is
-  repeatable and testable. About 3 KB gzipped for 90 sentences, about 5 microseconds to generate.
+  behind an API. Content is written as **scenarios** (`src/game/data/scenarios.ts`): one coherent
+  topic each (a jammed printer, a fire drill...) with opening lines, a pool of body sentences
+  and closing lines. An assignment is one scenario: an opening, shuffled body sentences up to the
+  length target (Short 120, Standard 250, Long 450 characters), and a closing. `{slot}` values
+  (names, days, things) stay the same across the whole assignment, and `{name2}` gives a
+  different value from the same list. Seeded rng, so it is repeatable and testable.
+  About 5 microseconds to generate, and a few KB of data.
 - `src/state/keyInput.ts` plus `KeyInputProvider`: one window key listener shared by the 3D keyboard
   (held keys) and the typing game (typed characters). Ignores auto-repeat and Ctrl/Meta shortcuts.
 - `src/hooks/useAssignment.ts` and `src/ui/Hud.tsx`: a plain 2D overlay with live WPM, accuracy,
-  time, Short/Standard/Long buttons, and Enter for the next assignment. This moves onto the
-  in-world monitor in Phase 3.
+  time, Short/Standard/Long buttons, and Enter for the next assignment. A "You typed" box shows
+  the real keys pressed, with mistakes in red. This moves onto the in-world monitor in Phase 3.
 
-Content notes: all text must be typeable ASCII (tests enforce it). More sentences per tier are
-cheap to add. If content grows large, load tiers with dynamic `import()` so only the current
+Content notes: all text must be typeable ASCII (tests enforce it). Body sentences must make sense
+in any order, because they are shuffled (no "Then...", "But..."). 4 scenarios per tier at the
+moment, so more scenarios are the main thing to add for variety. If content grows large, load tiers with dynamic `import()` so only the current
 tier is downloaded.
 
 ## Phase 2 - Economy and saving

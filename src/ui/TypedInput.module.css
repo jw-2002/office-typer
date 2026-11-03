@@ -1,0 +1,49 @@
+.input {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+}
+
+.label {
+  flex: none;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.typed {
+  min-width: 0;
+  overflow: hidden;
+  white-space: pre;
+}
+
+.placeholder {
+  color: var(--color-muted);
+}
+
+.correct {
+  color: var(--color-text);
+}
+
+/* Spaces typed by mistake would be invisible, so the red background is what shows them. */
+.wrong {
+  background: var(--color-error);
+  color: var(--color-bg);
+  text-decoration: underline;
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: var(--color-accent);
+}

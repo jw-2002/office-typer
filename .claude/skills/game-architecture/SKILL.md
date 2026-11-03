@@ -16,7 +16,9 @@ description: Architecture rules for the typing idle game's rules, economy, state
 
 ## Data-driven content
 
-Upgrades, jobs and assignments are typed arrays in `src/game/data/`. A new upgrade should be
+Upgrades, jobs and assignment text are typed arrays in `src/game/data/`. Assignment text is
+written as scenarios (opening, body, closing) so documents read coherently; body sentences are
+shuffled, so each must make sense in any order. A new upgrade should be
 one object, not new components. Shape example:
 
 ```ts
@@ -32,9 +34,10 @@ TypeScript should error if an upgrade has no visual.
 ## Typing engine
 
 - State: target text, cursor index, mistakes, started-at timestamp.
-- Input is one function: `applyKey(state, key, now) -> state`. Decided policy: a wrong key
-  is shown as a mistake and blocks progress until Backspace clears it. Backspace cannot
-  undo correct characters.
+- Input is one function: `applyKey(state, key, now) -> state`. Decided policy (TypeRacer
+  style): keys keep being accepted after a mistake, but everything typed from the first
+  mistake is wrong and must be removed with Backspace before progress continues. Backspace
+  cannot undo correct characters, and wrong characters are capped.
 - **WPM** = (correct characters / 5) / minutes. Show a rolling window (about the last 10 to
   15 seconds) for the live counter, and the full-assignment figure at the end. Best-ever WPM
   uses completed assignments only.

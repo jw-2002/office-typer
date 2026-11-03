@@ -1,20 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { fillSlots, generateAssignment, LENGTH_TARGETS, type AssignmentLength } from "./assignments";
-import { sentencePools } from "./data/sentences";
+import { LENGTH_TARGETS, fillSlots, generateAssignment, slotBase, type AssignmentLength } from "./assignments";
+import { scenarioPools } from "./data/scenarios";
 import { slots } from "./data/slots";
-import { titleTemplates } from "./data/titles";
 import { createRng } from "./random";
 
 const PRINTABLE_ASCII = /^[\x20-\x7e]+$/;
 const lengths = Object.keys(LENGTH_TARGETS) as AssignmentLength[];
 const usedSlots = (template: string) => [...template.matchAll(/\{(\w+)\}/g)].map((match) => match[1]);
+const allScenarios = scenarioPools.flat();
 
-describe("content data", () => {
-  const allTemplates = [...sentencePools.flat(), ...Object.values(titleTemplates).flat()];
+// Turns "Hi {name}." into a regex that matches any filled-in version of it.
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const toPattern = (template: string) => escapeRegExp(template).replace(/\\\{\w+\\\}/g, ".+?");
+
+describe("scenario data", () => {
+  const allTemplates = allScenarios.flatMap((s) => [s.title, ...s.opening, ...s.body, ...s.closing]);
 
   it("only uses slots that exist", () => {
     for (const template of allTemplates) {
-      for (const name of usedSlots(template)) expect(slots, `{${name}} in "${template}"`).toHaveProperty(name);
+      for (const name of usedSlots(template)) {
+        expect(slots, `{${name}} in "${template}"`).toHaveProperty(slotBase(name));
+      }
     }
   });
 
@@ -23,11 +29,29 @@ describe("content data", () => {
     for (const values of Object.values(slots)) values.forEach((value) => expect(value).toMatch(PRINTABLE_ASCII));
   });
 
-  it("has enough unique sentences per tier, each ending in punctuation", () => {
-    for (const pool of sentencePools) {
-      expect(pool.length).toBeGreaterThanOrEqual(25);
-      expect(new Set(pool).size).toBe(pool.length);
-      pool.forEach((sentence) => expect(sentence).toMatch(/[.!?]$/));
+  it("has enough tiers and scenarios", () => {
+    expect(scenarioPools.length).toBeGreaterThanOrEqual(3);
+    scenarioPools.forEach((pool) => expect(pool.length).toBeGreaterThanOrEqual(4));
+  });
+
+  it("gives every scenario enough material, with sentences that end in punctuation", () => {
+    for (const scenario of allScenarios) {
+      expect(scenario.opening.length, scenario.title).toBeGreaterThanOrEqual(2);
+      expect(scenario.closing.length, scenario.title).toBeGreaterThanOrEqual(2);
+      expect(scenario.body.length, scenario.title).toBeGreaterThanOrEqual(8);
+      expect(new Set(scenario.body).size).toBe(scenario.body.length);
+      for (const sentence of [...scenario.opening, ...scenario.body, ...scenario.closing]) {
+        expect(sentence).toMatch(/[.!?]$/);
+      }
+    }
+  });
+
+  it("does not start body sentences with a connective that points at the sentence before", () => {
+    // Body sentences are shuffled, so "Then ..." or "But ..." would refer to nothing.
+    for (const scenario of allScenarios) {
+      for (const sentence of scenario.body) {
+        expect(sentence, sentence).not.toMatch(/^(Then|So|But|And|Also|However|Therefore|Next|After that)/);
+      }
     }
   });
 });
@@ -37,6 +61,20 @@ describe("fillSlots", () => {
     const result = fillSlots("Hi {name}, see {thing}.", createRng(1));
     expect(result).not.toContain("{");
     expect(slots.name.some((name) => result.includes(name))).toBe(true);
+  });
+
+  it("keeps a slot's value the same within one map", () => {
+    const chosen = new Map<string, string>();
+    const a = fillSlots("{name}|{thing}|{day}", createRng(1), chosen);
+    const b = fillSlots("{day}|{thing}|{name}", createRng(2), chosen);
+    expect(b.split("|").reverse()).toEqual(a.split("|"));
+  });
+
+  it("gives numbered slots a different value from the same list", () => {
+    for (let seed = 0; seed < 50; seed++) {
+      const [first, second] = fillSlots("{name}|{name2}", createRng(seed)).split("|");
+      expect(first).not.toBe(second);
+    }
   });
 
   it("throws on an unknown slot", () => {
@@ -50,13 +88,13 @@ describe("generateAssignment", () => {
   });
 
   it("varies between seeds", () => {
-    const texts = new Set([1, 2, 3, 4, 5].map((seed) => generateAssignment(0, "standard", createRng(seed)).text));
+    const texts = new Set([1, 2, 3, 4, 5, 6].map((seed) => generateAssignment(0, "standard", createRng(seed)).text));
     expect(texts.size).toBeGreaterThan(1);
   });
 
   it.each(lengths)("reaches the %s target without running far past it", (length) => {
-    for (let tier = 0; tier < sentencePools.length; tier++) {
-      for (let seed = 0; seed < 25; seed++) {
+    for (let tier = 0; tier < scenarioPools.length; tier++) {
+      for (let seed = 0; seed < 40; seed++) {
         const { text } = generateAssignment(tier, length, createRng(seed));
         expect(text.length, `tier ${tier} seed ${seed}`).toBeGreaterThanOrEqual(LENGTH_TARGETS[length]);
         expect(text.length).toBeLessThan(LENGTH_TARGETS[length] + 120);
@@ -65,7 +103,7 @@ describe("generateAssignment", () => {
   });
 
   it("produces typeable text with every slot filled", () => {
-    for (let seed = 0; seed < 50; seed++) {
+    for (let seed = 0; seed < 60; seed++) {
       const { text, title } = generateAssignment(seed % 3, lengths[seed % 3], createRng(seed));
       for (const value of [text, title]) {
         expect(value).toMatch(PRINTABLE_ASCII);
@@ -74,10 +112,34 @@ describe("generateAssignment", () => {
     }
   });
 
-  it("does not repeat a sentence template inside one assignment", () => {
-    const { text } = generateAssignment(0, "long", createRng(5));
-    const sentences = text.split(/(?<=[.!?]) /);
-    expect(new Set(sentences).size).toBe(sentences.length);
+  it("uses the same names, days and things in the title and the text", () => {
+    // The "Re: {thing}" email puts the thing in its title and again in its opening line.
+    const titled = Array.from({ length: 200 }, (_, seed) => generateAssignment(1, "short", createRng(seed))).filter(
+      ({ title }) => title.startsWith("Re: the "),
+    );
+    expect(titled.length).toBeGreaterThan(0);
+    for (const { title, text } of titled) expect(text).toContain(title.slice("Re: ".length));
+  });
+
+  it("is one scenario: one of its opening lines first and one of its closing lines last", () => {
+    for (let tier = 0; tier < scenarioPools.length; tier++) {
+      for (let seed = 0; seed < 40; seed++) {
+        const { text } = generateAssignment(tier, "standard", createRng(seed));
+        const fits = scenarioPools[tier].some(
+          (scenario) =>
+            scenario.opening.some((line) => new RegExp(`^${toPattern(line)} `).test(text)) &&
+            scenario.closing.some((line) => new RegExp(` ${toPattern(line)}$`).test(text)),
+        );
+        expect(fits, `tier ${tier} seed ${seed}: ${text}`).toBe(true);
+      }
+    }
+  });
+
+  it("does not repeat a body sentence inside one assignment", () => {
+    for (let seed = 0; seed < 20; seed++) {
+      const sentences = generateAssignment(0, "long", createRng(seed)).text.split(/(?<=[.!?]) /);
+      expect(new Set(sentences).size).toBe(sentences.length);
+    }
   });
 
   it("reuses the hardest tier for tiers beyond the content", () => {

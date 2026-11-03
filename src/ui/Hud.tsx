@@ -2,6 +2,7 @@ import { LENGTH_TARGETS, type AssignmentLength } from "@/game/assignments";
 import { accuracy, elapsedMs, liveWpm } from "@/game/typing";
 import { useAssignment } from "@/hooks/useAssignment";
 import AssignmentText from "./AssignmentText";
+import TypedInput from "./TypedInput";
 import styles from "./Hud.module.css";
 
 const lengths = Object.keys(LENGTH_TARGETS) as AssignmentLength[];
@@ -28,38 +29,39 @@ export default function Hud() {
         <Stat label="Time" value={`${seconds.toFixed(1)}s`} />
       </div>
 
-      <section className={styles.panel}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>{assignment.title}</h1>
-          <div className={styles.lengths}>
-            {lengths.map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={styles.button}
-                aria-pressed={option === length}
-                // Stops the button taking focus, so Space and Enter keep going to the typing game.
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => chooseLength(option)}
-              >
-                {capitalise(option)}
-              </button>
-            ))}
-          </div>
-        </header>
+      <div className={styles.bottom}>
+        <section className={styles.panel}>
+          <header className={styles.header}>
+            <h1 className={styles.title}>{assignment.title}</h1>
+            <div className={styles.lengths}>
+              {lengths.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className={styles.button}
+                  aria-pressed={option === length}
+                  // Stops the button taking focus, so Space and Enter keep going to the typing game.
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => chooseLength(option)}
+                >
+                  {capitalise(option)}
+                </button>
+              ))}
+            </div>
+          </header>
 
-        <AssignmentText typing={typing} />
+          <AssignmentText typing={typing} />
 
-        <p className={styles.hint} aria-live="polite">
-          {finished
-            ? "Assignment complete. Press Enter for the next one."
-            : typing.wrongKey !== null
-              ? "Wrong key. Press Backspace to fix it."
-              : typing.startedAt === null
-                ? "Start typing."
+          <p className={styles.hint} aria-live="polite">
+            {finished
+              ? "Assignment complete. Press Enter for the next one."
+              : typing.wrong !== ""
+                ? "Mistake. Press Backspace to remove the red text."
                 : ""}
-        </p>
-      </section>
+          </p>
+        </section>
+        <TypedInput typing={typing} />
+      </div>
     </div>
   );
 }

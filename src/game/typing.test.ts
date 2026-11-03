@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { accuracy, applyKey, createTyping, finalWpm, isFinished, liveWpm, type TypingState } from "./typing";
+import {
+  MAX_WRONG_CHARS,
+  accuracy,
+  applyKey,
+  createTyping,
+  finalWpm,
+  isFinished,
+  liveWpm,
+  typedText,
+  type TypingState,
+} from "./typing";
 
-// Types each character of `keys` one second apart, starting at `start`.
+// Presses each key one second apart, starting at `start`.
 function type(state: TypingState, keys: readonly string[], start = 0): TypingState {
   return keys.reduce((s, key, i) => applyKey(s, key, start + i * 1000), state);
 }
@@ -14,25 +24,39 @@ describe("applyKey", () => {
     expect(state.finishedAt).toBe(1000);
   });
 
-  it("blocks on a wrong key until Backspace clears it", () => {
-    let state = type(createTyping("cat"), ["c", "x"]);
-    expect(state.wrongKey).toBe("x");
+  it("keeps accepting keys after a mistake, but they are all wrong until removed", () => {
+    // 'c' is right, 'x' is wrong, then 'a' would have been right but is now part of the error run.
+    const state = type(createTyping("cat"), ["c", "x", "a"]);
     expect(state.cursor).toBe(1);
+    expect(state.wrong).toBe("xa");
+    expect(typedText(state)).toBe("cxa");
+  });
 
-    // Further keys are ignored while blocked, even the right one.
-    state = type(state, ["a"], 5000);
-    expect(state.cursor).toBe(1);
-    expect(state.keystrokes).toBe(2);
-
+  it("removes wrong characters one at a time with Backspace, then continues", () => {
+    let state = type(createTyping("cat"), ["c", "x", "y"]);
+    state = type(state, ["Backspace"], 5000);
+    expect(state.wrong).toBe("x");
     state = type(state, ["Backspace", "a", "t"], 6000);
-    expect(state.wrongKey).toBeNull();
+    expect(state.wrong).toBe("");
     expect(isFinished(state)).toBe(true);
-    expect(state.mistakes).toBe(1);
   });
 
   it("does not let Backspace undo correct characters", () => {
-    const state = type(createTyping("cat"), ["c", "a", "Backspace"]);
+    const state = type(createTyping("cat"), ["c", "a", "Backspace", "Backspace"]);
     expect(state.cursor).toBe(2);
+    expect(state.wrong).toBe("");
+  });
+
+  it("stops accepting wrong characters at the limit", () => {
+    const state = type(createTyping("a".repeat(50)), Array(MAX_WRONG_CHARS + 5).fill("x"));
+    expect(state.wrong).toHaveLength(MAX_WRONG_CHARS);
+    expect(state.keystrokes).toBe(MAX_WRONG_CHARS);
+  });
+
+  it("never lets the error run extend past the end of the text", () => {
+    const state = type(createTyping("abc"), ["a", "x", "x", "x", "x"]);
+    expect(state.wrong).toBe("xx");
+    expect(state.cursor + state.wrong.length).toBe(3);
   });
 
   it("ignores non-printable keys", () => {
@@ -49,8 +73,7 @@ describe("applyKey", () => {
   });
 
   it("is case and space sensitive", () => {
-    const state = type(createTyping("A b"), ["a"]);
-    expect(state.wrongKey).toBe("a");
+    expect(type(createTyping("A b"), ["a"]).wrong).toBe("a");
     expect(type(createTyping("A b"), ["A", " ", "b"]).cursor).toBe(3);
   });
 
@@ -72,10 +95,11 @@ describe("accuracy", () => {
     expect(accuracy(createTyping("a"))).toBe(1);
   });
 
-  it("counts only keystrokes that were not ignored", () => {
-    // 1 correct, 1 wrong, 1 ignored while blocked, backspace, 1 correct = 3 counted, 1 wrong.
-    const state = type(createTyping("ab"), ["a", "x", "b", "Backspace", "b"]);
-    expect(accuracy(state)).toBeCloseTo(2 / 3);
+  it("counts every key in an error run as a mistake, even after it is erased", () => {
+    // a ok, x wrong, b wrong (it follows an error), Backspace x2, b ok = 4 counted keys, 2 wrong.
+    const state = type(createTyping("abcd"), ["a", "x", "b", "Backspace", "Backspace", "b"]);
+    expect(state.mistakes).toBe(2);
+    expect(accuracy(state)).toBeCloseTo(2 / 4);
   });
 });
 
@@ -88,10 +112,8 @@ describe("wpm", () => {
 
   it("liveWpm ramps up then decays when you stop", () => {
     const state = type(createTyping("a".repeat(100)), Array(30).fill("a"));
-    const typing = liveWpm(state, 29_000);
-    const idle = liveWpm(state, 60_000);
-    expect(typing).toBeGreaterThan(0);
-    expect(idle).toBe(0);
+    expect(liveWpm(state, 29_000)).toBeGreaterThan(0);
+    expect(liveWpm(state, 60_000)).toBe(0);
   });
 
   it("liveWpm switches to the final figure when done", () => {
