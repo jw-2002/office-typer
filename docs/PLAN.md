@@ -20,10 +20,21 @@ Build a playable prototype first, then layer on. Each phase should leave the gam
 
 ## Phase 1 - Typing core (no 3D needed to test)
 
-- Pure `src/game/typing.ts`: an assignment state machine (position, mistakes, finished),
-  accuracy, and rolling WPM. Unit-tested.
-- Assignment data file with a handful per length.
-- Global keydown feeds the engine (reuse the existing key listener rather than a second one).
+Done:
+
+- `src/game/typing.ts`: pure typing state machine (`applyKey`), accuracy, final and live WPM.
+  Rule: a wrong key blocks progress until Backspace; Backspace cannot undo correct characters.
+- `src/game/wpm.ts`: WPM maths and the rolling window.
+- `src/game/assignments.ts`: `generateAssignment(tier, length, rng)`. Text lives in the app, not
+  behind an API. Sentence pools per tier plus `{slot}` fill-ins (`src/game/data/`), assembled
+  to a target length (Short 120, Standard 300, Long 600 characters). Seeded rng, so it is
+  repeatable and testable. About 3 KB gzipped for 90 sentences, about 5 microseconds to generate.
+- Still to do: connect the global keydown listener to the engine, then a plain 2D overlay to
+  play it (reuse the keyboard's existing listener rather than adding a second one).
+
+Content notes: all text must be typeable ASCII (tests enforce it). More sentences per tier are
+cheap to add. If content grows large, load tiers with dynamic `import()` so only the current
+tier is downloaded.
 
 ## Phase 2 - Economy and saving
 

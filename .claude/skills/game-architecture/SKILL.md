@@ -32,8 +32,9 @@ TypeScript should error if an upgrade has no visual.
 ## Typing engine
 
 - State: target text, cursor index, mistakes, started-at timestamp.
-- Input is one function: `applyKey(state, key) -> state`. Backspace policy is a decision
-  (default: mistyped characters must be corrected before continuing).
+- Input is one function: `applyKey(state, key, now) -> state`. Decided policy: a wrong key
+  is shown as a mistake and blocks progress until Backspace clears it. Backspace cannot
+  undo correct characters.
 - **WPM** = (correct characters / 5) / minutes. Show a rolling window (about the last 10 to
   15 seconds) for the live counter, and the full-assignment figure at the end. Best-ever WPM
   uses completed assignments only.
