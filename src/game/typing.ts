@@ -78,6 +78,15 @@ export function applyKey(state: TypingState, key: string, now: number): TypingSt
   };
 }
 
+/**
+ * Moves the clock forward by `deltaMs`, as if that stretch of time never happened. Used to ignore time
+ * the player spent away from the game, so walking off mid-assignment does not wreck their WPM.
+ */
+export function shiftTime(state: TypingState, deltaMs: number): TypingState {
+  if (isFinished(state) || state.startedAt === null || deltaMs <= 0) return state;
+  return { ...state, startedAt: state.startedAt + deltaMs, recent: state.recent.map((time) => time + deltaMs) };
+}
+
 /** Share of counted keystrokes that were correct, from 0 to 1. */
 export function accuracy(state: TypingState): number {
   if (state.keystrokes === 0) return 1;

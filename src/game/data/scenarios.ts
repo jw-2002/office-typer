@@ -12,6 +12,8 @@
 export type DocumentKind = "email" | "memo" | "report";
 
 export type Scenario = {
+  /** Stable name, used to avoid showing the same scenario twice in a row. */
+  id: string;
   kind: DocumentKind;
   /** Shown as the document heading. Not typed by the player. */
   title: string;
@@ -23,6 +25,7 @@ export type Scenario = {
 // Tier 1: short plain words, almost no punctuation, no digits.
 const intern: readonly Scenario[] = [
   {
+    id: "printer",
     kind: "email",
     title: "Re: the printer",
     opening: ["Hi {name}, I need to tell you about the printer.", "Hello {name}, the printer is broken again."],
@@ -43,6 +46,7 @@ const intern: readonly Scenario[] = [
     closing: ["Please send help when you can.", "Thank you for reading this far."],
   },
   {
+    id: "fridge",
     kind: "memo",
     title: "Notice about the fridge",
     opening: ["Hello all, this is a note about the fridge.", "Dear team, we need to talk about the fridge."],
@@ -63,6 +67,7 @@ const intern: readonly Scenario[] = [
     closing: ["Thank you for your help.", "That is all for now."],
   },
   {
+    id: "welcome",
     kind: "email",
     title: "Welcome to the team",
     opening: ["Hi {name}, welcome to the team.", "Hello {name}, we are happy you are here."],
@@ -83,6 +88,7 @@ const intern: readonly Scenario[] = [
     closing: ["We hope you like it here.", "Please ask us if you need anything."],
   },
   {
+    id: "fire-drill",
     kind: "memo",
     title: "Fire drill on {day}",
     opening: ["Hello all, there is a fire drill on {day}.", "Dear team, please read this about the fire drill."],
@@ -102,11 +108,138 @@ const intern: readonly Scenario[] = [
     ],
     closing: ["Thank you for staying calm.", "That is all for now."],
   },
+  {
+    id: "stapler",
+    kind: "email",
+    title: "Where is my stapler?",
+    opening: ["Hi {name}, I am writing about my stapler.", "Hello {name}, has anyone seen my stapler?"],
+    body: [
+      "It is red and it has my name on it.",
+      "I last saw it on {day}.",
+      "Someone left a paper clip where my stapler used to be.",
+      "A paper clip is no use to anyone.",
+      "I have looked under my desk twice.",
+      "I have looked in the kitchen and the lift.",
+      "{name2} says the stapler was never here.",
+      "I know the stapler was here.",
+      "The stapler and I had a good thing going.",
+      "Everything I print now falls apart.",
+      "Nobody at {dept} will look me in the eye.",
+      "Please check your bags before you go home.",
+    ],
+    closing: ["Please let me know if you find it.", "Thank you for your time and your honesty."],
+  },
+  {
+    id: "cake",
+    kind: "memo",
+    title: "Cake in the kitchen",
+    opening: ["Hello all, there is cake in the kitchen.", "Dear team, good news, there is cake."],
+    body: [
+      "The cake is for {name}, and it is a birthday cake.",
+      "It is a very big cake.",
+      "There are not enough plates.",
+      "There are not enough forks.",
+      "Please use the spoons that nobody likes.",
+      "Do not take the biggest piece.",
+      "Do not take two pieces before everyone has had one.",
+      "I will be watching from my desk.",
+      "{name2} has already had three pieces.",
+      "Please leave some for {dept}.",
+      "The cake will not last until {day}.",
+      "Wash your plate when you are done.",
+    ],
+    closing: ["Enjoy the cake, everyone.", "That is all, now go and eat."],
+  },
+  {
+    id: "gerald-the-plant",
+    kind: "memo",
+    title: "A note about Gerald the plant",
+    opening: ["Dear team, we need to talk about Gerald the plant.", "Hello all, this note is about Gerald, our plant."],
+    body: [
+      "Gerald needs water on {day}.",
+      "Gerald does not like coffee.",
+      "Please stop pouring coffee in Gerald.",
+      "Gerald sits by the window to get some sun.",
+      "Gerald has been here longer than most of us.",
+      "{name} says Gerald is looking sad.",
+      "{name2} says Gerald is looking fine.",
+      "Gerald has dropped three leaves this week.",
+      "Please do not hang your coat on Gerald.",
+      "Gerald is not a coat stand.",
+      "{dept} wanted to take Gerald away.",
+      "We said no, because Gerald is family.",
+    ],
+    closing: ["Thank you for looking after Gerald.", "Gerald says thank you too."],
+  },
+  {
+    id: "broken-lift",
+    kind: "memo",
+    title: "The lift is broken",
+    opening: ["Hello all, the lift is broken again.", "Dear team, please read this before you use the lift."],
+    body: [
+      "The lift has been stuck on the third floor since {day}.",
+      "Please use the stairs until further notice.",
+      "The stairs are very long and very steep.",
+      "The man from {dept} is coming to fix it.",
+      "He said he would come last week.",
+      "If you get stuck, press the red button.",
+      "Do not press the red button for fun.",
+      "The music in the lift has stopped, which is a mercy.",
+      "{name} got stuck for an hour and missed lunch.",
+      "{name} is still upset about the lunch.",
+      "Please carry your own boxes upstairs.",
+      "Be kind to your knees.",
+    ],
+    closing: ["Thank you for your patience.", "We will let you know when it works."],
+  },
+  {
+    id: "lunch-order",
+    kind: "email",
+    title: "Lunch order for {day}",
+    opening: ["Hi all, I am taking the lunch order for {day}.", "Hello team, it is time to pick your lunch."],
+    body: [
+      "Please tell me what you want by ten.",
+      "The shop has sandwiches and soup.",
+      "The soup is the same soup as last time.",
+      "The sandwiches are also the same as last time.",
+      "{name} wants a cheese sandwich again.",
+      "{name2} wants whatever is the cheapest.",
+      "Please do not ask for anything that is not on the list.",
+      "I cannot carry more than six bags.",
+      "I will need the money first.",
+      "Please bring the exact change.",
+      "Last time someone paid me in biscuits.",
+      "The biscuits were good, but I cannot spend them.",
+    ],
+    closing: ["Thank you, and I hope you are hungry.", "Please be nice to the person with the bags."],
+  },
+  {
+    id: "quiet-word",
+    kind: "email",
+    title: "A quiet word",
+    opening: ["Hi {name}, I would like to have a quiet word.", "Hello {name}, please do not take this the wrong way."],
+    body: [
+      "Your chair squeaks when you sit down.",
+      "Your chair squeaks when you stand up.",
+      "Your chair squeaks when you do nothing at all.",
+      "I can hear your keyboard from the lift.",
+      "I can hear you eating crisps from the car park.",
+      "You hum when you are thinking.",
+      "The humming is very nice but also very loud.",
+      "{name2} wears headphones now because of it.",
+      "I am sure it is not on purpose.",
+      "We could swap your chair for a quiet one.",
+      "We could swap your crisps for a banana.",
+      "I will bring a banana on {day}.",
+    ],
+    closing: ["Thank you for understanding.", "I hope we can still be friends."],
+  },
 ];
 
 // Tier 2: commas, apostrophes, capitals and numbers.
 const associate: readonly Scenario[] = [
   {
+    id: "overdue-task",
     kind: "email",
     title: "Re: {thing}",
     opening: [
@@ -127,6 +260,7 @@ const associate: readonly Scenario[] = [
     closing: ["Thanks in advance, and sorry for the nagging.", "Let me know if there's anything I can do."],
   },
   {
+    id: "all-hands",
     kind: "memo",
     title: "Memo from {dept}",
     opening: [
@@ -147,6 +281,7 @@ const associate: readonly Scenario[] = [
     closing: ["Thanks, and see you there, whether you like it or not.", "That's all for now, folks."],
   },
   {
+    id: "meeting-room",
     kind: "email",
     title: "Booking the meeting room",
     opening: [
@@ -167,6 +302,7 @@ const associate: readonly Scenario[] = [
     closing: ["Thanks, I owe you a coffee.", "Sorry again, and thanks for your patience."],
   },
   {
+    id: "casual-friday",
     kind: "memo",
     title: "Reminder for all staff",
     opening: ["Hi team, a quick reminder about casual Friday.", "Hello everyone, we need to talk about casual Friday."],
@@ -183,11 +319,141 @@ const associate: readonly Scenario[] = [
     ],
     closing: ["Thanks, and enjoy your Friday.", "That's all, so let's keep it smart-ish."],
   },
+  {
+    id: "holiday-request",
+    kind: "email",
+    title: "Holiday request: {day}",
+    opening: [
+      "Hi {name}, I'd like to book some holiday, if that's all right.",
+      "Hello {name}, I'm writing to request a few days off.",
+    ],
+    body: [
+      "I'd like {n} days off, starting on {day}.",
+      "I've got {n2} days left, and I've never used them.",
+      "I promise my work will be done before I go.",
+      "{name2} has agreed to cover for me, in exchange for biscuits.",
+      "I won't be checking my email, unless it's urgent.",
+      "Please don't define urgent as anything from {dept}.",
+      "I'm going somewhere with a beach, a hammock, and no signal.",
+      "My out-of-office will say I'm in a meeting, which is almost true.",
+      "If anything breaks, please don't call me, call {name2}.",
+    ],
+    closing: ["Thanks so much, you're the best.", "Let me know if that works, and I'll book it."],
+  },
+  {
+    id: "team-building",
+    kind: "memo",
+    title: "Team building day",
+    opening: [
+      "Hello team, we're having a team-building day on {day}.",
+      "Dear all, you'll be pleased to hear that team building is back.",
+    ],
+    body: [
+      "Attendance is voluntary, in the way that Mondays are voluntary.",
+      "We'll start with an icebreaker, which nobody enjoys.",
+      "There will be a trust fall, so please wear sensible shoes.",
+      "{name} has volunteered to be caught.",
+      "{name2} has volunteered to do the catching, which is concerning.",
+      "Lunch will be sandwiches, and we've ordered {n} of them.",
+      "The afternoon includes an escape room, so bring a snack.",
+      "The aim is to work together, though {dept} will probably take over.",
+      "Prizes will be awarded, mostly in the form of stationery.",
+    ],
+    closing: [
+      "We're looking forward to seeing you, and your enthusiasm.",
+      "Please arrive on time, or we'll start without you.",
+    ],
+  },
+  {
+    id: "expenses-claim",
+    kind: "email",
+    title: "Your expenses claim",
+    opening: [
+      "Hi {name}, I've had a look at your expenses claim.",
+      "Hello {name}, we need to talk about your expenses, I'm afraid.",
+    ],
+    body: [
+      "I've counted {n} receipts, and {n2} of them are for biscuits.",
+      "The taxi receipt is dated {day}, but you were on holiday.",
+      "A claim for emotional support coffee isn't allowed.",
+      "{dept} has asked me to remind you that stationery isn't a personal gift.",
+      "Please attach the original receipts, not photos of receipts.",
+      "Please don't write miscellaneous on every line.",
+      "Your total is a lot higher than we expected, and a lot lower than you'd like.",
+      "{name2} will review it, but don't expect a quick answer.",
+      "I've highlighted the problem lines, and it's most of them.",
+    ],
+    closing: ["Thanks, and sorry to be the bearer of bad news.", "Please fix it by {day}, or it'll be rejected."],
+  },
+  {
+    id: "it-ticket",
+    kind: "email",
+    title: "Re: Re: Your IT ticket",
+    opening: [
+      "Hi {name}, thanks for contacting the helpdesk, your ticket number is {n}.",
+      "Hello {name}, we've received your request, and we're thrilled.",
+    ],
+    body: [
+      "Have you tried turning it off and on again?",
+      "We've tried turning it off and on again, and nothing has changed.",
+      "Your issue has been escalated to {name2}, who's on holiday.",
+      "Sending the same request {n2} times won't make it faster.",
+      "Your password has expired, and so has the one we sent you.",
+      "We can't reset your password until you remember your old password.",
+      "Please don't open any emails that say you've won a prize.",
+      "The server is fine, it's your computer that's the problem.",
+      "We'll be with you shortly, which is a very flexible word.",
+    ],
+    closing: ["Thanks for your patience, and for not shouting.", "This ticket will now be closed, as no one replied."],
+  },
+  {
+    id: "coffee-machine",
+    kind: "memo",
+    title: "The new coffee machine",
+    opening: [
+      "Dear staff, we're delighted to announce a new coffee machine.",
+      "Hello everyone, the old coffee machine has finally given up.",
+    ],
+    body: [
+      "The new machine has {n} buttons, and none of them are labelled.",
+      "Please don't press all of them at once.",
+      "It makes a noise like a small aeroplane.",
+      "The old machine will be given a quiet send-off on {day}.",
+      "{name} cried a little, but it was a happy sort of cry.",
+      "Please use the cups provided, and not the vase.",
+      "{dept} has set a limit of {n2} coffees per person, per day.",
+      "The limit will not be enforced, but it will be remembered.",
+      "If it beeps three times, step away slowly.",
+    ],
+    closing: ["Enjoy your coffee, responsibly.", "That's all, so go and caffeinate."],
+  },
+  {
+    id: "performance-review",
+    kind: "email",
+    title: "Your performance review",
+    opening: [
+      "Hi {name}, it's time for your annual performance review.",
+      "Hello {name}, we've scheduled your review for {day}, so please don't panic.",
+    ],
+    body: [
+      "You're meeting expectations, which is the polite way of saying fine.",
+      "Your strengths include punctuality, enthusiasm, and having a desk.",
+      "Your areas for growth include the same things, but more.",
+      "{name2} says you're a team player, mostly on Fridays.",
+      "You've sent {n} emails this year, and {n2} of them were replies.",
+      "Please bring examples of your work, or just a good story.",
+      "We'll discuss your goals, and then we'll set some new ones.",
+      "There's no raise this year, but there's a very nice certificate.",
+      "{dept} would like you to know that they're watching, kindly.",
+    ],
+    closing: ["Thanks, and see you there, with biscuits.", "Please don't worry, it's mostly a formality."],
+  },
 ];
 
 // Tier 3: full punctuation, brackets, quotes, symbols and longer words.
 const manager: readonly Scenario[] = [
   {
+    id: "quarterly-results",
     kind: "report",
     title: "{dept} report: Q{q} results",
     opening: [
@@ -210,6 +476,7 @@ const manager: readonly Scenario[] = [
     ],
   },
   {
+    id: "strategy-pivot",
     kind: "email",
     title: "Fwd: Fwd: {thing}",
     opening: [
@@ -232,6 +499,7 @@ const manager: readonly Scenario[] = [
     ],
   },
   {
+    id: "audit",
     kind: "memo",
     title: "Notice from {dept}: audit",
     opening: [
@@ -254,6 +522,7 @@ const manager: readonly Scenario[] = [
     ],
   },
   {
+    id: "handover",
     kind: "email",
     title: "Handover notes (please read)",
     opening: [
@@ -271,6 +540,144 @@ const manager: readonly Scenario[] = [
       "The quiet room is no longer quiet or a room.",
     ],
     closing: ["Thanks, I owe you one (or {n2}).", "I'll be checking my email (secretly), so please don't mention it."],
+  },
+  {
+    id: "mission-statement",
+    kind: "memo",
+    title: "Our new mission statement",
+    opening: [
+      "All staff: after {n} months of consultation, we've finalised our mission statement.",
+      "Dear colleagues, we're excited to unveil our new mission statement (it's very inspiring).",
+    ],
+    body: [
+      'Our mission is to "synergise cross-functional deliverables" (we asked {name} what that means).',
+      "Our vision: to be the leading provider of whatever it is we provide.",
+      "Our values are integrity, innovation, and (occasionally) punctuality.",
+      '{dept} wanted the word "passion" included; {dept2} wanted it removed.',
+      "The statement has been printed on {n2} mugs, and no one has read them.",
+      "Feedback is welcome; however, the statement is final.",
+      'The statement is {n3} words long, which {name2} says is "concise".',
+      "Please memorise it; there may be a quiz (there will be a quiz).",
+    ],
+    closing: [
+      "Together, we'll achieve great things (or at least adequate ones).",
+      "Thank you for your commitment; it's noted & appreciated.",
+    ],
+  },
+  {
+    id: "customer-complaint",
+    kind: "email",
+    title: "Re: Complaint #{n}",
+    opening: [
+      "Dear {name}, thank you for your feedback (all {n2} pages of it).",
+      "Hi {name}, we've received your complaint; it's been given the attention it deserves.",
+    ],
+    body: [
+      "We're sorry that your experience \"didn't meet expectations\".",
+      "Your concerns have been forwarded to {dept}; they've been forwarded back.",
+      'The delay, we feel, was "unavoidable" (and entirely the fault of {dept}).',
+      "A refund isn't possible; however, we can offer a very nice apology.",
+      "Please note: our policy states that policies are subject to change.",
+      "We value your business & your patience (mostly your patience).",
+      "If you'd like to escalate this, please contact {name2}; good luck.",
+      "Your reference number is {n3}-A; please don't lose it, or us.",
+    ],
+    closing: [
+      "Yours sincerely, {name2} (Customer Delight Officer).",
+      "We hope this resolves your issue; if not, see paragraph 1.",
+    ],
+  },
+  {
+    id: "office-move",
+    kind: "memo",
+    title: "Office move: what you need to know",
+    opening: [
+      "Attention all staff: we're moving desks on {day} (don't panic).",
+      "Heads-up: the office move begins {day}, and resistance is futile.",
+    ],
+    body: [
+      "Pack your belongings in the boxes provided (we only have {n}).",
+      'Label everything clearly; "Misc." is not a label.',
+      "{name} will be sitting next to {name2}; they've been informed.",
+      "The seating plan is final, except where it isn't (see Appendix C).",
+      'The new desks are "hot desks"; the name is a warning.',
+      "Plants may be moved; pets may not; {name} knows what happened last time.",
+      "The kitchen is staying put, thankfully (we asked nicely).",
+      "Please be done by close of business; the removal team is on a schedule.",
+    ],
+    closing: [
+      "Thank you for your cooperation; we'll see you at your new desk (somewhere).",
+      "Questions? Please direct them to {dept}; they're moving, too.",
+    ],
+  },
+  {
+    id: "meeting-minutes",
+    kind: "report",
+    title: "Minutes: meeting about meetings",
+    opening: [
+      "Minutes of the {dept} meeting held on {day} (attendees: everyone; contributors: few).",
+      "Summary of the weekly meeting about the meeting about meetings.",
+    ],
+    body: [
+      "Item 1: the agenda was approved, after a brief debate about the agenda.",
+      "Item 2: {name} presented {n} slides; {name2} questioned slide {n2}.",
+      "Item 3: it was agreed that we need a meeting to discuss the meeting.",
+      'Action: {name2} to "take this offline" (no one knows where that is).',
+      "Action: {name} to send the minutes; the minutes are these minutes.",
+      "Any other business: someone asked who took the good pens; silence followed.",
+      "The meeting was adjourned for {n3} minutes, then re-adjourned.",
+      "Attendance: {dept}, {dept2}, & a very quiet person in the corner.",
+    ],
+    closing: [
+      "Next meeting: {day}; the same time, the same room, the same decisions.",
+      "These minutes will be reviewed at the next meeting (see you there).",
+    ],
+  },
+  {
+    id: "job-advert",
+    kind: "email",
+    title: "Job advert: please proofread",
+    opening: [
+      "Hi {name}, could you proofread the new job advert for me (it's urgent-ish)?",
+      "Hello {name}, here's the draft job description; please be gentle.",
+    ],
+    body: [
+      'Job title: "Rockstar Ninja Administrator" (we may regret this).',
+      "Requirements: {n} years' experience, in a technology that's {n2} months old.",
+      'Benefits include free tea, a laminated certificate, & "exposure".',
+      'Candidates must be "self-starters" who also "love collaboration".',
+      "Salary: competitive (compared to what, we can't say).",
+      "{dept} will provide a laptop; they'll want it back, probably.",
+      "Hours are flexible, as long as you're here from 9:00 to 5:00.",
+      "Apply by {day}; late applications will be read slowly.",
+    ],
+    closing: [
+      "Thanks, you're a star (a rockstar, even).",
+      "Please send corrections by {day}, or forever hold your peace.",
+    ],
+  },
+  {
+    id: "security-training",
+    kind: "memo",
+    title: "Mandatory training: stay safe online",
+    opening: [
+      "Attention: all staff must complete the cyber-security course by {day}.",
+      "Dear colleagues, your mandatory training is overdue (we've all been there).",
+    ],
+    body: [
+      'Module 1: don\'t click on links from "a prince who needs your help".',
+      'Module 2: passwords shouldn\'t be "password" (or "password2").',
+      "Module 3: never share your password, not even with {name} from {dept}.",
+      "The course takes {n} minutes; most people spend {n2} hours on it.",
+      "A short quiz follows; you must score 80% (or try again, forever).",
+      "Phishing, we're told, isn't a relaxing hobby by a lake.",
+      '{name2} failed the quiz {n3} times, but is "learning".',
+      "On completion, you'll receive a certificate; please frame it, or don't.",
+    ],
+    closing: [
+      "Stay safe, stay alert, & stay off the suspicious links.",
+      "Thank you; remember, the best defence is a long, strange password.",
+    ],
   },
 ];
 

@@ -9,6 +9,7 @@ function down(overrides: Partial<KeyDownEventLike> = {}): KeyDownEventLike {
     metaKey: false,
     repeat: false,
     preventDefault: vi.fn(),
+    getModifierState: () => false,
     ...overrides,
   };
 }
@@ -18,7 +19,7 @@ describe("createKeyInput", () => {
     const input = createKeyInput();
     input.keyDown(down());
     expect(input.pressed.has("KeyA")).toBe(true);
-    input.keyUp({ code: "KeyA" });
+    input.keyUp({ code: "KeyA", getModifierState: () => false });
     expect(input.pressed.has("KeyA")).toBe(false);
   });
 
@@ -72,5 +73,33 @@ describe("createKeyInput", () => {
     input.keyDown(down({ code: "KeyB" }));
     input.releaseAll();
     expect(input.pressed.size).toBe(0);
+  });
+
+  it("press() types a key without a physical keydown or any held key", () => {
+    const input = createKeyInput();
+    const listener = vi.fn();
+    input.subscribe(listener);
+    input.press("x");
+    expect(listener).toHaveBeenCalledWith("x");
+    expect(input.pressed.size).toBe(0);
+  });
+
+  it("tracks Caps Lock and tells subscribers when it changes", () => {
+    const input = createKeyInput();
+    const onChange = vi.fn();
+    input.subscribeCapsLock(onChange);
+    expect(input.isCapsLockOn()).toBe(false);
+
+    input.keyDown(down({ getModifierState: () => true }));
+    expect(input.isCapsLockOn()).toBe(true);
+    expect(onChange).toHaveBeenCalledTimes(1);
+
+    // Same state again is not a change.
+    input.keyDown(down({ getModifierState: () => true }));
+    expect(onChange).toHaveBeenCalledTimes(1);
+
+    input.keyUp({ code: "CapsLock", getModifierState: () => false });
+    expect(input.isCapsLockOn()).toBe(false);
+    expect(onChange).toHaveBeenCalledTimes(2);
   });
 });

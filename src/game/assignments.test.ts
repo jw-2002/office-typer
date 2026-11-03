@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { LENGTH_TARGETS, fillSlots, generateAssignment, slotBase, type AssignmentLength } from "./assignments";
+import {
+  LENGTH_TARGETS,
+  RECENT_SCENARIO_MEMORY,
+  fillSlots,
+  generateAssignment,
+  rememberScenario,
+  slotBase,
+  type AssignmentLength,
+} from "./assignments";
 import { scenarioPools } from "./data/scenarios";
 import { slots } from "./data/slots";
 import { createRng } from "./random";
@@ -31,7 +39,14 @@ describe("scenario data", () => {
 
   it("has enough tiers and scenarios", () => {
     expect(scenarioPools.length).toBeGreaterThanOrEqual(3);
-    scenarioPools.forEach((pool) => expect(pool.length).toBeGreaterThanOrEqual(4));
+    // Comfortably more than the no-repeat memory, or the memory would leave nothing to pick from.
+    scenarioPools.forEach((pool) => expect(pool.length).toBeGreaterThanOrEqual(RECENT_SCENARIO_MEMORY * 2));
+  });
+
+  it("gives every scenario a unique, tidy id", () => {
+    const ids = allScenarios.map((scenario) => scenario.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    ids.forEach((id) => expect(id).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/));
   });
 
   it("gives every scenario enough material, with sentences that end in punctuation", () => {
@@ -53,6 +68,14 @@ describe("scenario data", () => {
         expect(sentence, sentence).not.toMatch(/^(Then|So|But|And|Also|However|Therefore|Next|After that)/);
       }
     }
+  });
+});
+
+describe("rememberScenario", () => {
+  it("keeps only the most recent few", () => {
+    const ids = ["a", "b", "c", "d", "e", "f"].reduce<string[]>((recent, id) => rememberScenario(recent, id), []);
+    expect(ids).toEqual(["c", "d", "e", "f"].slice(-RECENT_SCENARIO_MEMORY));
+    expect(ids).toHaveLength(RECENT_SCENARIO_MEMORY);
   });
 });
 
@@ -140,6 +163,24 @@ describe("generateAssignment", () => {
       const sentences = generateAssignment(0, "long", createRng(seed)).text.split(/(?<=[.!?]) /);
       expect(new Set(sentences).size).toBe(sentences.length);
     }
+  });
+
+  it("never repeats a recent scenario", () => {
+    for (let seed = 0; seed < 60; seed++) {
+      const recent = scenarioPools[1].slice(0, RECENT_SCENARIO_MEMORY).map((scenario) => scenario.id);
+      const { scenarioId } = generateAssignment(1, "short", createRng(seed), recent);
+      expect(recent).not.toContain(scenarioId);
+    }
+  });
+
+  it("falls back to any scenario if every one is recent", () => {
+    const every = scenarioPools[0].map((scenario) => scenario.id);
+    expect(() => generateAssignment(0, "short", createRng(1), every)).not.toThrow();
+  });
+
+  it("reports which scenario it used", () => {
+    const { scenarioId } = generateAssignment(2, "short", createRng(3));
+    expect(scenarioPools[2].map((scenario) => scenario.id)).toContain(scenarioId);
   });
 
   it("reuses the hardest tier for tiers beyond the content", () => {

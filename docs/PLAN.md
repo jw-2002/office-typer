@@ -41,10 +41,25 @@ Done:
   time, Short/Standard/Long buttons, and Enter for the next assignment. A "You typed" box shows
   the real keys pressed, with mistakes in red. This moves onto the in-world monitor in Phase 3.
 
+Also done (Phase 1.5):
+
+- **Variety**: 10 scenarios per tier (30 total), bigger slot lists, and a short memory
+  (`RECENT_SCENARIO_MEMORY`) so the same scenario does not come up again straight away. The
+  memory lives in `useAssignment` for now and moves into the game store in Phase 2.
+- **Touch devices**: on a coarse pointer a transparent field (`TypingSink`) covers the assignment
+  panel, so tapping it opens the on-screen keyboard. It diffs the field's value instead of reading
+  key events, because phone keyboards often report every key as "Unidentified". A "Next
+  assignment" button replaces Enter. The panel lifts above the keyboard (`--keyboard-inset`).
+  **Not yet tested on a real phone.**
+- **Caps Lock** warning in the HUD.
+- **Time away** (window blur or hidden tab) is cut out of the assignment's time, so it does not
+  hurt WPM. This also helps leaderboard plausibility later.
+- **CI**: `.github/workflows/ci.yml` runs tsc, lint, tests, format check and build on push.
+
 Content notes: all text must be typeable ASCII (tests enforce it). Body sentences must make sense
-in any order, because they are shuffled (no "Then...", "But..."). 4 scenarios per tier at the
-moment, so more scenarios are the main thing to add for variety. If content grows large, load tiers with dynamic `import()` so only the current
-tier is downloaded.
+in any order, because they are shuffled (no "Then...", "But..."). More scenarios are the main thing
+to add for variety: aim for 20 or more per tier before real players. If content grows large, load
+tiers with dynamic `import()` so only the current tier is downloaded.
 
 ## Phase 2 - Economy and saving
 

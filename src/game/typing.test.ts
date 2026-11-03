@@ -7,6 +7,7 @@ import {
   finalWpm,
   isFinished,
   liveWpm,
+  shiftTime,
   typedText,
   type TypingState,
 } from "./typing";
@@ -124,5 +125,24 @@ describe("wpm", () => {
   it("keeps recent timestamps bounded", () => {
     const state = type(createTyping("a".repeat(500)), Array(400).fill("a"));
     expect(state.recent.length).toBeLessThanOrEqual(11);
+  });
+});
+
+describe("shiftTime", () => {
+  it("makes time spent away not count towards elapsed time or WPM", () => {
+    // 5 correct keys over 4 seconds, then 60 seconds away.
+    const typed = type(createTyping("a".repeat(20)), Array(5).fill("a"));
+    const before = liveWpm(typed, 4000);
+    const shifted = shiftTime(typed, 60_000);
+    expect(liveWpm(shifted, 64_000)).toBeCloseTo(before);
+  });
+
+  it("does nothing before the player starts, after finishing, or for no time", () => {
+    const fresh = createTyping("ab");
+    expect(shiftTime(fresh, 5000)).toBe(fresh);
+    const done = type(createTyping("a"), ["a"]);
+    expect(shiftTime(done, 5000)).toBe(done);
+    const started = type(createTyping("ab"), ["a"]);
+    expect(shiftTime(started, 0)).toBe(started);
   });
 });

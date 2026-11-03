@@ -12,12 +12,22 @@ export const LENGTH_TARGETS = { short: 120, standard: 250, long: 450 } as const 
 >;
 
 export type Assignment = {
+  /** Which scenario this came from, so callers can avoid repeating it. */
+  scenarioId: string;
   kind: DocumentKind;
   /** Shown as the document heading. Not typed by the player. */
   title: string;
   /** The text the player types. */
   text: string;
 };
+
+/** How many recent scenarios to avoid repeating. Every tier has more scenarios than this. */
+export const RECENT_SCENARIO_MEMORY = 4;
+
+/** Adds a scenario to the recent list, keeping only the last few. */
+export function rememberScenario(recentIds: readonly string[], id: string): string[] {
+  return [...recentIds, id].slice(-RECENT_SCENARIO_MEMORY);
+}
 
 /** {name2} and {name} are separate slots that draw from the same list ("name"). */
 export const slotBase = (slotName: string): string => slotName.replace(/\d+$/, "");
@@ -47,11 +57,18 @@ export function fillSlots(template: string, rng: Rng, chosen = new Map<string, s
 /**
  * Builds one coherent document: a scenario from the pool for `tier` (0 is easiest), then its opening,
  * shuffled body sentences up to the length target, and its closing. Tiers beyond the available
- * content reuse the hardest pool. Pass a seeded rng for repeatable output.
+ * content reuse the hardest pool. Scenarios listed in `recentIds` are skipped, unless that would
+ * leave none. Pass a seeded rng for repeatable output.
  */
-export function generateAssignment(tier: number, length: AssignmentLength, rng: Rng): Assignment {
+export function generateAssignment(
+  tier: number,
+  length: AssignmentLength,
+  rng: Rng,
+  recentIds: readonly string[] = [],
+): Assignment {
   const scenarios = scenarioPools[Math.min(Math.max(tier, 0), scenarioPools.length - 1)];
-  const scenario = pick(rng, scenarios);
+  const fresh = scenarios.filter((candidate) => !recentIds.includes(candidate.id));
+  const scenario = pick(rng, fresh.length > 0 ? fresh : scenarios);
   const chosen = new Map<string, string>();
   const fill = (template: string) => fillSlots(template, rng, chosen);
 
@@ -69,5 +86,5 @@ export function generateAssignment(tier: number, length: AssignmentLength, rng: 
   }
   sentences.push(closing);
 
-  return { kind: scenario.kind, title: fill(scenario.title), text: sentences.join(" ") };
+  return { scenarioId: scenario.id, kind: scenario.kind, title: fill(scenario.title), text: sentences.join(" ") };
 }
