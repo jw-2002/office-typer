@@ -1,3 +1,4 @@
+// Builds an assignment (title and text) from a scenario, a length and a random source. Pure, no React.
 import { scenarioPools, type DocumentKind } from "./data/scenarios";
 import { slots } from "./data/slots";
 import { pick, shuffled, type Rng } from "./random";

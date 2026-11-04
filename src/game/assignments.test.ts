@@ -1,3 +1,4 @@
+// Tests for assignment generation and for the validity of the scenario data.
 import { describe, expect, it } from "vitest";
 import {
   LENGTH_TARGETS,

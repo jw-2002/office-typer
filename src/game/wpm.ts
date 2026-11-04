@@ -1,3 +1,4 @@
+// Words-per-minute maths, both the final figure and the rolling live figure.
 export const ROLLING_WINDOW_MS = 10_000;
 
 // Standard typing convention: one "word" is five characters, so punctuation and long words count fairly.

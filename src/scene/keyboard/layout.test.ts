@@ -1,3 +1,4 @@
+// Tests that the keyboard layout data is consistent.
 import { describe, expect, it } from "vitest";
 import { keys, layoutDepth, layoutWidth, type KeyDef } from "./layout";
 

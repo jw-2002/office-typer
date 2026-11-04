@@ -1,3 +1,4 @@
+// Reports whether the device is touch-first, so the HUD can offer the on-screen keyboard.
 import { useSyncExternalStore } from "react";
 
 // A coarse pointer means a finger on a touch screen, which is where we need the on-screen keyboard.

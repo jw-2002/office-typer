@@ -1,3 +1,4 @@
+// Shows the assignment text with done, wrong, current and remaining parts styled.
 import type { TypingState } from "@/game/typing";
 import styles from "./AssignmentText.module.css";
 

@@ -59,6 +59,8 @@ Use the `@/` alias for imports across folders.
 
 ## Naming and style
 
+- **Every file starts with a one-line comment** saying what it is for (`//` in .ts/.tsx, `/* */` in
+  .css, including tests and CSS modules). New file means new header; changed purpose means update it.
 - Components `PascalCase`, hooks `useThing`, constants `SCREAMING_SNAKE` only for true
   constants, everything else `camelCase`.
 - Match the surrounding file's formatting. The repo uses Prettier.

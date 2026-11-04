@@ -1,3 +1,4 @@
+// A ticking clock value that drives live readouts such as WPM.
 import { useEffect, useState } from "react";
 
 /** The current performance.now(), refreshed on an interval while `active`. Drives live readouts like WPM. */

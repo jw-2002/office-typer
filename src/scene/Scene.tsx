@@ -1,3 +1,4 @@
+// Everything inside the <Canvas>: lights, the keyboard, a floor grid and camera controls.
 import { OrbitControls, Grid } from "@react-three/drei";
 import Keyboard from "@/scene/keyboard/Keyboard";
 

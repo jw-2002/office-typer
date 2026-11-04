@@ -1,3 +1,4 @@
+// The context and hook for reaching the shared key input from any component.
 import { createContext, useContext } from "react";
 import type { KeyInput } from "./keyInput";
 

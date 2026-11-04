@@ -1,3 +1,4 @@
+// Tests for the shared key input.
 import { describe, expect, it, vi } from "vitest";
 import { createKeyInput, type KeyDownEventLike } from "./keyInput";
 

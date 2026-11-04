@@ -1,3 +1,4 @@
+// Runs one assignment at a time: wires key input to the typing engine and handles time away.
 import { useEffect, useEffectEvent, useReducer } from "react";
 import { generateAssignment, rememberScenario, type Assignment, type AssignmentLength } from "@/game/assignments";
 import { applyKey, createTyping, isFinished, shiftTime, type TypingState } from "@/game/typing";

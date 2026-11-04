@@ -1,3 +1,4 @@
+// The "You typed" box showing the latest keys, with wrong ones in red.
 import { typedText, type TypingState } from "@/game/typing";
 import styles from "./TypedInput.module.css";
 

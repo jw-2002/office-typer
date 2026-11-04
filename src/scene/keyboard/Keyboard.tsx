@@ -1,3 +1,4 @@
+// The 3D keyboard: renders every key from the layout and animates the ones being pressed.
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox, Text } from "@react-three/drei";

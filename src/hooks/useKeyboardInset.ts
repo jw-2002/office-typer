@@ -1,3 +1,4 @@
+// Publishes the on-screen keyboard height as a CSS variable so the HUD can sit above it.
 import { useEffect } from "react";
 
 /**

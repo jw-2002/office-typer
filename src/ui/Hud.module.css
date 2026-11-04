@@ -1,3 +1,4 @@
+/* Styles for the HUD layout, stats and panel. */
 /* Sits over the canvas. Only the panel and its buttons take pointer events, so the 3D scene stays draggable. */
 .hud {
   position: fixed;

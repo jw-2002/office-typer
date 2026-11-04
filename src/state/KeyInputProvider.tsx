@@ -1,3 +1,4 @@
+// Creates the shared key input once and attaches the window key listeners.
 import { useEffect, useState, type ReactNode } from "react";
 import { createKeyInput } from "./keyInput";
 import { KeyInputContext } from "./useKeyInput";

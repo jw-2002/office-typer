@@ -1,3 +1,4 @@
+// Tests for converting text-field changes into key presses.
 import { describe, expect, it } from "vitest";
 import { diffToKeys } from "./diffToKeys";
 

@@ -1,3 +1,4 @@
+// Seedable random helpers (pick, shuffle) so generation is repeatable in tests.
 // A random source returning a float in [0, 1). Math.random fits this type, so the UI can pass it
 // directly, while tests pass createRng(seed) to get repeatable results.
 export type Rng = () => number;

@@ -1,3 +1,4 @@
+// Top-level layout: the 3D <Canvas> holding the scene, with the 2D HUD layered over it.
 import { Canvas } from "@react-three/fiber";
 import Scene from "@/scene/Scene";
 import Hud from "@/ui/Hud";

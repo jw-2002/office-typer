@@ -1,3 +1,4 @@
+/* Styles for the invisible touch input and its prompt. */
 /* Fills the positioned parent. Invisible but still focusable, which display: none would not be. */
 .sink {
   position: absolute;

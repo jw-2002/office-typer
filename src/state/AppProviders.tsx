@@ -1,3 +1,4 @@
+// Composes every app-wide provider in one place.
 import type { ReactNode } from "react";
 import KeyInputProvider from "./KeyInputProvider";
 

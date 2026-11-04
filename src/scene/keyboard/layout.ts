@@ -1,3 +1,4 @@
+// Data describing the physical keyboard layout (key codes, labels, positions, widths).
 export type KeyDef = { code: string; label: string; x: number; z: number; w: number };
 
 type Item = { code: string; label: string; w: number } | number;

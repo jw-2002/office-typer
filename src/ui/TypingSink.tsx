@@ -1,3 +1,4 @@
+// An invisible text field over the assignment that opens the phone keyboard and feeds keys in.
 import { useState, type FormEvent, type KeyboardEvent } from "react";
 import { diffToKeys } from "@/state/diffToKeys";
 import { useKeyInput } from "@/state/useKeyInput";

@@ -1,3 +1,4 @@
+// The 2D overlay: stats, the assignment panel, length choice and the typed-text box.
 import { LENGTH_TARGETS, type AssignmentLength } from "@/game/assignments";
 import { accuracy, elapsedMs, liveWpm } from "@/game/typing";
 import { useAssignment } from "@/hooks/useAssignment";

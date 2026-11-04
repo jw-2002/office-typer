@@ -1,3 +1,4 @@
+// Browser entry point: mounts <App /> inside the app-wide providers into #root (index.html loads this file).
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";

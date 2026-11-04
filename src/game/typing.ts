@@ -1,3 +1,4 @@
+// The typing engine: pure state and rules for one assignment (keystrokes, mistakes, finish, WPM, accuracy).
 import { ROLLING_WINDOW_MS, rollingWpm, wpm } from "./wpm";
 
 // Rules (TypeRacer style): keys keep being accepted after a mistake, but everything typed from the

@@ -1,3 +1,4 @@
+/* Global styles: design tokens (colours, spacing, fonts) as CSS variables, plus the reset. */
 :root {
   --color-bg: #111827;
   --color-surface: #1f2937;

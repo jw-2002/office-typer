@@ -1,3 +1,4 @@
+// Tests for the typing engine rules.
 import { describe, expect, it } from "vitest";
 import {
   MAX_WRONG_CHARS,

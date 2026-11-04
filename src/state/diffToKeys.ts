@@ -1,3 +1,4 @@
+// Converts a change in a text field into key presses, for touch keyboards.
 /**
  * Turns a change in a text field's value into key presses. On-screen keyboards often report every key as
  * "Unidentified", so instead of reading key events we compare the field before and after each edit:

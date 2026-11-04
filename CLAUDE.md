@@ -37,4 +37,6 @@ readable code over clever code.
 - Real names of products (Cherry MX, GPT, Llama, Claude, etc.) must not appear in the game.
   Use the parody names in `docs/GAME_DESIGN.md`. The currency name is a single constant.
 - Do not start phases out of order or add backend/ads work until the plan says so.
+- Every source file starts with a one-line comment saying what it is for (`//` in .ts/.tsx, `/* */` in .css).
+  Add one to every new file and update it if the file's job changes. Code map: `docs/ARCHITECTURE.md`.
 - Keep this file short. Detail goes in `docs/` and the skills.

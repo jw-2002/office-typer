@@ -1,3 +1,4 @@
+// Tests for the WPM maths.
 import { describe, expect, it } from "vitest";
 import { rollingWpm, wpm } from "./wpm";
 

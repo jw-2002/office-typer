@@ -1,3 +1,4 @@
+// Tests for the seeded random helpers.
 import { describe, expect, it } from "vitest";
 import { createRng, pick, shuffled } from "./random";
 

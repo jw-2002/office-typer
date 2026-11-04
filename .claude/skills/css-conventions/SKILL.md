@@ -62,3 +62,7 @@ and the content shown on the in-world monitor via `<Html>`.
 
 No hard-coded colours or magic spacing outside tokens, no unused classes, and the 3D scene
 still receives pointer events through the HUD.
+
+## File header
+
+Start every CSS file with a one-line `/* ... */` comment saying what it styles.
