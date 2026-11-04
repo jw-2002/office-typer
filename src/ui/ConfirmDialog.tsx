@@ -1,8 +1,7 @@
 // An "are you sure?" box shown over the desktop, for actions that cannot be undone. Escape cancels.
-import { useEffect, useId } from "react";
+import { useId } from "react";
 import Button from "./Button";
-import Window from "./Window";
-import styles from "./ConfirmDialog.module.css";
+import Dialog, { DialogActions, DialogText } from "./Dialog";
 
 type ConfirmDialogProps = {
   title: string;
@@ -16,36 +15,16 @@ type ConfirmDialogProps = {
 export default function ConfirmDialog({ title, message, confirmLabel, onConfirm, onCancel }: ConfirmDialogProps) {
   const messageId = useId();
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onCancel();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onCancel]);
-
   return (
-    <div className={styles.backdrop}>
-      <div
-        role="alertdialog"
-        aria-modal="true"
-        aria-label={title}
-        aria-describedby={messageId}
-        className={styles.dialog}
-      >
-        <Window title={title}>
-          <p id={messageId} className={styles.message}>
-            {message}
-          </p>
-          <div className={styles.buttons}>
-            {/* Cancel comes first and is the plain one, so the red button is the deliberate choice. */}
-            <Button onClick={onCancel}>Cancel</Button>
-            <Button variant="danger" onClick={onConfirm}>
-              {confirmLabel}
-            </Button>
-          </div>
-        </Window>
-      </div>
-    </div>
+    <Dialog title={title} onClose={onCancel} describedBy={messageId}>
+      <DialogText id={messageId}>{message}</DialogText>
+      <DialogActions>
+        {/* Cancel comes first and is the plain one, so the red button is the deliberate choice. */}
+        <Button onClick={onCancel}>Cancel</Button>
+        <Button variant="danger" onClick={onConfirm}>
+          {confirmLabel}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

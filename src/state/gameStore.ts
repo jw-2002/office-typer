@@ -17,6 +17,8 @@ type GameStore = Progress & {
   lastReward: Reward | null;
   finishAssignment: (result: AssignmentResult) => void;
   buy: (upgradeId: string) => void;
+  /** Closes the promotion message once the player has seen it. */
+  dismissPromotion: () => void;
   /** Switches to an upgrade already owned, such as an older computer. */
   equip: (upgradeId: string) => void;
   /** Erases everything and starts again. Autosave then overwrites the saved game. */
@@ -39,6 +41,8 @@ export const useGameStore = create<GameStore>()((set, get) => ({
   },
   buy: (upgradeId) => set(buyUpgrade(progressOf(get()), upgradeId)),
   equip: (upgradeId) => set(equipUpgrade(progressOf(get()), upgradeId)),
+  dismissPromotion: () =>
+    set((state) => (state.lastReward ? { lastReward: { ...state.lastReward, promotedTo: null } } : {})),
   reset: () => set({ ...newProgress(), lastReward: null }),
   load: (progress) => set({ ...progressOf(progress), lastReward: null }),
 }));

@@ -1,5 +1,5 @@
 // A fake computer desktop: a window with working title bar buttons, and a task bar of programs (Assignment, Shop,
-// Settings), with a status tray. It takes the look of the operating system the computer runs. Shown on the 3D monitor, or in the HUD on touch.
+// Career, Settings), with a status tray. It takes the look of the operating system the computer runs. Shown on the 3D monitor, or in the HUD on touch.
 import { useState, type ReactNode } from "react";
 import { osNames } from "@/game/data/os";
 import { useOs } from "@/hooks/useOsTheme";
@@ -7,7 +7,9 @@ import { useGameStore } from "@/state/gameStore";
 import type { CurrentAssignment } from "@/state/useCurrentAssignment";
 import AssignmentPanel from "./AssignmentPanel";
 import Button from "./Button";
+import CareerPanel from "./CareerPanel";
 import ConfirmDialog from "./ConfirmDialog";
+import PromotionDialog from "./PromotionDialog";
 import SettingsPanel from "./SettingsPanel";
 import ShopPanel from "./ShopPanel";
 import Tray from "./Tray";
@@ -18,6 +20,7 @@ import styles from "./Desktop.module.css";
 const tabs = [
   { id: "assignment", label: "Assignment" },
   { id: "shop", label: "Shop" },
+  { id: "career", label: "Career" },
   { id: "settings", label: "Settings" },
 ] as const;
 type TabId = (typeof tabs)[number]["id"];
@@ -36,6 +39,8 @@ export default function Desktop({ current, typingField }: DesktopProps) {
   const [maximised, setMaximised] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const reset = useGameStore((state) => state.reset);
+  const promotion = useGameStore((state) => state.lastReward?.promotedTo ?? null);
+  const dismissPromotion = useGameStore((state) => state.dismissPromotion);
   const os = useOs();
 
   const title = tab === "assignment" ? current.assignment.title : tabs.find((t) => t.id === tab)?.label;
@@ -66,6 +71,7 @@ export default function Desktop({ current, typingField }: DesktopProps) {
           <div key={tab} className={styles.page}>
             {tab === "assignment" && <AssignmentPanel current={current}>{typingField}</AssignmentPanel>}
             {tab === "shop" && <ShopPanel />}
+            {tab === "career" && <CareerPanel />}
             {tab === "settings" && <SettingsPanel onRequestReset={() => setConfirmingReset(true)} />}
           </div>
         </Window>
@@ -89,6 +95,8 @@ export default function Desktop({ current, typingField }: DesktopProps) {
         <Tray current={current} />
         <span className={styles.os}>{osNames[os]}</span>
       </nav>
+
+      {promotion && <PromotionDialog job={promotion} onClose={dismissPromotion} />}
 
       {confirmingReset && (
         <ConfirmDialog

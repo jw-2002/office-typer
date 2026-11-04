@@ -59,7 +59,7 @@ export function useAssignment(tier: number) {
 
   // Pay out once, when the assignment finishes. finishedAt only changes when a new assignment ends.
   const finishedAt = game.typing.finishedAt;
-  const report = useEffectEvent(() => finishAssignment(assignmentResult(game.typing, performance.now())));
+  const report = useEffectEvent(() => finishAssignment(assignmentResult(game.typing, performance.now(), game.length)));
   useEffect(() => {
     if (finishedAt !== null) report();
   }, [finishedAt]);

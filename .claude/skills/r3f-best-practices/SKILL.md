@@ -44,6 +44,15 @@ that loop.
 - Primitives are fine and encouraged for the prototype. Wrap each placeholder in a component
   with the final model's name so swapping it later changes one file.
 
+## Moving the camera by hand
+
+- drei's `OrbitControls` only aims the camera (the `lookAt`) while `controls.enabled` is true. If you move the camera
+  yourself while the controls are off, also call `camera.lookAt(controls.target)`, or it slides to the new spot still
+  facing the old way and then snaps round when the controls come back on (`CameraRig` does this).
+- Check a camera move by its **facing direction** as well as its position. Matching positions can hide a camera
+  looking the wrong way.
+- Orbit controls coast after a drag when `enableDamping` is on; turn it off while you steer the camera.
+
 ## Lighting and materials
 
 - Few lights. One ambient or `<Environment preset=...>` plus one directional is usually enough.
@@ -60,6 +69,13 @@ that loop.
   constantly, so default `frameloop` is expected.
 
 ## Events
+
+- **Click-through:** R3F only raycasts objects that have event handlers. Anything without one (a monitor frame, a
+  desk) is invisible to clicks, so a click passes through to objects behind it. Wrap solid things in
+  `<Solid>` (`src/scene/Solid.tsx`), which stops clicks and hover.
+- **DOM inside the canvas container** (drei `<Html>`) makes `event.offsetX/Y` relative to the clicked element, so R3F
+  computes a wrong pointer. The Canvas uses `createCanvasEvents` (`src/scene/canvasEvents.ts`) to measure from
+  `clientX/Y` against the canvas instead. Keep it, or clicks on the monitor will hit random 3D objects.
 
 - Use `onPointerDown/Up/Over/Out/Click` on meshes. Call `e.stopPropagation()` so objects
   behind do not also fire.

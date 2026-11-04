@@ -2,6 +2,7 @@
 import type { Job } from "./data/jobs";
 import { startingUpgradeIds, upgradeCategories, upgrades, type Upgrade, type UpgradeCategory } from "./data/upgrades";
 import { bestOwned, jobFor, payout } from "./economy";
+import type { AssignmentLength } from "./assignments";
 import { accuracy, finalWpm, type TypingState } from "./typing";
 
 export type Stats = {
@@ -51,11 +52,11 @@ export function equippedUpgrade(progress: Pick<Progress, "equipped">, category: 
 }
 
 /** What a finished assignment looked like. Built from the typing state by the caller. */
-export type AssignmentResult = { characters: number; accuracy: number; wpm: number };
+export type AssignmentResult = { characters: number; accuracy: number; wpm: number; length: AssignmentLength };
 
 /** Summarises a finished typing run. */
-export function assignmentResult(typing: TypingState, now: number): AssignmentResult {
-  return { characters: typing.cursor, accuracy: accuracy(typing), wpm: finalWpm(typing, now) };
+export function assignmentResult(typing: TypingState, now: number, length: AssignmentLength): AssignmentResult {
+  return { characters: typing.cursor, accuracy: accuracy(typing), wpm: finalWpm(typing, now), length };
 }
 
 export type Reward = { payout: number; promotedTo: Job | null };
@@ -82,6 +83,7 @@ export function completeAssignment(
   const credits = payout({
     characters: result.characters,
     accuracy: result.accuracy,
+    length: result.length,
     job: before,
     ownedUpgradeIds: progress.upgrades,
   });

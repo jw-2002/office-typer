@@ -1,9 +1,16 @@
 // The money rules: payout per assignment, upgrade and job multipliers, and number formatting. Pure, no React.
+import type { AssignmentLength } from "./assignments";
 import { jobs, type Job } from "./data/jobs";
 import { upgradeCategories, upgrades, type Upgrade } from "./data/upgrades";
 
 /** Credits earned per correct character before any multiplier. */
 export const BASE_PAYOUT_PER_CHAR = 0.25;
+
+/**
+ * Longer assignments pay clearly more per character, so choosing one is a real trade-off: a Short one is quick and
+ * easy to finish, a Long one needs sustained focus (one slip costs accuracy over many more characters) but earns more.
+ */
+export const LENGTH_PAY: Readonly<Record<AssignmentLength, number>> = { short: 1, standard: 1.25, long: 1.5 };
 
 /** Squared, so sloppy typing costs real money: 90% accuracy pays 81%. */
 export function accuracyMultiplier(accuracy: number): number {
@@ -25,14 +32,21 @@ export function upgradeMultiplier(ownedIds: readonly string[]): number {
   );
 }
 
-export type PayoutInput = { characters: number; accuracy: number; job: Job; ownedUpgradeIds: readonly string[] };
+export type PayoutInput = {
+  characters: number;
+  accuracy: number;
+  length: AssignmentLength;
+  job: Job;
+  ownedUpgradeIds: readonly string[];
+};
 
 /** Credits for one finished assignment, rounded so the HUD never shows long decimals. */
-export function payout({ characters, accuracy, job, ownedUpgradeIds }: PayoutInput): number {
+export function payout({ characters, accuracy, length, job, ownedUpgradeIds }: PayoutInput): number {
   const raw =
     BASE_PAYOUT_PER_CHAR *
     characters *
     accuracyMultiplier(accuracy) *
+    LENGTH_PAY[length] *
     job.payoutMultiplier *
     upgradeMultiplier(ownedUpgradeIds);
   return Math.round(raw);
@@ -47,6 +61,35 @@ export function jobFor(totalChars: number): Job {
 export function nextJob(current: Job): Job | null {
   const index = jobs.findIndex((job) => job.id === current.id);
   return jobs[index + 1] ?? null;
+}
+
+/** The job before this one, or null at the bottom of the ladder. */
+export function previousJob(current: Job): Job | null {
+  const index = jobs.findIndex((job) => job.id === current.id);
+  return index > 0 ? jobs[index - 1] : null;
+}
+
+/** How far the player is from the next promotion. */
+export type PromotionProgress = {
+  job: Job;
+  /** The next job, or null at the top of the ladder. */
+  next: Job | null;
+  /** From 0 to 1 of the way to the next job. 1 at the top of the ladder. */
+  fraction: number;
+  /** Characters still to type for the next job. 0 at the top of the ladder. */
+  remaining: number;
+};
+
+export function promotionProgress(totalChars: number): PromotionProgress {
+  const job = jobFor(totalChars);
+  const next = nextJob(job);
+  if (!next) return { job, next, fraction: 1, remaining: 0 };
+  return {
+    job,
+    next,
+    fraction: (totalChars - job.minChars) / (next.minChars - job.minChars),
+    remaining: next.minChars - totalChars,
+  };
 }
 
 const SUFFIXES = ["", "K", "M", "B", "T"];

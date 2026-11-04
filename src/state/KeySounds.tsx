@@ -1,4 +1,4 @@
-// Plays a key sound for every typed key, using the sound of the switches in use. Renders nothing.
+// Plays a key sound for every typed key (in the sound of the switches in use), and a fanfare on promotion. Renders nothing.
 import { useEffect, useEffectEvent, useState } from "react";
 import { createKeyClicker } from "@/audio/keyClicker";
 import { switchSounds } from "@/audio/switchSounds";
@@ -22,6 +22,16 @@ export default function KeySounds() {
     clicker.play(sound);
   });
   useEffect(() => input.subscribe((key) => onKey(key)), [input]);
+
+  // A promotion gets a fanfare, once, when the reward that carries it arrives.
+  useEffect(
+    () =>
+      useGameStore.subscribe((state, previous) => {
+        if (state.lastReward === previous.lastReward || !state.lastReward?.promotedTo) return;
+        if (!useAudioStore.getState().muted) clicker.fanfare();
+      }),
+    [clicker],
+  );
 
   return null;
 }

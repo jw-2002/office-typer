@@ -18,17 +18,18 @@ export default function Scene() {
 
       <Office />
 
-      {/* Orbiting is limited so you stay at the desk: a little look around, no walking behind the monitor. */}
+      {/* The camera is locked while seated (CameraRig turns the controls off). Once standing you can look around
+          and zoom, but only a little: no walking behind the desk. Both poses sit inside these limits. */}
       <OrbitControls
         makeDefault
-        target={[...cameraPoses.desk.target]}
+        target={[...cameraPoses.seated.target]}
         enablePan={false}
-        minDistance={0.35}
-        maxDistance={1.6}
-        minAzimuthAngle={-0.7}
-        maxAzimuthAngle={0.7}
-        minPolarAngle={0.6}
-        maxPolarAngle={1.75}
+        minDistance={0.9}
+        maxDistance={3}
+        minAzimuthAngle={-1}
+        maxAzimuthAngle={1}
+        minPolarAngle={0.7}
+        maxPolarAngle={1.65}
       />
       <CameraRig />
     </>

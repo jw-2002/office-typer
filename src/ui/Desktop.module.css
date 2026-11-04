@@ -70,9 +70,10 @@
   opacity: 0.85;
 }
 
-/* On phones the task bar has to fit three programs and the tray, so it gets tighter and drops the OS name. */
+/* On phones the task bar cannot fit four programs and the tray in one row, so it tightens up, drops the OS name and wraps. */
 @media (max-width: 600px) {
   .taskbar {
+    flex-wrap: wrap;
     gap: var(--space-1);
     padding-inline: var(--space-2);
     --button-padding-x: var(--space-2);

@@ -31,3 +31,6 @@ export const jobs = [
 ] as const satisfies readonly Job[];
 
 export type JobId = (typeof jobs)[number]["id"];
+
+/** What kind of work each assignment tier is, for the career screen. Index is `Job.assignmentTier`. */
+export const assignmentTierNames: readonly string[] = ["Everyday notices", "Office business", "Executive paperwork"];

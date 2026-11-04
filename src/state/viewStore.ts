@@ -1,11 +1,11 @@
-// Which view the camera is in: close to the screen at the desk, or pulled back to look around the office.
+// Which view the camera is in: seated at the desk (locked in place), or standing up to look around the office.
 import { create } from "zustand";
 
-export type CameraView = "desk" | "office";
+export type CameraView = "seated" | "standing";
 
 type ViewStore = { view: CameraView; setView: (view: CameraView) => void };
 
 export const useViewStore = create<ViewStore>()((set) => ({
-  view: "desk",
+  view: "seated",
   setView: (view) => set({ view }),
 }));

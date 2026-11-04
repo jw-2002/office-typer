@@ -18,11 +18,16 @@ Placeholder: **Credits**. Candidate: **Billable Hours**. Defined in one constant
 ## Assignments
 
 - Types: emails, memos, reports, spreadsheet notes, "code comments", meeting minutes.
-- The player chooses a length per assignment: Short / Standard / Long. Short pays less in total
-  but is quicker; the pay per character should be close to equal so it is a real choice.
+- The player chooses a length per assignment: Short / Standard / Long. Short is quick; longer ones pay a
+  clearly more per character (+25% and +50%), so it is a real choice rather than a free upgrade.
 - Difficulty rises with job level: longer text, punctuation, capitals, numbers, harder words.
 - Payout sketch: `base * characters * accuracyMultiplier * jobMultiplier * upgradeMultiplier`.
 - Text comes from a data file of templates/snippets, not generated on the fly (for now).
+
+## Promotion moment
+
+Crossing a promotion threshold interrupts you with a themed message (new pay, new kind of work), a short
+fanfare, and a bouncing new name plate on the desk. The Career program shows the ladder and the progress bar.
 
 ## Progression: job titles
 
@@ -72,8 +77,8 @@ plain plastic for the Intern, up to a big gold plate for the Chief Typing Execut
 
 Almost everything is on the 3D monitor, in the fake OS: credits and live WPM in the task bar tray, accuracy,
 time and the "You typed" box in the assignment window, and the highest WPM, career progress and sound in
-Settings. The only 2D overlay is a button to switch between the Desk view (close to the screen) and the Office
-view (pulled back). On touch devices the same desktop sits in the HUD instead.
+Settings. The only 2D overlay is a faint Stand up / Sit down hint low on the screen. Seated, the camera is locked on the screen; standing, you can look around
+the office. On touch devices the same desktop sits in the HUD instead.
 
 - Live **WPM** is a rolling window, not a whole-session average.
 - The highest WPM is stored in the save (and later the leaderboard).

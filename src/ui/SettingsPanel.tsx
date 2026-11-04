@@ -1,7 +1,6 @@
-// The settings program: your record and career, the sound setting, and the reset (which asks for confirmation first).
+// The settings program: your record, the sound setting, and the reset (which asks for confirmation first).
 import { CURRENCY } from "@/game/currency";
-import { formatNumber, nextJob } from "@/game/economy";
-import { currentJob } from "@/game/progress";
+import { formatNumber } from "@/game/economy";
 import { useAudioStore } from "@/state/audioStore";
 import { useGameStore } from "@/state/gameStore";
 import Button from "./Button";
@@ -14,8 +13,6 @@ type SettingsPanelProps = {
 
 export default function SettingsPanel({ onRequestReset }: SettingsPanelProps) {
   const stats = useGameStore((state) => state.stats);
-  const job = useGameStore(currentJob);
-  const promotion = nextJob(job);
   const muted = useAudioStore((state) => state.muted);
   const setMuted = useAudioStore((state) => state.setMuted);
 
@@ -24,10 +21,6 @@ export default function SettingsPanel({ onRequestReset }: SettingsPanelProps) {
       <section>
         <h3 className={styles.heading}>Your record</h3>
         <dl className={styles.stats}>
-          <dt>Job</dt>
-          <dd>{job.title}</dd>
-          <dt>To next promotion</dt>
-          <dd>{promotion ? `${formatNumber(promotion.minChars - stats.totalChars)} chars` : "Top of the ladder"}</dd>
           <dt>Assignments finished</dt>
           <dd>{formatNumber(stats.assignmentsCompleted)}</dd>
           <dt>Characters typed</dt>

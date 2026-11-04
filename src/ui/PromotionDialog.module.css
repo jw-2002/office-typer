@@ -1,0 +1,6 @@
+/* Styles for the promotion message: the list of what the new job brings. */
+.perks {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-4);
+  line-height: 1.5;
+}

@@ -179,12 +179,44 @@ tiers with dynamic `import()` so only the current tier is downloaded.
   `--cursor-default` and `--cursor-pointer` tokens (small inline SVGs): black arrow and white glove for the
   90s look, white arrow for the blue one, clean black arrow for the light one, glowing cyan and orange
   for the last two. Buttons use the hand.
+- **Bug fixed later (clicks on the monitor swapped the computer):** R3F computed the pointer from
+  `event.offsetX/Y`, which is relative to the clicked DOM element, so clicks on the monitor text landed near the
+  top-left of the 3D view, on the shelf. Fixed with `createCanvasEvents` (pointer from `clientX/Y`) plus `Solid`
+  (the desk, monitor and keyboard block clicks to what is behind them).
+- **Camera reworked** (renames the earlier "desk" and "office" views): **Seated** is locked in place (no orbit or
+  zoom, framed a bit further back so the monitor, name plate, keyboard and a peek at the shelf all fit) and
+  **Standing** is reached with the **Stand up** button (**Sit down** to return). The camera rises, then steps back
+  along a smooth path (`CameraRig`), and only while standing can you look around and zoom a little.
+- **Camera facing bug fixed**: while the orbit controls were off (seated, and during stand and sit) nothing aimed
+  the camera, so it moved to the right place facing the wrong way, then snapped round when the controls came back
+  (standing up), or stayed facing the wrong way for good (sitting down). `CameraRig` now aims it itself. Verified
+  by measuring the facing error (0 degrees throughout) and by sitting down giving a picture identical to the start.
+- **Posture hint**: the stand up / sit down control is no longer a boxed button. `PostureHint` is faint text with
+  a small icon (a sneaker for Stand up, a chair for Sit down) low on the screen (half see-through, fully visible on hover), still a real `<button>` underneath
+  for screen readers. On phones it moves to the top, because the bottom is the desktop.
 - Not done on purpose: no keyboard or other upgrade categories yet, and no sound for the room (ambience) or promotions.
 
-## Phase 5 - Jobs and promotions
+## Phase 5 - Jobs and promotions (done)
 
-- Promotion thresholds, new assignment tiers, title shown in HUD, a small promotion moment.
-- Length choice (Short/Standard/Long) on assignment select.
+- **Promotion moment**: finishing the assignment that crosses a threshold opens a themed
+  "Promotion!" message on the desktop (`PromotionDialog`) listing the new pay, any new kind of work, and
+  the name plate. Enter, Escape or the button dismisses it. A four-note **fanfare** plays (respects mute),
+  and the desk **name plate pops in** with a bounce when the job changes (`NamePlate`, animated in `useFrame`).
+  The store keeps the promotion in `lastReward.promotedTo`, cleared by `dismissPromotion`.
+- **Career program** (fourth task bar tab, `CareerPanel`): your job, pay multiplier and kind of work, a
+  progress bar to the next promotion (`promotionProgress` in `economy.ts`), and the whole ladder with
+  done, current and to-do rows. The job rows moved out of Settings.
+- **Length is a real choice**: longer assignments pay more per character (`LENGTH_PAY` in `economy.ts`:
+  Short x1, Standard x1.25, Long x1.5), and the buttons show the bonus. Promotion progress counts characters, so
+  every length counts the same toward promotions. `AssignmentResult` now carries the length.
+- **Assignment tiers** (everyday notices, office business, executive paperwork) come from the job
+  (`Job.assignmentTier`, named in `assignmentTierNames`), unchanged from Phase 2. There are 9 jobs; 180K
+  characters (hours of typing) reaches the top, and thresholds are plain data in `jobs.ts` to tune.
+- New shared UI: `Dialog` (backdrop, window, Escape), used by both the reset confirmation and the
+  promotion message, and `ProgressBar`.
+- The task bar wraps onto two rows on phones, because four programs and the tray do not fit in one.
+- **Not done**: no leaderboard-style comparison yet (Phase 8), and the job ladder's difficulty ramp is only
+  the three scenario tiers. More scenarios per tier is still the best way to add variety.
 
 ## Phase 6 - AI assistant tab
 

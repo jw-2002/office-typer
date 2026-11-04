@@ -7,7 +7,7 @@ beforeEach(() => useGameStore.getState().load(newProgress()));
 
 describe("game store", () => {
   it("finishing an assignment pays out and remembers the reward", () => {
-    useGameStore.getState().finishAssignment({ characters: 120, accuracy: 1, wpm: 50 });
+    useGameStore.getState().finishAssignment({ characters: 120, accuracy: 1, wpm: 50, length: "short" });
     const state = useGameStore.getState();
     expect(state.player.currency).toBe(30);
     expect(state.lastReward?.payout).toBe(30);
@@ -32,11 +32,19 @@ describe("game store", () => {
     expect(useGameStore.getState().equipped.computer).toBe("grey-tower");
   });
 
+  it("dismissPromotion clears the promotion but keeps the payout", () => {
+    useGameStore.getState().finishAssignment({ characters: 1200, accuracy: 1, wpm: 50, length: "short" });
+    expect(useGameStore.getState().lastReward?.promotedTo?.id).toBe("data-entry-clerk");
+    useGameStore.getState().dismissPromotion();
+    expect(useGameStore.getState().lastReward?.promotedTo).toBeNull();
+    expect(useGameStore.getState().lastReward?.payout).toBe(300);
+  });
+
   it("reset erases progress, upgrades and the last reward", () => {
     useGameStore
       .getState()
       .load({ ...newProgress(), player: { currency: 500 }, upgrades: ["beige-box", "grey-tower", "mushy"] });
-    useGameStore.getState().finishAssignment({ characters: 120, accuracy: 1, wpm: 50 });
+    useGameStore.getState().finishAssignment({ characters: 120, accuracy: 1, wpm: 50, length: "short" });
     useGameStore.getState().reset();
     const state = useGameStore.getState();
     expect(state.player.currency).toBe(0);

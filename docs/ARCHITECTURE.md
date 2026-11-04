@@ -38,6 +38,8 @@ logic. Assignment text comes from `assignments.ts` + `data/`.
 - `src/audio` key sound recipes and the Web Audio player (impure; the mute setting is in `src/state`).
 - `src/scene` everything inside `<Canvas>`: `Scene` (lights, controls) holds `Office`, which places
   `Room`, `Desk`, the live `Computer`, the `Shelf` of old computers, the job `NamePlate` and the
-  keyboard. `CameraRig` glides the camera between the two views in `cameraViews.ts`. 1 unit = 1 metre.
-- `src/ui` the DOM overlay. `Desktop` (window + task bar tabs) holds `AssignmentPanel`, `ShopPanel` and `SettingsPanel`;
+  keyboard. `CameraRig` moves the camera between the seated and standing views in `cameraViews.ts`, and locks it while seated.
+  `Solid` makes things block clicks, and `canvasEvents.ts` measures the pointer from the canvas. 1 unit = 1 metre.
+- `src/ui` the DOM overlay. `Desktop` (window + task bar tabs) holds `AssignmentPanel`, `ShopPanel`, `CareerPanel` and `SettingsPanel`,
+  and shows `Dialog`-based messages (`ConfirmDialog`, `PromotionDialog`) over them;
   it appears on the 3D monitor via `MonitorScreen`, or in the HUD on touch. `osThemes.css` restyles it all.

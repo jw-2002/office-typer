@@ -1,4 +1,4 @@
-/* Styles for the confirmation box: a dimmed backdrop over the whole desktop, with a small window in the middle. */
+/* Styles for dialogs: a dimmed backdrop over the whole desktop, with a small window in the middle. */
 .backdrop {
   position: absolute;
   inset: 0;
@@ -13,12 +13,12 @@
   width: min(24rem, 100%);
 }
 
-.message {
+.text {
   margin: 0 0 var(--space-3);
   line-height: 1.4;
 }
 
-.buttons {
+.actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);

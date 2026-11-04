@@ -1,0 +1,68 @@
+/* Styles for the career program: the current job and progress on one side, the ladder on the other. */
+.career {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.heading {
+  margin: 0 0 var(--space-1);
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.heading:not(:first-child) {
+  margin-top: var(--space-3);
+}
+
+.job {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.detail {
+  margin: var(--space-1) 0 0;
+  line-height: 1.4;
+}
+
+.ladder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rung {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+}
+
+.chars {
+  font-variant-numeric: tabular-nums;
+}
+
+.rung[data-state="done"] {
+  color: var(--color-muted);
+  text-decoration: line-through;
+}
+
+.rung[data-state="todo"] {
+  color: var(--color-muted);
+}
+
+/* The job you hold now stands out in the OS accent colour. */
+.rung[data-state="current"] {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 700;
+}

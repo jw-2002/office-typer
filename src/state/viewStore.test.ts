@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import { useViewStore } from "./viewStore";
 
 describe("view store", () => {
-  it("starts at the desk and can switch to the office and back", () => {
-    expect(useViewStore.getState().view).toBe("desk");
-    useViewStore.getState().setView("office");
-    expect(useViewStore.getState().view).toBe("office");
-    useViewStore.getState().setView("desk");
-    expect(useViewStore.getState().view).toBe("desk");
+  it("starts seated and can stand up and sit down again", () => {
+    expect(useViewStore.getState().view).toBe("seated");
+    useViewStore.getState().setView("standing");
+    expect(useViewStore.getState().view).toBe("standing");
+    useViewStore.getState().setView("seated");
+    expect(useViewStore.getState().view).toBe("seated");
   });
 });

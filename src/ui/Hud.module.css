@@ -1,21 +1,16 @@
-/* Sits over the canvas. Only the buttons and the touch desktop take pointer events, so the 3D scene stays draggable. */
+/* Sits over the canvas. Only the posture hint and the touch desktop take pointer events, so the 3D scene stays draggable. */
 .hud {
   position: fixed;
   inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--space-3);
   padding: var(--space-3);
   /* Lifts the desktop above the on-screen keyboard where the browser lets it cover the page. */
   padding-bottom: calc(var(--space-3) + var(--keyboard-inset, 0px));
   box-sizing: border-box;
   pointer-events: none;
-}
-
-.corner {
-  display: flex;
-  justify-content: flex-end;
 }
 
 .desktop {

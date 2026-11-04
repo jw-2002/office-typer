@@ -14,7 +14,7 @@ import {
   type Progress,
 } from "./progress";
 
-const perfect = (characters: number) => ({ characters, accuracy: 1, wpm: 60 });
+const perfect = (characters: number) => ({ characters, accuracy: 1, wpm: 60, length: "short" as const });
 const upgrade = (id: string) => upgrades.find((candidate) => candidate.id === id)!;
 const withCredits = (currency: number): Progress => ({ ...newProgress(), player: { currency } });
 
@@ -28,8 +28,13 @@ describe("completeAssignment", () => {
   });
 
   it("keeps the best WPM and does not lose it on a slower run", () => {
-    const fast = completeAssignment(newProgress(), { characters: 120, accuracy: 1, wpm: 90 }).progress;
-    const slow = completeAssignment(fast, { characters: 120, accuracy: 1, wpm: 40 }).progress;
+    const fast = completeAssignment(newProgress(), {
+      characters: 120,
+      accuracy: 1,
+      wpm: 90,
+      length: "short" as const,
+    }).progress;
+    const slow = completeAssignment(fast, { characters: 120, accuracy: 1, wpm: 40, length: "short" as const }).progress;
     expect(slow.stats.bestWpm).toBe(90);
   });
 
