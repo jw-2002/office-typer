@@ -1,0 +1,76 @@
+// The save file format: one versioned object, how to build it, and how to read old or damaged ones safely.
+import { startingUpgradeIds, upgrades } from "./data/upgrades";
+import type { Progress } from "./progress";
+
+export const SAVE_VERSION = 1;
+
+export type SaveData = Progress & {
+  version: number;
+  /** Wall-clock ms when saved. Used later to work out offline progress. */
+  savedAt: number;
+};
+
+/**
+ * Where saves live. Async because the cloud version will be; the localStorage one just resolves at once.
+ * `load` gives null when there is no usable save.
+ */
+export interface SaveRepository {
+  load(): Promise<SaveData | null>;
+  save(data: SaveData): Promise<void>;
+}
+
+export function toSave(progress: Progress, now: number): SaveData {
+  return { version: SAVE_VERSION, savedAt: now, ...progress };
+}
+
+// Each entry upgrades a save from version N to N + 1. Add one here when SAVE_VERSION goes up.
+const migrations: Readonly<Record<number, (old: Record<string, unknown>) => Record<string, unknown>>> = {};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** A finite number of at least zero, otherwise 0. */
+function count(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : 0;
+}
+
+/**
+ * Turns whatever was stored into a valid, current save, or null when it cannot be trusted at all
+ * (not an object, no version, or from a newer version of the game). Fields that are merely wrong are
+ * repaired rather than rejected, so a small glitch never wipes a player's progress.
+ */
+export function migrate(raw: unknown): SaveData | null {
+  if (!isRecord(raw)) return null;
+  let current: Record<string, unknown> = raw;
+  let version = current.version;
+  if (typeof version !== "number" || !Number.isInteger(version) || version < 1 || version > SAVE_VERSION) return null;
+
+  while (version < SAVE_VERSION) {
+    const step = migrations[version];
+    if (!step) return null;
+    current = step(current);
+    version += 1;
+  }
+
+  const player = isRecord(current.player) ? current.player : {};
+  const stats = isRecord(current.stats) ? current.stats : {};
+  const known = new Set<string>(upgrades.map((upgrade) => upgrade.id));
+  const owned = Array.isArray(current.upgrades)
+    ? current.upgrades.filter((id): id is string => typeof id === "string" && known.has(id))
+    : [];
+
+  return {
+    version: SAVE_VERSION,
+    savedAt: count(current.savedAt),
+    player: { currency: count(player.currency) },
+    // The free starting upgrades are always owned; a Set drops duplicates.
+    upgrades: [...new Set([...startingUpgradeIds, ...owned])],
+    stats: {
+      totalChars: count(stats.totalChars),
+      assignmentsCompleted: count(stats.assignmentsCompleted),
+      bestWpm: count(stats.bestWpm),
+      totalEarned: count(stats.totalEarned),
+    },
+  };
+}

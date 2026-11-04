@@ -61,12 +61,28 @@ in any order, because they are shuffled (no "Then...", "But..."). More scenarios
 to add for variety: aim for 20 or more per tier before real players. If content grows large, load
 tiers with dynamic `import()` so only the current tier is downloaded.
 
-## Phase 2 - Economy and saving
+## Phase 2 - Economy and saving (done)
 
-- Game store: currency, owned upgrades, job level, stats (best WPM, total typed).
-- Upgrades and jobs as data. One generic `buy(upgradeId)` action, one generic `UpgradeCard`.
-- Payout formula in `src/game/economy.ts`, unit-tested.
-- Save/load to localStorage as one versioned JSON object with a migration function.
+- **Store**: `src/state/gameStore.ts` (Zustand) holds `player.currency`, owned `upgrades` and
+  `stats` (total chars, assignments, best WPM, total earned), with `finishAssignment`, `buy` and
+  `load` actions. The rules are pure functions in `src/game/progress.ts`.
+- **Data**: `src/game/data/upgrades.ts` (computers and key switches, tiers that must be bought in
+  order) and `src/game/data/jobs.ts` (9 jobs). One generic `buy(id)` and one `UpgradeCard`.
+- **Economy** (`src/game/economy.ts`): payout = 0.25 per correct char x accuracy squared x job
+  multiplier x upgrade multiplier (best owned upgrade per category, multiplied across categories).
+  Costs and multipliers are placeholders to balance later.
+- **Promotions** come from total correct characters, not assignment count, so choosing Short,
+  Standard or Long cannot game it. A job also sets which scenario tier is used.
+- **Saving**: `src/game/save.ts` (versioned object, `migrate` repairs bad fields and rejects
+  unusable saves) and `src/state/localSaveRepository.ts` (async `SaveRepository`, backs up a
+  damaged save). `src/state/autosave.ts` loads on start, saves 5 seconds after a change, and on
+  tab hide.
+- **UI**: HUD shows credits, job, characters to promotion and best WPM; a Shop button opens a
+  simple panel. The shop moves to the monitor or room in Phase 4.
+- The scenario history (`recentIds`) stayed in `useAssignment`. It is not saved and is cheap, so
+  moving it into the store would only add impure state to a reducer.
+- **Not done on purpose**: no reset-save button, no offline progress (needs the AI assistant), no
+  settings in the save yet.
 
 ## Phase 3 - Office scene prototype
 

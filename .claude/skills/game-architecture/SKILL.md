@@ -46,6 +46,7 @@ TypeScript should error if an upgrade has no visual.
 
 ## Economy
 
+- Promotions use total correct characters, not assignment count, so assignment length cannot game them.
 - Payout is a pure function of assignment, accuracy and owned upgrades. Keep the formula in
   one place (`economy.ts`) and unit test it.
 - Costs scale geometrically (about 1.15x to 1.5x per level); put the growth factor in data.
@@ -65,7 +66,7 @@ TypeScript should error if an upgrade has no visual.
 - One versioned JSON object: `{ version, savedAt, player, upgrades, stats, settings }`.
 - `src/game/save.ts` owns the schema, validation and `migrate(oldSave) -> latest`. Unknown or
   corrupt data falls back to a fresh save without crashing, and keeps a backup copy.
-- Access storage only through a `SaveRepository` interface (`load`, `save`). The first
+- Access storage only through an async `SaveRepository` interface (`load`, `save`), async so a cloud version fits. The first
   implementation is localStorage. A cloud implementation replaces it later.
 - Autosave on a throttle and on `visibilitychange`, not on every keystroke.
 

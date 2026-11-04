@@ -1,7 +1,9 @@
 // Runs one assignment at a time: wires key input to the typing engine and handles time away.
 import { useEffect, useEffectEvent, useReducer } from "react";
 import { generateAssignment, rememberScenario, type Assignment, type AssignmentLength } from "@/game/assignments";
+import { assignmentResult } from "@/game/progress";
 import { applyKey, createTyping, isFinished, shiftTime, type TypingState } from "@/game/typing";
+import { useGameStore } from "@/state/gameStore";
 import { useKeyInput } from "@/state/useKeyInput";
 import { useNow } from "./useNow";
 
@@ -34,9 +36,13 @@ function reducer(game: Game, action: Action): Game {
   return typing === game.typing ? game : { ...game, typing };
 }
 
-/** Runs one assignment at a time from the shared key input. Enter starts the next one when finished. */
+/**
+ * Runs one assignment at a time from the shared key input. Enter starts the next one when finished.
+ * Finishing pays the player through the game store. `tier` picks which scenarios are used.
+ */
 export function useAssignment(tier: number) {
   const input = useKeyInput();
+  const finishAssignment = useGameStore((state) => state.finishAssignment);
   const [game, dispatch] = useReducer(reducer, undefined, () => newGame(tier, "short", []));
   const finished = isFinished(game.typing);
   const started = game.typing.startedAt !== null;
@@ -50,6 +56,13 @@ export function useAssignment(tier: number) {
     else if (key === "Enter") start(game.length);
   });
   useEffect(() => input.subscribe((key) => onKey(key)), [input]);
+
+  // Pay out once, when the assignment finishes. finishedAt only changes when a new assignment ends.
+  const finishedAt = game.typing.finishedAt;
+  const report = useEffectEvent(() => finishAssignment(assignmentResult(game.typing, performance.now())));
+  useEffect(() => {
+    if (finishedAt !== null) report();
+  }, [finishedAt]);
 
   // Time spent away from the window or tab does not count against the player.
   useEffect(() => {
