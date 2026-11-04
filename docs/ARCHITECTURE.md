@@ -11,6 +11,8 @@ one-line comment saying what it does.
    `KeyInputProvider`, which creates the shared key input and attaches the window `keydown`/`keyup`
    listeners, and `startAutosave`, which loads the save into the game store.
 4. `src/App.tsx` renders two siblings: the 3D `<Canvas>` (with `Scene`) and the 2D `Hud`.
+   `AppProviders` also includes `AssignmentProvider`, which runs the current assignment once so the
+   HUD and the 3D monitor share it.
 
 ## Where the game flow lives
 
@@ -32,5 +34,6 @@ logic. Assignment text comes from `assignments.ts` + `data/`.
 - `src/game` pure rules and data (no React or three.js), with tests beside them.
 - `src/state` providers, the key input, and (later) the store and save repository.
 - `src/hooks` hooks shared by UI.
-- `src/scene` everything inside `<Canvas>`.
+- `src/scene` everything inside `<Canvas>`: `Scene` (lights, controls) holds `Office`, which places
+  `Room`, `Desk`, `Monitor` and the keyboard. 1 unit = 1 metre.
 - `src/ui` the DOM overlay.

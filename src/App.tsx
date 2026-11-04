@@ -6,7 +6,8 @@ import Hud from "@/ui/Hud";
 export default function App() {
   return (
     <>
-      <Canvas camera={{ position: [0, 12, 9], fov: 50 }}>
+      {/* The camera starts where a person's eyes would be, seated at the desk. Units are metres. */}
+      <Canvas dpr={[1, 2]} camera={{ position: [0, 1.2, 0.78], fov: 50, near: 0.05, far: 50 }}>
         <Scene />
       </Canvas>
       <Hud />

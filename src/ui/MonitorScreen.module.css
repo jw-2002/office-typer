@@ -1,0 +1,13 @@
+/* Styles for the page shown on the monitor. Sized in pixels by MonitorScreen; the 3D scene scales it to metres. */
+.screen {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  overflow: hidden;
+  user-select: none;
+}

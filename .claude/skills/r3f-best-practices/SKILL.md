@@ -70,6 +70,11 @@ that loop.
 - Use drei `<Html transform occlude>` to put real DOM on the screen, so assignment text, tabs
   and the AI panel are ordinary React and CSS.
 - Keep the DOM small; many `<Html>` instances are costly. One per screen.
+- `<Html>` renders in a **separate React root**: context does not reach inside. Read context in
+  the 3D component and pass props down; Zustand stores work. In `transform` mode one CSS pixel is
+  `distanceFactor / 400` metres. Give it a low `zIndexRange` so it stays under the HUD.
+- Anything in the 2D HUD that must be clickable needs `pointer-events: auto`, because the HUD
+  container is `none` so the scene stays draggable.
 - Typing input: listen to `window` keydown rather than a focused `<input>` inside `<Html>`.
 
 ## Context and state

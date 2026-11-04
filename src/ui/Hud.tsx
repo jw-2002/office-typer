@@ -1,24 +1,20 @@
-// The 2D overlay: stats, the assignment panel, length choice, the typed-text box and the shop.
+// The 2D overlay: stats, shop and the typed-text box. On touch devices it also holds the assignment panel.
 import { useState } from "react";
-import { LENGTH_TARGETS, type AssignmentLength } from "@/game/assignments";
 import { CURRENCY } from "@/game/currency";
 import { formatNumber, nextJob } from "@/game/economy";
 import { currentJob } from "@/game/progress";
 import { accuracy, elapsedMs, liveWpm } from "@/game/typing";
-import { useAssignment } from "@/hooks/useAssignment";
 import { useCapsLock } from "@/hooks/useCapsLock";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useKeyboardInset } from "@/hooks/useKeyboardInset";
 import { useGameStore } from "@/state/gameStore";
-import AssignmentText from "./AssignmentText";
+import { useCurrentAssignment } from "@/state/useCurrentAssignment";
+import AssignmentPanel from "./AssignmentPanel";
 import Button from "./Button";
 import ShopPanel from "./ShopPanel";
 import TypedInput from "./TypedInput";
 import TypingSink from "./TypingSink";
 import styles from "./Hud.module.css";
-
-const lengths = Object.keys(LENGTH_TARGETS) as AssignmentLength[];
-const capitalise = (word: string) => word[0].toUpperCase() + word.slice(1);
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -33,11 +29,11 @@ export default function Hud() {
   const currency = useGameStore((state) => state.player.currency);
   const totalChars = useGameStore((state) => state.stats.totalChars);
   const bestWpm = useGameStore((state) => state.stats.bestWpm);
-  const lastReward = useGameStore((state) => state.lastReward);
   const job = useGameStore(currentJob);
   const promotion = nextJob(job);
 
-  const { assignment, typing, length, now, finished, chooseLength, next } = useAssignment(job.assignmentTier);
+  const current = useCurrentAssignment();
+  const { typing, now } = current;
   const capsLock = useCapsLock();
   const touch = useCoarsePointer();
   const [shopOpen, setShopOpen] = useState(false);
@@ -67,34 +63,12 @@ export default function Hud() {
       {shopOpen && <ShopPanel />}
 
       <div className={styles.bottom}>
-        <section className={styles.panel}>
-          <header className={styles.header}>
-            <h1 className={styles.title}>{assignment.title}</h1>
-            <div className={styles.lengths}>
-              {lengths.map((option) => (
-                <Button key={option} aria-pressed={option === length} onClick={() => chooseLength(option)}>
-                  {capitalise(option)}
-                </Button>
-              ))}
-            </div>
-          </header>
-
-          <AssignmentText typing={typing} />
-
-          <div className={styles.footer}>
-            <p className={styles.hint} aria-live="polite">
-              {finished && lastReward
-                ? `Assignment complete. +${CURRENCY.symbol}${formatNumber(lastReward.payout)}` +
-                  (lastReward.promotedTo ? ` Promoted to ${lastReward.promotedTo.title}!` : "")
-                : typing.wrong !== ""
-                  ? "Mistake. Press Backspace to remove the red text."
-                  : ""}
-            </p>
-            {finished && <Button onClick={next}>Next assignment (Enter)</Button>}
-          </div>
-
-          {touch && <TypingSink />}
-        </section>
+        {/* Phones cannot use the 3D monitor for typing, so the panel (with its touch field) sits here instead. */}
+        {touch && (
+          <AssignmentPanel current={current}>
+            <TypingSink />
+          </AssignmentPanel>
+        )}
         <TypedInput typing={typing} />
       </div>
     </div>

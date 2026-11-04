@@ -84,13 +84,31 @@ tiers with dynamic `import()` so only the current tier is downloaded.
 - **Not done on purpose**: no reset-save button, no offline progress (needs the AI assistant), no
   settings in the save yet.
 
-## Phase 3 - Office scene prototype
+## Phase 3 - Office scene prototype (done)
 
-- Room, desk, chair, computer and monitor built from primitives.
-- Monitor shows the assignment UI using drei `<Html transform>` (real DOM on the 3D screen,
-  so text and tabs are normal React and CSS).
-- Keyboard sits on the desk and reacts to real typing (already built).
-- HUD overlay: WPM, currency, job.
+- **Scale decided**: 1 unit = 1 metre. The keyboard keeps its own 1-unit-per-keycap model and is
+  scaled by `KEY_UNIT` (0.019) where it is placed on the desk (`src/scene/Office.tsx`).
+- **Models**: all built from boxes in code, no asset files. `Room` (floor, three walls), `Desk`,
+  `Monitor`, composed in `Office`. Each is its own component so a real `.glb` can replace it later.
+  No chair yet (the camera is the player's eyes) and no shadows (flat lighting for now).
+- **Monitor**: drei `<Html transform>` puts the real `AssignmentPanel` on the screen. It draws a
+  CSS pixel as `distanceFactor / 400` metres, so `DISTANCE_FACTOR` maps the 800 x 450 px page onto
+  the 0.64 x 0.36 m screen. `zIndexRange={[0, 0]}` keeps it under the HUD.
+- **Gotcha**: `<Html>` renders in a separate React root, so React context does not reach inside.
+  The Monitor reads the assignment from context outside and passes it as props; the Zustand store
+  works inside. `AssignmentPanel` therefore takes props only.
+- **Shared assignment state**: `AssignmentProvider` runs `useAssignment` once, and the HUD and the
+  monitor both read it with `useCurrentAssignment()`.
+- **Touch**: on a coarse pointer the monitor screen stays dark and the panel (with the typing
+  field) is shown in the HUD instead, because an input inside CSS-3D DOM is unreliable on phones.
+  `useFitCamera` widens the field of view on narrow screens.
+- **Camera**: starts at seated eye height, with limited orbit (no walking behind the monitor).
+- **HUD**: credits, job, characters to promotion, WPM, accuracy, time, best WPM, Shop, and the
+  "You typed" box. Stat tiles shrink on phones.
+- **Checked in a headless browser** (desktop and a phone profile): scene renders, buttons on the
+  3D monitor click, typing, mistakes, payout and autosave all work. Real devices still untested.
+- Known rough edges: the open Shop panel covers the right of the monitor (it moves in Phase 4);
+  the monitor's perspective looks tall and stretched at the default camera, and the room is bare.
 
 ## Phase 4 - Upgrades you can see and hear
 

@@ -1,28 +1,33 @@
-// Everything inside the <Canvas>: lights, the keyboard, a floor grid and camera controls.
-import { OrbitControls, Grid } from "@react-three/drei";
-import Keyboard from "@/scene/keyboard/Keyboard";
+// Everything inside the <Canvas>: lights, the office and the camera controls. App.tsx owns the Canvas itself.
+import { OrbitControls } from "@react-three/drei";
+import Office from "./Office";
+import { palette } from "./palette";
+import { useFitCamera } from "./useFitCamera";
 
-// Everything rendered inside <Canvas>. App.tsx owns the Canvas itself.
 export default function Scene() {
+  useFitCamera();
   return (
     <>
-      <color attach="background" args={["#111827"]} />
+      <color attach="background" args={[palette.background]} />
 
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[5, 10, 6]} intensity={1.5} />
+      {/* Ambient light fills every surface evenly; the directional light is the "sun" that gives shape. */}
+      <ambientLight intensity={0.7} />
+      <directionalLight position={[1.5, 3, 2]} intensity={1.6} />
 
-      <Keyboard />
+      <Office />
 
-      <Grid
-        position={[0, -0.8, 0]}
-        args={[20, 20]}
-        cellColor="#374151"
-        sectionColor="#6b7280"
-        fadeDistance={40}
-        infiniteGrid
+      {/* Orbiting is limited so you stay at the desk: a little look around, no walking behind the monitor. */}
+      <OrbitControls
+        makeDefault
+        target={[0, 0.93, -0.08]}
+        enablePan={false}
+        minDistance={0.4}
+        maxDistance={1.6}
+        minAzimuthAngle={-0.7}
+        maxAzimuthAngle={0.7}
+        minPolarAngle={0.6}
+        maxPolarAngle={1.75}
       />
-
-      <OrbitControls makeDefault />
     </>
   );
 }
