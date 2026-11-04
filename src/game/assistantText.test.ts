@@ -1,7 +1,9 @@
 // Tests for the text assistants seem to type, and for the assistant data.
 import { describe, expect, it } from "vitest";
 import { assistantText } from "./assistantText";
+import { generateAssignment } from "./assignments";
 import { createRng } from "./random";
+import { scenarioPools } from "./data/scenarios";
 import { upgrades, type Upgrade } from "./data/upgrades";
 
 const catalogue: readonly Upgrade[] = upgrades;
@@ -19,9 +21,12 @@ describe("assistantText", () => {
     }
   });
 
-  it("an ordinary assistant never does", () => {
+  it("an ordinary assistant gets the plain assignment text, with nothing slipped in", () => {
     for (let seed = 1; seed <= 60; seed++) {
-      expect(assistantText(plain, seed % 3, createRng(seed)).toLowerCase(), `seed ${seed}`).not.toContain("goblin");
+      const tier = seed % 3;
+      expect(assistantText(plain, tier, createRng(seed)), `seed ${seed}`).toBe(
+        generateAssignment(tier, "short", createRng(seed)).text,
+      );
     }
   });
 
@@ -57,5 +62,14 @@ describe("assistant data", () => {
 
   it("assistants do not change the pay multiplier", () => {
     for (const assistant of assistants) expect(assistant.payoutMultiplier).toBe(1);
+  });
+});
+
+describe("goblin scenarios", () => {
+  it("every tier has at least one assignment about goblins, so the habit is not only the assistant's", () => {
+    for (const pool of scenarioPools) {
+      const goblins = pool.filter((scenario) => /goblin/i.test(JSON.stringify(scenario)));
+      expect(goblins.length).toBeGreaterThanOrEqual(1);
+    }
   });
 });

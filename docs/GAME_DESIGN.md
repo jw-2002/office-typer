@@ -96,7 +96,7 @@ the office. On touch devices the same desktop sits in the HUD instead.
 
 ## Possible later
 
-- More scenarios per tier, and real 3D models replacing the primitive placeholders.
+- Still more scenarios, and real 3D models replacing the primitive placeholders.
 - More decorations on the shelf and desk.
 
 Not planned: accounts, cloud saves, leaderboards, ads and offline earnings.

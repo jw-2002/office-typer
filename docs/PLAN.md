@@ -43,7 +43,7 @@ Done:
 
 Also done (Phase 1.5):
 
-- **Variety**: 10 scenarios per tier (30 total), bigger slot lists, and a short memory
+- **Variety**: 10 scenarios per tier at first (now 20, see Phase 6), bigger slot lists, and a short memory
   (`RECENT_SCENARIO_MEMORY`) so the same scenario does not come up again straight away. The
   memory lives in `useAssignment` for now and moves into the game store in Phase 2.
 - **Touch devices**: on a coarse pointer a transparent field (`TypingSink`) covers the assignment
@@ -58,7 +58,7 @@ Also done (Phase 1.5):
 
 Content notes: all text must be typeable ASCII (tests enforce it). Body sentences must make sense
 in any order, because they are shuffled (no "Then...", "But..."). More scenarios are the main thing
-to add for variety: aim for 20 or more per tier before real players. If content grows large, load
+to add for variety (20 per tier now, which is enough for the short game). If content grows large, load
 tiers with dynamic `import()` so only the current tier is downloaded.
 
 ## Phase 2 - Economy and saving (done)
@@ -247,7 +247,10 @@ little single-player game, saved in the browser.
   4, 6, 10, 14, 20 and 27 minutes). The top assistant costs 150,000 to keep the game the same length, which leaves a
   final stretch of saving up for it. Everything else costs what it did.
 - Save format is version 3 (adds `finale`, `stats.secondsPlayed` and the assistant category).
-- **Not done**: no more scenarios were added. A short game means fewer repeats, but 10 per tier is still thin.
+- **Scenarios**: now 20 per tier, 60 in all (30 new). Each tier has a goblin one (`goblin-cupboard`,
+  `goblin-sighting`, `goblin-policy`), so the goblin habit is not only Gippity-1's. New tests keep it honest:
+  body sentences may not be numbered ("Risk 1:") or point at other sentences ("as mentioned"), because they are
+  shuffled. That guard found and fixed the same flaw in the older meeting minutes.
 
 ## Phase 7 - Scenery shop and polish
 
@@ -281,4 +284,4 @@ deploying from git. Saves live in the browser's localStorage behind a small `Sav
 - World scale: the keyboard currently uses 1 unit = one keycap (about 19 mm). Easiest path is
   to build the desk at real-world scale in metres and scale the Keyboard group down when it
   is placed on the desk.
-- More scenarios per tier, and a final pass on balance once it has been played start to finish.
+- A final pass on balance once it has been played start to finish.

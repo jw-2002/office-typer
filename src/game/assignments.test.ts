@@ -70,6 +70,18 @@ describe("scenario data", () => {
       }
     }
   });
+
+  it("does not number its body sentences or point at other ones, because they are shuffled", () => {
+    // A lone "Risk 1:" turning up after "Risk 6:" reads as a mistake. A whole list inside one sentence is fine.
+    const label = /\b(Risk|Question|Item|Step|Point|Stage|Phase|Rule|Part) \d/g;
+    for (const scenario of allScenarios) {
+      for (const sentence of scenario.body) {
+        const startsNumbered = /^(Risk|Question|Item|Step|Point|Stage|Phase|Rule|Part) \d/.test(sentence);
+        if (startsNumbered) expect((sentence.match(label) ?? []).length, sentence).toBeGreaterThanOrEqual(2);
+        expect(sentence, sentence).not.toMatch(/\b(firstly|secondly|thirdly|as before|as mentioned|as above)\b/i);
+      }
+    }
+  });
 });
 
 describe("rememberScenario", () => {
