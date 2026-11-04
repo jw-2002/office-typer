@@ -1,7 +1,7 @@
 // The money rules: payout per assignment, upgrade and job multipliers, and number formatting. Pure, no React.
 import type { AssignmentLength } from "./assignments";
 import { jobs, type Job } from "./data/jobs";
-import { upgradeCategories, upgrades, type Upgrade } from "./data/upgrades";
+import { upgradeCategories, upgrades, type AssistantSpec, type Upgrade } from "./data/upgrades";
 
 /** Credits earned per correct character before any multiplier. */
 export const BASE_PAYOUT_PER_CHAR = 0.25;
@@ -52,6 +52,21 @@ export function payout({ characters, accuracy, length, job, ownedUpgradeIds }: P
   return Math.round(raw);
 }
 
+/**
+ * Credits an AI assistant earns per second. It uses your job and upgrade multipliers, like your own typing, but gets no
+ * length bonus, so a skilled typist on Long assignments stays ahead of the cheaper assistants.
+ */
+export function assistantIncome(assistant: AssistantSpec, job: Job, ownedUpgradeIds: readonly string[]): number {
+  const charactersPerSecond = (assistant.wpm * 5) / 60;
+  return (
+    charactersPerSecond *
+    BASE_PAYOUT_PER_CHAR *
+    accuracyMultiplier(assistant.accuracy) *
+    job.payoutMultiplier *
+    upgradeMultiplier(ownedUpgradeIds)
+  );
+}
+
 /** The job held at a given total of correct characters. */
 export function jobFor(totalChars: number): Job {
   return jobs.reduce<Job>((best, job) => (totalChars >= job.minChars ? job : best), jobs[0]);
@@ -90,6 +105,20 @@ export function promotionProgress(totalChars: number): PromotionProgress {
     fraction: (totalChars - job.minChars) / (next.minChars - job.minChars),
     remaining: next.minChars - totalChars,
   };
+}
+
+/** 0.43 -> "0.4", 2.46 -> "2.5", 36.2 -> "36", 1200 -> "1.2K". For credits per second. */
+export function formatRate(perSecond: number): string {
+  return perSecond < 10 ? perSecond.toFixed(1) : formatNumber(perSecond);
+}
+
+/** 45 -> "0m 45s", 754 -> "12m 34s", 4320 -> "1h 12m". For how long a game took. */
+export function formatDuration(totalSeconds: number): string {
+  const seconds = Math.max(0, Math.floor(totalSeconds));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (hours > 0) return `${hours}h ${minutes.toString().padStart(2, "0")}m`;
+  return `${minutes}m ${(seconds % 60).toString().padStart(2, "0")}s`;
 }
 
 const SUFFIXES = ["", "K", "M", "B", "T"];

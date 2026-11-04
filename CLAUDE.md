@@ -1,9 +1,9 @@
 # Office Typer
 
-A 3D browser idle/grind game about typing. The player sits at an office desk, completes typing
-assignments shown on an in-world monitor, earns currency, and spends it on upgrades (computer,
-keyboard, key switches, scenery, an AI assistant that works on its own). Completing enough work
-earns promotions with harder, better-paid assignments. Main goal: **fun**, not teaching typing.
+A short 3D browser game about typing (30 to 80 minutes). The player sits at an office desk, completes typing
+assignments shown on an in-world monitor, earns currency, and spends it on upgrades (computer, key switches,
+AI assistants that type on their own). Completing enough work earns promotions. The game ends when the top AI
+assistant makes the player redundant. Main goal: **fun**, not teaching typing.
 
 Full idea: `docs/GAME_DESIGN.md`. Roadmap and decisions: `docs/PLAN.md`. Read both before
 starting significant work, and update them when decisions change.
@@ -36,7 +36,7 @@ readable code over clever code.
   can be unit tested.
 - Real names of products (Cherry MX, GPT, Llama, Claude, etc.) must not appear in the game.
   Use the parody names in `docs/GAME_DESIGN.md`. The currency name is a single constant.
-- Do not start phases out of order or add backend/ads work until the plan says so.
+- There is no backend, accounts, leaderboard, ads or offline earnings, by design (see `docs/PLAN.md`). Do not add them.
 - Every source file starts with a one-line comment saying what it is for (`//` in .ts/.tsx, `/* */` in .css).
   Add one to every new file and update it if the file's job changes. Code map: `docs/ARCHITECTURE.md`.
 - Keep this file short. Detail goes in `docs/` and the skills.

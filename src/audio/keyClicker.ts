@@ -6,6 +6,8 @@ export type KeyClicker = {
   play: (sound: KeySound) => void;
   /** A short rising tune for a promotion. */
   fanfare: () => void;
+  /** A slow falling tune for being made redundant. */
+  redundancy: () => void;
 };
 
 const NOISE_SECONDS = 0.15;
@@ -14,6 +16,9 @@ const PITCH_JITTER = 0.1;
 // C, E, G and a high C, one after another.
 const FANFARE_NOTES = [523.25, 659.25, 783.99, 1046.5];
 const FANFARE_STEP_SECONDS = 0.13;
+// G, F, E flat and a low C, slowly: the sound of bad news.
+const REDUNDANCY_NOTES = [392, 349.23, 311.13, 261.63];
+const REDUNDANCY_STEP_SECONDS = 0.38;
 
 type Audio = { ctx: AudioContext; noise: AudioBuffer; master: GainNode };
 
@@ -95,6 +100,15 @@ export function createKeyClicker(): KeyClicker {
       FANFARE_NOTES.forEach((frequency, index) => {
         const last = index === FANFARE_NOTES.length - 1;
         tone(ready, "triangle", frequency, 0.5, last ? 0.9 : 0.25, index * FANFARE_STEP_SECONDS);
+      });
+    },
+
+    redundancy() {
+      const ready = start();
+      if (!ready) return;
+      REDUNDANCY_NOTES.forEach((frequency, index) => {
+        const last = index === REDUNDANCY_NOTES.length - 1;
+        tone(ready, "triangle", frequency, 0.45, last ? 1.6 : 0.5, index * REDUNDANCY_STEP_SECONDS);
       });
     },
   };

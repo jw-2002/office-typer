@@ -2,7 +2,7 @@
 import { startingUpgradeIds, upgrades } from "./data/upgrades";
 import { normaliseEquipped, type Progress } from "./progress";
 
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 export type SaveData = Progress & {
   version: number;
@@ -27,6 +27,8 @@ export function toSave(progress: Progress, now: number): SaveData {
 const migrations: Readonly<Record<number, (old: Record<string, unknown>) => Record<string, unknown>>> = {
   // 1 -> 2 added `equipped`. It needs no change here: validation below fills it in from the upgrades owned.
   1: (old) => old,
+  // 2 -> 3 added the AI assistant category, `finale` and `stats.secondsPlayed`. All are filled in by validation below.
+  2: (old) => old,
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -66,6 +68,7 @@ export function migrate(raw: unknown): SaveData | null {
   // The free starting upgrades are always owned; a Set drops duplicates.
   const ownedIds = [...new Set([...startingUpgradeIds, ...owned])];
   const equipped = isRecord(current.equipped) ? current.equipped : {};
+  const finale = isRecord(current.finale) ? current.finale : {};
 
   return {
     version: SAVE_VERSION,
@@ -73,11 +76,16 @@ export function migrate(raw: unknown): SaveData | null {
     player: { currency: count(player.currency) },
     upgrades: ownedIds,
     equipped: normaliseEquipped(ownedIds, equipped),
+    finale: {
+      stage: finale.stage === "pending" || finale.stage === "redundant" ? finale.stage : "none",
+      seconds: count(finale.seconds),
+    },
     stats: {
       totalChars: count(stats.totalChars),
       assignmentsCompleted: count(stats.assignmentsCompleted),
       bestWpm: count(stats.bestWpm),
       totalEarned: count(stats.totalEarned),
+      secondsPlayed: count(stats.secondsPlayed),
     },
   };
 }

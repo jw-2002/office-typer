@@ -1,6 +1,6 @@
 ---
 name: game-architecture
-description: Architecture rules for the typing idle game's rules, economy, state and persistence. Use before writing game logic, the Zustand store, upgrades/jobs data, WPM, payouts, offline progress or save/load code.
+description: Architecture rules for the typing idle game's rules, economy, state and persistence. Use before writing game logic, the Zustand store, upgrades/jobs data, WPM, payouts, the game clock, the ending or save/load code.
 ---
 
 # Game architecture
@@ -54,27 +54,24 @@ TypeScript should error if an upgrade has no visual.
   (1.2K, 3.4M). Revisit big-number libraries only if values approach 1e15.
 - The currency name comes from `src/game/currency.ts`. Never hard-code it in UI strings.
 
-## Time and idle income
+## Time and the ending
 
-- The AI assistant runs on a fixed-step tick, driven by one game loop, not a timer per
-  feature. Do not tie game logic to render frames.
-- Offline progress: on load, compute `now - lastSavedAt`, cap it (for example 8 hours), and
-  credit the assistant's earnings once. Never reward changing the system clock beyond the cap.
+- Everything that happens by itself (AI assistants earning, the redundancy countdown) runs from one game clock
+  (`src/state/assistantLoop.ts`, once a second, calling the pure `tickGame`). Do not tie game logic to render frames or
+  add a timer per feature. The clock skips hidden tabs and caps long gaps.
+- **No offline progress**, by design. Nothing earns while the tab is hidden or the game is closed.
+- The game ends through `Progress.finale` (`none`, `pending`, `redundant`). Once redundant, `tickGame`, buying and
+  payouts do nothing. Keep new systems behind that check.
 
 ## Persistence
 
-- One versioned JSON object: `{ version, savedAt, player, upgrades, stats, settings }`.
+- One versioned JSON object (see `src/game/save.ts`): `version`, `savedAt`, `player`, `upgrades`, `equipped`, `finale` and
+  `stats`. Bump `SAVE_VERSION` and add a `migrations` entry whenever the shape changes.
 - `src/game/save.ts` owns the schema, validation and `migrate(oldSave) -> latest`. Unknown or
   corrupt data falls back to a fresh save without crashing, and keeps a backup copy.
-- Access storage only through an async `SaveRepository` interface (`load`, `save`), async so a cloud version fits. The first
-  implementation is localStorage. A cloud implementation replaces it later.
+- Access storage only through the async `SaveRepository` interface (`load`, `save`). The implementation is
+  localStorage. There is no cloud save planned.
 - Autosave on a throttle and on `visibilitychange`, not on every keystroke.
-
-## Backend readiness (later)
-
-- Treat the client as untrusted. The server will recompute or sanity check anything that
-  affects the leaderboard (WPM plausibility, rate of earnings).
-- Do not add auth, ads or network code until `docs/PLAN.md` reaches that phase.
 
 ## Naming and legal
 

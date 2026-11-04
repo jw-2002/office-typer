@@ -3,7 +3,7 @@
 
 import type { OsId } from "./os";
 
-export type UpgradeCategory = "computer" | "switches";
+export type UpgradeCategory = "computer" | "switches" | "assistant";
 
 export type Upgrade = {
   id: string;
@@ -15,11 +15,26 @@ export type Upgrade = {
   payoutMultiplier: number;
   /** Computers only: the operating system, which sets how the whole UI looks. */
   os?: OsId;
+  /** AI assistants only: how it works on its own. */
+  assistant?: AssistantSpec;
+  /** AI assistants only: buying this one gets the player made redundant, which ends the game. */
+  endsGame?: boolean;
+};
+
+/** An AI assistant types by itself. Its mistakes lower its pay the same way yours do. */
+export type AssistantSpec = {
+  /** How fast it types. */
+  wpm: number;
+  /** From 0 to 1. */
+  accuracy: number;
+  /** A habit that shows in what it types. */
+  quirk?: "goblins";
 };
 
 export const categoryLabels: Readonly<Record<UpgradeCategory, string>> = {
   computer: "Computer",
   switches: "Key switches",
+  assistant: "AI assistant",
 };
 
 export const upgradeCategories = Object.keys(categoryLabels) as UpgradeCategory[];
@@ -102,10 +117,48 @@ export const upgrades = [
     cost: 1500,
     payoutMultiplier: 1.5,
   },
+  {
+    id: "gippity-1",
+    category: "assistant",
+    name: "Gippity-1",
+    description: "Types slowly and keeps bringing up goblins.",
+    cost: 400,
+    payoutMultiplier: 1,
+    assistant: { wpm: 8, accuracy: 0.8, quirk: "goblins" },
+  },
+  {
+    id: "drama-llama-7b",
+    category: "assistant",
+    name: "Drama Llama 7B",
+    description: "Quick, but sulks about every assignment.",
+    cost: 3000,
+    payoutMultiplier: 1,
+    assistant: { wpm: 20, accuracy: 0.88 },
+  },
+  {
+    id: "gemstone-flash",
+    category: "assistant",
+    name: "Gemstone Flash",
+    description: "Brilliant, sparkly and easily distracted.",
+    cost: 25000,
+    payoutMultiplier: 1,
+    assistant: { wpm: 45, accuracy: 0.94 },
+  },
+  {
+    id: "clyde-octet-5",
+    category: "assistant",
+    name: "Clyde Octet 5",
+    description: "Never tires, never complains and never needs you.",
+    cost: 150000,
+    payoutMultiplier: 1,
+    assistant: { wpm: 100, accuracy: 0.99 },
+    endsGame: true,
+  },
 ] as const satisfies readonly Upgrade[];
 
 export type UpgradeId = (typeof upgrades)[number]["id"];
 export type ComputerId = Extract<(typeof upgrades)[number], { category: "computer" }>["id"];
+export type AssistantId = Extract<(typeof upgrades)[number], { category: "assistant" }>["id"];
 export type SwitchId = Extract<(typeof upgrades)[number], { category: "switches" }>["id"];
 
 /** Upgrades the player starts with: everything that costs nothing. */

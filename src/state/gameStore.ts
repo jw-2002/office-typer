@@ -4,6 +4,7 @@ import type { Upgrade, UpgradeCategory } from "@/game/data/upgrades";
 import {
   buyUpgrade,
   completeAssignment,
+  tickGame,
   equippedUpgrade,
   equipUpgrade,
   newProgress,
@@ -17,6 +18,8 @@ type GameStore = Progress & {
   lastReward: Reward | null;
   finishAssignment: (result: AssignmentResult) => void;
   buy: (upgradeId: string) => void;
+  /** Moves the game on by this many seconds: the assistant earns and the clock runs. */
+  tick: (seconds: number) => void;
   /** Closes the promotion message once the player has seen it. */
   dismissPromotion: () => void;
   /** Switches to an upgrade already owned, such as an older computer. */
@@ -28,18 +31,24 @@ type GameStore = Progress & {
 };
 
 /** Just the saved part of the store. */
-export function progressOf({ player, upgrades, equipped, stats }: Progress): Progress {
-  return { player, upgrades, equipped, stats };
+export function progressOf({ player, upgrades, equipped, finale, stats }: Progress): Progress {
+  return { player, upgrades, equipped, finale, stats };
 }
 
 export const useGameStore = create<GameStore>()((set, get) => ({
   ...newProgress(),
   lastReward: null,
   finishAssignment: (result) => {
+    // Once made redundant, nothing earns.
+    if (get().finale.stage === "redundant") return;
     const { progress, reward } = completeAssignment(progressOf(get()), result);
     set({ ...progress, lastReward: reward });
   },
-  buy: (upgradeId) => set(buyUpgrade(progressOf(get()), upgradeId)),
+  buy: (upgradeId) => {
+    if (get().finale.stage === "redundant") return;
+    set(buyUpgrade(progressOf(get()), upgradeId));
+  },
+  tick: (seconds) => set(tickGame(progressOf(get()), seconds)),
   equip: (upgradeId) => set(equipUpgrade(progressOf(get()), upgradeId)),
   dismissPromotion: () =>
     set((state) => (state.lastReward ? { lastReward: { ...state.lastReward, promotedTo: null } } : {})),

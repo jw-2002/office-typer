@@ -11,6 +11,9 @@ import {
   newProgress,
   normaliseEquipped,
   progressChanged,
+  assistantRate,
+  tickGame,
+  FINALE_FALLBACK_SECONDS,
   type Progress,
 } from "./progress";
 
@@ -23,7 +26,13 @@ describe("completeAssignment", () => {
     const { progress, reward } = completeAssignment(newProgress(), perfect(120));
     expect(reward.payout).toBe(30);
     expect(progress.player.currency).toBe(30);
-    expect(progress.stats).toEqual({ totalChars: 120, assignmentsCompleted: 1, bestWpm: 60, totalEarned: 30 });
+    expect(progress.stats).toEqual({
+      totalChars: 120,
+      assignmentsCompleted: 1,
+      bestWpm: 60,
+      totalEarned: 30,
+      secondsPlayed: 0,
+    });
     expect(reward.promotedTo).toBeNull();
   });
 
@@ -39,7 +48,7 @@ describe("completeAssignment", () => {
   });
 
   it("promotes when total characters cross a threshold, once", () => {
-    let progress = completeAssignment(newProgress(), perfect(900)).progress;
+    let progress = completeAssignment(newProgress(), perfect(180)).progress;
     const promoted = completeAssignment(progress, perfect(120));
     expect(promoted.reward.promotedTo?.id).toBe("data-entry-clerk");
     expect(currentJob(promoted.progress).id).toBe("data-entry-clerk");
@@ -126,10 +135,11 @@ describe("equipping", () => {
 
   it("normaliseEquipped repairs missing, unknown and unowned choices with the best owned", () => {
     const owned = ["beige-box", "grey-tower", "mushy"];
-    expect(normaliseEquipped(owned, {})).toEqual({ computer: "grey-tower", switches: "mushy" });
+    expect(normaliseEquipped(owned, {})).toEqual({ computer: "grey-tower", switches: "mushy", assistant: "" });
     expect(normaliseEquipped(owned, { computer: "beige-box", switches: "blueberry" })).toEqual({
       computer: "beige-box",
       switches: "mushy",
+      assistant: "",
     });
     // A switch is not a valid computer, even though it is owned.
     expect(normaliseEquipped(owned, { computer: "mushy" }).computer).toBe("grey-tower");
@@ -144,5 +154,81 @@ describe("progressChanged", () => {
     expect(progressChanged(start, { ...start, stats: { ...start.stats } })).toBe(true);
     expect(progressChanged(start, { ...start, equipped: { ...start.equipped } })).toBe(true);
     expect(progressChanged(start, equipUpgrade(buyUpgrade(withCredits(100), "grey-tower"), "beige-box"))).toBe(true);
+  });
+});
+
+describe("AI assistants", () => {
+  const withAssistant = (id: string, currency = 0): Progress => ({
+    ...newProgress(),
+    player: { currency },
+    upgrades: [...newProgress().upgrades, id],
+    equipped: { ...newProgress().equipped, assistant: id },
+  });
+
+  it("starts with none, earning nothing", () => {
+    expect(assistantRate(newProgress())).toBe(0);
+    expect(tickGame(newProgress(), 10).player.currency).toBe(0);
+  });
+
+  it("is bought in order like other upgrades, and put to use at once", () => {
+    expect(buyStatus(withCredits(99999), upgrade("drama-llama-7b"))).toBe("locked");
+    const bought = buyUpgrade(withCredits(400), "gippity-1");
+    expect(bought.equipped.assistant).toBe("gippity-1");
+    expect(bought.player.currency).toBe(0);
+  });
+
+  it("earns each second, counts as earned and does not count toward promotion", () => {
+    const progress = withAssistant("gippity-1");
+    const after = tickGame(progress, 10);
+    expect(assistantRate(progress)).toBeGreaterThan(0);
+    expect(after.player.currency).toBeCloseTo(assistantRate(progress) * 10);
+    expect(after.stats.totalEarned).toBeCloseTo(after.player.currency);
+    expect(after.stats.secondsPlayed).toBe(10);
+    expect(after.stats.totalChars).toBe(0);
+  });
+
+  it("uses the assistant in use, so you can go back to an older one", () => {
+    const owned = {
+      ...withAssistant("drama-llama-7b"),
+      upgrades: [...newProgress().upgrades, "gippity-1", "drama-llama-7b"],
+    };
+    const faster = assistantRate(owned);
+    const older = assistantRate(equipUpgrade(owned, "gippity-1"));
+    expect(older).toBeGreaterThan(0);
+    expect(older).toBeLessThan(faster);
+  });
+});
+
+describe("the ending", () => {
+  const top: Progress = {
+    ...newProgress(),
+    player: { currency: 200_000 },
+    upgrades: [...newProgress().upgrades, "gippity-1", "drama-llama-7b", "gemstone-flash"],
+  };
+
+  it("buying the top assistant starts the countdown to redundancy", () => {
+    expect(buyUpgrade(top, "clyde-octet-5").finale.stage).toBe("pending");
+    expect(buyUpgrade(top, "gemstone-flash").finale.stage).toBe("none");
+  });
+
+  it("the next assignment finished after that is the last", () => {
+    const pending = buyUpgrade(top, "clyde-octet-5");
+    const done = completeAssignment(pending, perfect(120)).progress;
+    expect(done.finale.stage).toBe("redundant");
+    // It still paid out, since it was a real piece of work.
+    expect(done.player.currency).toBeGreaterThan(pending.player.currency);
+  });
+
+  it("if the player stops typing, redundancy arrives after the fallback wait", () => {
+    const pending = buyUpgrade(top, "clyde-octet-5");
+    const early = tickGame(pending, FINALE_FALLBACK_SECONDS - 1);
+    expect(early.finale.stage).toBe("pending");
+    expect(tickGame(early, 2).finale.stage).toBe("redundant");
+  });
+
+  it("nothing earns or counts once redundant", () => {
+    const redundant = tickGame(buyUpgrade(top, "clyde-octet-5"), FINALE_FALLBACK_SECONDS + 1);
+    expect(redundant.finale.stage).toBe("redundant");
+    expect(tickGame(redundant, 100)).toBe(redundant);
   });
 });

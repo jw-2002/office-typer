@@ -55,6 +55,8 @@
   gap: var(--space-2);
   margin: var(--space-3) calc(-1 * var(--space-3)) 0;
   padding: var(--space-1) var(--space-3);
+  /* Five programs and the tray share this bar, so its buttons are a little tighter than usual. */
+  --button-padding-x: var(--space-2);
   background: var(--taskbar-bg);
   box-shadow: var(--taskbar-shadow);
   color: var(--taskbar-text);
@@ -66,7 +68,12 @@
 }
 
 .os {
+  /* The task bar can get crowded, so the name shortens rather than wrapping onto two lines. */
+  min-width: 0;
+  overflow: hidden;
   font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   opacity: 0.85;
 }
 
@@ -76,7 +83,6 @@
     flex-wrap: wrap;
     gap: var(--space-1);
     padding-inline: var(--space-2);
-    --button-padding-x: var(--space-2);
     margin-inline: calc(-1 * var(--space-3));
   }
 

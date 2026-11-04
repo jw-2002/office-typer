@@ -1,6 +1,7 @@
 # Game Design
 
-Title: **Office Typer**. Tone: light, silly corporate satire.
+Title: **Office Typer**. Tone: light, silly corporate satire. A short game: about 30 to 80 minutes, depending on how
+fast you type, ending when an AI assistant takes your job.
 
 ## Core loop
 
@@ -56,12 +57,22 @@ Upgrading the computer is therefore also a style change, which is part of the re
 and switches stay owned and can be swapped back to at any time (looks and sound only; pay always uses
 the best owned).
 
-## AI assistant (idle income)
+## AI assistants
 
-A subscription the player buys and upgrades. It gets its own tab on the monitor and types
-assignments on its own, slowly at first. Tiers are parodies:
-Gippity-1, Drama Llama 7B, Gemstone Flash, Clyde Octet 5. Each tier costs more and works faster.
-Active typing should always out-earn it early on so typing stays the main verb.
+You buy AI assistants in order. They type on their own while you work, earning credits at their own speed and accuracy
+(their mistakes cost pay, just like yours), using your job and upgrade multipliers. They never count toward
+promotions, which are about your own typing. The tiers are parodies, and you can swap back to an older one:
+
+- **Gippity-1** (8 WPM, 80%): slow, sloppy and obsessed with goblins, which keep turning up in what it types.
+- **Drama Llama 7B** (20 WPM, 88%): quick, but sulks.
+- **Gemstone Flash** (45 WPM, 94%): sparkly and easily distracted. About as good as a casual typist.
+- **Clyde Octet 5** (100 WPM, 99%): never tires, never complains, never needs you.
+
+## The ending
+
+Buying Clyde Octet 5 gets you made redundant: after the next assignment you finish (or a minute of waiting), a
+redundancy notice shows your time at the company, assignments, highest WPM, credits earned and fastest ever
+redundancy. "Start a new career" begins again. A faster run (better typing, earlier upgrades) is a better run.
 
 ## Audio
 
@@ -81,11 +92,11 @@ Settings. The only 2D overlay is a faint Stand up / Sit down hint low on the scr
 the office. On touch devices the same desktop sits in the HUD instead.
 
 - Live **WPM** is a rolling window, not a whole-session average.
-- The highest WPM is stored in the save (and later the leaderboard).
+- The highest WPM is stored in the save, and the fastest redundancy time is kept between runs.
 
-## Future (not in the prototype)
+## Possible later
 
-- Accounts (Google sign-in, maybe email+password), cloud save.
-- Leaderboard: total points and highest WPM.
-- Freemium: optional rewarded ad for a small currency bonus.
-- Real 3D models replacing primitive placeholders.
+- More scenarios per tier, and real 3D models replacing the primitive placeholders.
+- More decorations on the shelf and desk.
+
+Not planned: accounts, cloud saves, leaderboards, ads and offline earnings.

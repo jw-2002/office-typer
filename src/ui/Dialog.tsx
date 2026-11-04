@@ -5,8 +5,8 @@ import styles from "./Dialog.module.css";
 
 type DialogProps = {
   title: string;
-  /** Called when the player presses Escape. */
-  onClose: () => void;
+  /** Called when the player presses Escape. Leave out for a dialog that cannot be dismissed. */
+  onClose?: () => void;
   /** The id of the element holding the main message, so screen readers read it out. */
   describedBy?: string;
   children: ReactNode;
@@ -14,6 +14,7 @@ type DialogProps = {
 
 export default function Dialog({ title, onClose, describedBy, children }: DialogProps) {
   useEffect(() => {
+    if (!onClose) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };

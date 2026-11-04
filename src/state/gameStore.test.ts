@@ -33,11 +33,11 @@ describe("game store", () => {
   });
 
   it("dismissPromotion clears the promotion but keeps the payout", () => {
-    useGameStore.getState().finishAssignment({ characters: 1200, accuracy: 1, wpm: 50, length: "short" });
+    useGameStore.getState().finishAssignment({ characters: 400, accuracy: 1, wpm: 50, length: "short" });
     expect(useGameStore.getState().lastReward?.promotedTo?.id).toBe("data-entry-clerk");
     useGameStore.getState().dismissPromotion();
     expect(useGameStore.getState().lastReward?.promotedTo).toBeNull();
-    expect(useGameStore.getState().lastReward?.payout).toBe(300);
+    expect(useGameStore.getState().lastReward?.payout).toBe(100);
   });
 
   it("reset erases progress, upgrades and the last reward", () => {
@@ -54,9 +54,34 @@ describe("game store", () => {
     expect(state.lastReward).toBeNull();
   });
 
+  it("tick makes the assistant earn and runs the clock", () => {
+    useGameStore.getState().load({
+      ...newProgress(),
+      upgrades: [...newProgress().upgrades, "gippity-1"],
+      equipped: { ...newProgress().equipped, assistant: "gippity-1" },
+    });
+    useGameStore.getState().tick(5);
+    expect(useGameStore.getState().player.currency).toBeGreaterThan(0);
+    expect(useGameStore.getState().stats.secondsPlayed).toBe(5);
+  });
+
+  it("once made redundant, nothing pays out or can be bought", () => {
+    useGameStore
+      .getState()
+      .load({ ...newProgress(), player: { currency: 500 }, finale: { stage: "redundant", seconds: 0 } });
+    useGameStore.getState().finishAssignment({ characters: 120, accuracy: 1, wpm: 50, length: "short" });
+    useGameStore.getState().buy("strawberry");
+    useGameStore.getState().tick(10);
+    const state = useGameStore.getState();
+    expect(state.player.currency).toBe(500);
+    expect(state.upgrades).not.toContain("strawberry");
+    expect(state.stats.secondsPlayed).toBe(0);
+  });
+
   it("progressOf leaves out actions and the last reward", () => {
     expect(Object.keys(progressOf(useGameStore.getState())).sort()).toEqual([
       "equipped",
+      "finale",
       "player",
       "stats",
       "upgrades",

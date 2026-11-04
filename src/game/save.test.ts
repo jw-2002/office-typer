@@ -37,7 +37,13 @@ describe("migrate", () => {
     expect(result).not.toBeNull();
     expect(result?.player.currency).toBe(0);
     expect(result?.upgrades).toEqual(["beige-box", "mushy", "strawberry"]);
-    expect(result?.stats).toEqual({ totalChars: 0, assignmentsCompleted: 0, bestWpm: 80, totalEarned: 0 });
+    expect(result?.stats).toEqual({
+      totalChars: 0,
+      assignmentsCompleted: 0,
+      bestWpm: 80,
+      totalEarned: 0,
+      secondsPlayed: 0,
+    });
   });
 
   it("upgrades a version 1 save, which had no equipped choice, to the best owned", () => {
@@ -50,7 +56,9 @@ describe("migrate", () => {
     };
     const result = migrate(old);
     expect(result?.version).toBe(SAVE_VERSION);
-    expect(result?.equipped).toEqual({ computer: "grey-tower", switches: "strawberry" });
+    expect(result?.equipped).toEqual({ computer: "grey-tower", switches: "strawberry", assistant: "" });
+    expect(result?.finale).toEqual({ stage: "none", seconds: 0 });
+    expect(result?.stats.secondsPlayed).toBe(0);
     expect(result?.player.currency).toBe(12);
   });
 
@@ -61,6 +69,20 @@ describe("migrate", () => {
     );
     expect(migrate({ ...base, equipped: { computer: "gaming-rig" } })?.equipped.computer).toBe("grey-tower");
     expect(migrate({ ...base, equipped: "nonsense" })?.equipped.computer).toBe("grey-tower");
+  });
+
+  it("keeps an unfinished ending, and repairs a nonsense one", () => {
+    const base = { version: SAVE_VERSION, upgrades: [] };
+    expect(migrate({ ...base, finale: { stage: "pending", seconds: 12 } })?.finale).toEqual({
+      stage: "pending",
+      seconds: 12,
+    });
+    expect(migrate({ ...base, finale: { stage: "redundant", seconds: 0 } })?.finale.stage).toBe("redundant");
+    expect(migrate({ ...base, finale: { stage: "fired", seconds: -3 } })?.finale).toEqual({
+      stage: "none",
+      seconds: 0,
+    });
+    expect(migrate({ ...base, finale: "x" })?.finale).toEqual({ stage: "none", seconds: 0 });
   });
 
   it("always includes the free starting upgrades", () => {

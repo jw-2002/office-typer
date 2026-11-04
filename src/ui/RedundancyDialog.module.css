@@ -1,0 +1,17 @@
+/* Styles for the redundancy notice: the run's figures in two columns. */
+.stats {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-3);
+}
+
+.stats dt {
+  color: var(--color-muted);
+}
+
+.stats dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}

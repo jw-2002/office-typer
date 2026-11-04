@@ -24,7 +24,9 @@ export default function UpgradeCard({ upgrade, status, equipped, onBuy, onEquip 
         <span className={styles.name}>{upgrade.name}</span>
         <span className={styles.description}>{upgrade.description}</span>
         <span className={styles.effect}>
-          x{upgrade.payoutMultiplier} pay
+          {upgrade.assistant
+            ? `${upgrade.assistant.wpm} WPM, ${Math.round(upgrade.assistant.accuracy * 100)}% accurate`
+            : `x${upgrade.payoutMultiplier} pay`}
           {upgrade.cost > 0 && ` - ${CURRENCY.symbol}${formatNumber(upgrade.cost)}`}
         </span>
       </div>

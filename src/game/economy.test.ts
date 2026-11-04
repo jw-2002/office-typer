@@ -6,6 +6,9 @@ import {
   BASE_PAYOUT_PER_CHAR,
   accuracyMultiplier,
   LENGTH_PAY,
+  assistantIncome,
+  formatDuration,
+  formatRate,
   bestOwned,
   formatNumber,
   jobFor,
@@ -101,8 +104,8 @@ describe("jobs", () => {
 
   it("jobFor picks the highest job whose threshold is reached", () => {
     expect(jobFor(0).id).toBe("intern");
-    expect(jobFor(999).id).toBe("intern");
-    expect(jobFor(1000).id).toBe("data-entry-clerk");
+    expect(jobFor(199).id).toBe("intern");
+    expect(jobFor(200).id).toBe("data-entry-clerk");
     expect(jobFor(10_000_000).id).toBe("chief-typing-executive");
   });
 
@@ -119,16 +122,57 @@ describe("jobs", () => {
 
 describe("promotionProgress", () => {
   it("measures the way to the next job", () => {
-    expect(promotionProgress(0)).toMatchObject({ fraction: 0, remaining: 1000 });
+    expect(promotionProgress(0)).toMatchObject({ fraction: 0, remaining: 200 });
     expect(promotionProgress(0).next?.id).toBe("data-entry-clerk");
-    expect(promotionProgress(500).fraction).toBe(0.5);
-    // Just promoted: the bar starts again for the following job (1000 to 3000).
-    expect(promotionProgress(1000)).toMatchObject({ fraction: 0, remaining: 2000 });
-    expect(promotionProgress(1000).job.id).toBe("data-entry-clerk");
+    expect(promotionProgress(100).fraction).toBe(0.5);
+    // Just promoted: the bar starts again for the following job (200 to 600).
+    expect(promotionProgress(200)).toMatchObject({ fraction: 0, remaining: 400 });
+    expect(promotionProgress(200).job.id).toBe("data-entry-clerk");
   });
 
   it("is full, with nothing left, at the top of the ladder", () => {
     expect(promotionProgress(10_000_000)).toMatchObject({ next: null, fraction: 1, remaining: 0 });
+  });
+});
+
+describe("assistantIncome", () => {
+  const gippity = { wpm: 8, accuracy: 0.8 };
+
+  it("is its typing speed times the pay rate, with its mistakes costing pay like yours", () => {
+    // 8 WPM is 0.667 characters a second; 0.25 a character; accuracy squared is 0.64.
+    expect(assistantIncome(gippity, jobs[0], [])).toBeCloseTo(0.667 * 0.25 * 0.64, 3);
+  });
+
+  it("uses your job and upgrade multipliers, but not the length bonus", () => {
+    const base = assistantIncome(gippity, jobs[0], []);
+    expect(assistantIncome(gippity, jobs[3], [])).toBeCloseTo(base * 2);
+    expect(assistantIncome(gippity, jobs[0], ["grey-tower"])).toBeCloseTo(base * 1.3);
+  });
+
+  it("a faster, more accurate assistant earns much more", () => {
+    expect(assistantIncome({ wpm: 100, accuracy: 0.99 }, jobs[0], [])).toBeGreaterThan(
+      10 * assistantIncome(gippity, jobs[0], []),
+    );
+  });
+});
+
+describe("formatDuration", () => {
+  it("shows minutes and seconds, then hours and minutes", () => {
+    expect(formatDuration(0)).toBe("0m 00s");
+    expect(formatDuration(45)).toBe("0m 45s");
+    expect(formatDuration(754)).toBe("12m 34s");
+    expect(formatDuration(3600)).toBe("1h 00m");
+    expect(formatDuration(4320)).toBe("1h 12m");
+    expect(formatDuration(-5)).toBe("0m 00s");
+  });
+});
+
+describe("formatRate", () => {
+  it("keeps a decimal for small rates and abbreviates big ones", () => {
+    expect(formatRate(0.43)).toBe("0.4");
+    expect(formatRate(2.46)).toBe("2.5");
+    expect(formatRate(36.2)).toBe("36");
+    expect(formatRate(1200)).toBe("1.2K");
   });
 });
 

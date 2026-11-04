@@ -1,7 +1,7 @@
 /* Styles for the shop: categories side by side on wide screens, stacked on narrow ones. */
 .shop {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
   gap: var(--space-3);
   align-items: start;
 }

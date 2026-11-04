@@ -53,7 +53,7 @@ Also done (Phase 1.5):
   **Not yet tested on a real phone.**
 - **Caps Lock** warning in the HUD.
 - **Time away** (window blur or hidden tab) is cut out of the assignment's time, so it does not
-  hurt WPM. This also helps leaderboard plausibility later.
+  hurt WPM, and keeps the highest-WPM figure honest.
 - **CI**: `.github/workflows/ci.yml` runs tsc, lint, tests, format check and build on push.
 
 Content notes: all text must be typeable ASCII (tests enforce it). Body sentences must make sense
@@ -215,25 +215,48 @@ tiers with dynamic `import()` so only the current tier is downloaded.
 - New shared UI: `Dialog` (backdrop, window, Escape), used by both the reset confirmation and the
   promotion message, and `ProgressBar`.
 - The task bar wraps onto two rows on phones, because four programs and the tray do not fit in one.
-- **Not done**: no leaderboard-style comparison yet (Phase 8), and the job ladder's difficulty ramp is only
+- **Not done**: the job ladder's difficulty ramp is only
   the three scenario tiers. More scenarios per tier is still the best way to add variety.
 
-## Phase 6 - AI assistant tab
+## Phase 6 - AI assistants and the ending (done)
 
-- Tab on the monitor, auto-worker driven by a fixed-step game tick, tier upgrades.
-- Offline progress: on load, credit capped idle earnings from time since last save.
+**The game is now short and finite.** It lasts about 38 minutes for a 100 WPM typist, 50 for 70 WPM and 80 for 40 WPM
+(tuned with a simulation: standard assignments, 96% accuracy, buying upgrades as soon as affordable). It ends when you
+buy the best AI assistant and are made redundant. No offline progress, no database, no accounts, no ads: it is a fun
+little single-player game, saved in the browser.
+
+- **Assistants** are a fourth upgrade category (`category: "assistant"`), so they use the same shop cards, buying in
+  order, owned list and Use / In use swapping as everything else. Each has a speed (WPM) and accuracy
+  (`AssistantSpec` in `src/game/data/upgrades.ts`). Gippity-1: 8 WPM at 80% (400), Drama Llama 7B: 20 at 88%
+  (3,000), Gemstone Flash: 45 at 94% (25,000), Clyde Octet 5: 100 at 99% (150,000, ends the game).
+- **Income** (`assistantIncome` in `economy.ts`): characters per second x 0.25 x accuracy squared x your job
+  multiplier x your upgrade multiplier. No length bonus, so a fast typist on Long assignments stays ahead of the
+  cheaper assistants. The assistant in use earns, so you can swap back to an older one. Its characters do **not**
+  count toward promotions: those stay about your own typing.
+- **Game clock** (`src/state/assistantLoop.ts`): one loop, once a second, calling `tick` on the store (pure rules in
+  `tickGame`). It skips hidden tabs and caps long gaps, so nothing earns while you are away.
+- **Assistant tab** (`AssistantPanel`): the assistant's speed, accuracy and income, and a live view of it typing
+  (`useAssistantTyping`). The tray shows its income as a "+0.2/s" chip.
+- **Goblins**: Gippity-1 keeps working goblins into what it types (`assistantText.ts`), and an assistant's mistakes
+  show up as lost pay, so the cheap one is the funny one. Only it has the quirk.
+- **The ending** (`Progress.finale`): buying Clyde Octet 5 starts "pending". The next assignment you finish (or 60
+  seconds, if you stop) makes you redundant: a sad tune plays, and a notice shows your stats, with "Start a new
+  career". Nothing earns or can be bought after that. The fastest run is kept in localStorage (`recordsStore`).
+- **Retuned for a short game**: the promotion ladder is 0.4 of the original 15-hour one (200, 600, 1,275, 2,200,
+  3,400, 5,000, 7,000 and 9,600 characters), so promotions come quickly (a 70 WPM typist is promoted at about 1, 2,
+  4, 6, 10, 14, 20 and 27 minutes). The top assistant costs 150,000 to keep the game the same length, which leaves a
+  final stretch of saving up for it. Everything else costs what it did.
+- Save format is version 3 (adds `finale`, `stats.secondsPlayed` and the assistant category).
+- **Not done**: no more scenarios were added. A short game means fewer repeats, but 10 per tier is still thin.
 
 ## Phase 7 - Scenery shop and polish
 
 - Buyable decor, replace primitives with real models, lighting pass, sound pass, balance pass.
 
-## Phase 8 - Backend (later)
+## Dropped
 
-- Auth, cloud save, leaderboard. See hosting notes below.
-
-## Phase 9 - Monetisation (last)
-
-- Optional rewarded ad. Only after there are real players.
+These were planned and are no longer wanted: **accounts, cloud save, a leaderboard, rewarded ads and offline
+earnings.** The game is a short, local, single-player piece, so there is no backend to host or secure.
 
 ## Feasibility
 
@@ -245,39 +268,17 @@ Yes, this is feasible, and none of it needs exotic tech. Rough risk ranking:
    `.glb`. `gltfjsx` turns a `.glb` into an R3F component.
 2. **Balance** of an idle economy takes iteration. Keep all numbers in data files so tuning
    does not mean editing components.
-3. **Leaderboard cheating**: any score sent from the browser can be faked. Plan to validate
-   server-side with plausibility checks (for example reject impossible WPM). Do not treat the
-   leaderboard as trustworthy until then.
-4. **Rewarded ads on the web** are harder than on mobile. Ad networks need approval and traffic.
-   Another route is publishing on a games portal that provides an ad SDK. Check current terms
-   when you get there.
-5. Scope. Phases 0-5 are a complete, fun game on their own.
+3. Scope. Phases 0-6 are a complete, fun game on their own.
 
-## Hosting and database (free or cheap)
+## Hosting
 
-Re-check free-tier limits when you get there, since they change.
-
-- **Frontend hosting**: Cloudflare Pages, Vercel or Netlify. All have free tiers and deploy
-  from git. It is a static site, so this is trivial.
-- **Backend recommendation: Supabase.** Hosted Postgres plus built-in auth (Google sign-in and
-  email+password, with hashing handled for you, so do not write your own). Row Level Security
-  lets the browser talk to the database directly and safely for per-user saves, so you may need
-  no custom backend at first. Leaderboard is a table or view. Score validation can go in an
-  Edge Function. Free-tier projects may pause when inactive.
-- **Alternative: Firebase** (Auth plus Firestore). Also generous free tier and easy leaderboards,
-  but NoSQL and more lock-in.
-- **Alternative: Cloudflare Workers plus D1** (SQLite). Very cheap and fast, but you write the
-  backend and auth yourself.
-- Keep persistence behind a small interface (`SaveRepository` with `load` and `save`), so
-  localStorage now and Supabase later is a swap, not a rewrite.
+The game is a static site, so any free static host works (Cloudflare Pages, Vercel, Netlify or GitHub Pages),
+deploying from git. Saves live in the browser's localStorage behind a small `SaveRepository` interface.
 
 ## Decisions still open
 
 - Currency name (Credits vs Billable Hours vs other).
-- State library: plan is Zustand for game state (fine-grained subscriptions, readable from
-  inside `useFrame`), with React context providers for audio, settings and auth.
 - World scale: the keyboard currently uses 1 unit = one keycap (about 19 mm). Easiest path is
   to build the desk at real-world scale in metres and scale the Keyboard group down when it
   is placed on the desk.
-- Shop as a monitor tab or physical objects.
-- Whether the AI tab and the shop share one "apps" UI on the monitor.
+- More scenarios per tier, and a final pass on balance once it has been played start to finish.

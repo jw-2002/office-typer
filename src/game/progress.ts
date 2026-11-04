@@ -1,7 +1,7 @@
 // The player's progress (money, upgrades, stats) and the pure steps that change it: finish an assignment, buy an upgrade.
 import type { Job } from "./data/jobs";
 import { startingUpgradeIds, upgradeCategories, upgrades, type Upgrade, type UpgradeCategory } from "./data/upgrades";
-import { bestOwned, jobFor, payout } from "./economy";
+import { assistantIncome, bestOwned, jobFor, payout } from "./economy";
 import type { AssignmentLength } from "./assignments";
 import { accuracy, finalWpm, type TypingState } from "./typing";
 
@@ -13,7 +13,18 @@ export type Stats = {
   bestWpm: number;
   /** Credits earned over the whole game, spending not subtracted. */
   totalEarned: number;
+  /** Seconds the game has been open and running. How long a run took. */
+  secondsPlayed: number;
 };
+
+/**
+ * How the game ends. Buying the top AI assistant starts "pending": the next assignment finished (or a minute's wait)
+ * makes the player redundant, and then nothing more earns.
+ */
+export type Finale = { stage: "none" | "pending" | "redundant"; seconds: number };
+
+/** How long the player gets after buying the top assistant, if they stop typing, before they are made redundant. */
+export const FINALE_FALLBACK_SECONDS = 60;
 
 export type Progress = {
   player: { currency: number };
@@ -24,6 +35,7 @@ export type Progress = {
    * best upgrade owned, so swapping back to an old computer costs nothing.
    */
   equipped: Readonly<Record<UpgradeCategory, string>>;
+  finale: Finale;
   stats: Stats;
 };
 
@@ -66,7 +78,8 @@ export function newProgress(): Progress {
     player: { currency: 0 },
     upgrades: startingUpgradeIds,
     equipped: normaliseEquipped(startingUpgradeIds, {}),
-    stats: { totalChars: 0, assignmentsCompleted: 0, bestWpm: 0, totalEarned: 0 },
+    finale: { stage: "none", seconds: 0 },
+    stats: { totalChars: 0, assignmentsCompleted: 0, bestWpm: 0, totalEarned: 0, secondsPlayed: 0 },
   };
 }
 
@@ -95,10 +108,14 @@ export function completeAssignment(
       assignmentsCompleted: progress.stats.assignmentsCompleted + 1,
       bestWpm: Math.max(progress.stats.bestWpm, result.wpm),
       totalEarned: progress.stats.totalEarned + credits,
+      secondsPlayed: progress.stats.secondsPlayed,
     },
   };
-  const after = currentJob(next);
-  return { progress: next, reward: { payout: credits, promotedTo: after.id === before.id ? null : after } };
+  // The assignment after buying the top assistant is the player's last.
+  const ending: Progress =
+    progress.finale.stage === "pending" ? { ...next, finale: { stage: "redundant", seconds: 0 } } : next;
+  const after = currentJob(ending);
+  return { progress: ending, reward: { payout: credits, promotedTo: after.id === before.id ? null : after } };
 }
 
 export type BuyStatus = "ok" | "owned" | "locked" | "too-expensive";
@@ -122,6 +139,8 @@ export function buyUpgrade(progress: Progress, upgradeId: string): Progress {
     upgrades: [...progress.upgrades, upgrade.id],
     // A new purchase is put to use straight away.
     equipped: { ...progress.equipped, [upgrade.category]: upgrade.id },
+    // The top assistant can do the player's job, so the clock starts on being made redundant.
+    finale: upgrade.endsGame && progress.finale.stage === "none" ? { stage: "pending", seconds: 0 } : progress.finale,
   };
 }
 
@@ -140,4 +159,36 @@ const progressKeys = Object.keys(newProgress()) as (keyof Progress)[];
 /** Whether any saved part of the progress is a different object, so it needs saving again. */
 export function progressChanged(before: Progress, after: Progress): boolean {
   return progressKeys.some((key) => before[key] !== after[key]);
+}
+
+/** Credits per second from the assistant in use. 0 with none. */
+export function assistantRate(progress: Progress): number {
+  const assistant = equippedUpgrade(progress, "assistant")?.assistant;
+  return assistant ? assistantIncome(assistant, currentJob(progress), progress.upgrades) : 0;
+}
+
+/**
+ * Moves the game on by `seconds` of real time: the assistant earns, the clock runs, and a pending redundancy counts
+ * down. Called about once a second. Does nothing once the player has been made redundant.
+ */
+export function tickGame(progress: Progress, seconds: number): Progress {
+  if (progress.finale.stage === "redundant" || seconds <= 0) return progress;
+  const credits = assistantRate(progress) * seconds;
+  const waited = progress.finale.seconds + seconds;
+  const finale: Finale =
+    progress.finale.stage === "pending"
+      ? waited >= FINALE_FALLBACK_SECONDS
+        ? { stage: "redundant", seconds: 0 }
+        : { stage: "pending", seconds: waited }
+      : progress.finale;
+  return {
+    ...progress,
+    player: { currency: progress.player.currency + credits },
+    finale,
+    stats: {
+      ...progress.stats,
+      totalEarned: progress.stats.totalEarned + credits,
+      secondsPlayed: progress.stats.secondsPlayed + seconds,
+    },
+  };
 }

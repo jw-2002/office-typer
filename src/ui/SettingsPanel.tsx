@@ -1,6 +1,6 @@
 // The settings program: your record, the sound setting, and the reset (which asks for confirmation first).
 import { CURRENCY } from "@/game/currency";
-import { formatNumber } from "@/game/economy";
+import { formatDuration, formatNumber } from "@/game/economy";
 import { useAudioStore } from "@/state/audioStore";
 import { useGameStore } from "@/state/gameStore";
 import Button from "./Button";
@@ -21,6 +21,8 @@ export default function SettingsPanel({ onRequestReset }: SettingsPanelProps) {
       <section>
         <h3 className={styles.heading}>Your record</h3>
         <dl className={styles.stats}>
+          <dt>Time played</dt>
+          <dd>{formatDuration(stats.secondsPlayed)}</dd>
           <dt>Assignments finished</dt>
           <dd>{formatNumber(stats.assignmentsCompleted)}</dd>
           <dt>Characters typed</dt>
