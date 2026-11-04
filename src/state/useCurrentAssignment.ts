@@ -2,7 +2,8 @@
 import { createContext, useContext } from "react";
 import type { useAssignment } from "@/hooks/useAssignment";
 
-export type CurrentAssignment = ReturnType<typeof useAssignment>;
+/** The running assignment, plus the live keyboard state the on-screen desktop needs. */
+export type CurrentAssignment = ReturnType<typeof useAssignment> & { capsLock: boolean };
 
 export const CurrentAssignmentContext = createContext<CurrentAssignment | null>(null);
 

@@ -37,6 +37,7 @@ logic. Assignment text comes from `assignments.ts` + `data/`.
 - `src/hooks` hooks shared by UI.
 - `src/audio` key sound recipes and the Web Audio player (impure; the mute setting is in `src/state`).
 - `src/scene` everything inside `<Canvas>`: `Scene` (lights, controls) holds `Office`, which places
-  `Room`, `Desk`, `Monitor` and the keyboard. 1 unit = 1 metre.
-- `src/ui` the DOM overlay. `Desktop` (window + task bar tabs) holds `AssignmentPanel` and `ShopPanel`;
+  `Room`, `Desk`, the live `Computer`, the `Shelf` of old computers, the job `NamePlate` and the
+  keyboard. `CameraRig` glides the camera between the two views in `cameraViews.ts`. 1 unit = 1 metre.
+- `src/ui` the DOM overlay. `Desktop` (window + task bar tabs) holds `AssignmentPanel`, `ShopPanel` and `SettingsPanel`;
   it appears on the 3D monitor via `MonitorScreen`, or in the HUD on touch. `osThemes.css` restyles it all.

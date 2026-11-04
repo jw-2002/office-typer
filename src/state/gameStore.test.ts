@@ -32,6 +32,20 @@ describe("game store", () => {
     expect(useGameStore.getState().equipped.computer).toBe("grey-tower");
   });
 
+  it("reset erases progress, upgrades and the last reward", () => {
+    useGameStore
+      .getState()
+      .load({ ...newProgress(), player: { currency: 500 }, upgrades: ["beige-box", "grey-tower", "mushy"] });
+    useGameStore.getState().finishAssignment({ characters: 120, accuracy: 1, wpm: 50 });
+    useGameStore.getState().reset();
+    const state = useGameStore.getState();
+    expect(state.player.currency).toBe(0);
+    expect(state.upgrades).toEqual(newProgress().upgrades);
+    expect(state.equipped).toEqual(newProgress().equipped);
+    expect(state.stats).toEqual(newProgress().stats);
+    expect(state.lastReward).toBeNull();
+  });
+
   it("progressOf leaves out actions and the last reward", () => {
     expect(Object.keys(progressOf(useGameStore.getState())).sort()).toEqual([
       "equipped",

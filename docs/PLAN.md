@@ -146,6 +146,39 @@ tiers with dynamic `import()` so only the current tier is downloaded.
   the neon one glitches, the glassy one comes into focus. Turned off for `prefers-reduced-motion`.
 - **HUD corners** follow `--hud-radius`, which is square for the first two looks.
 - The first computer is now a flat 90s desktop case under a CRT (not a tower).
+- **Shelf** (`src/scene/Shelf.tsx`): the computers you own but are not using sit on a shelf on the
+  back wall at 30% size, each in a fixed spot at the sides of the monitor. Click one to swap to it.
+  This needed the monitor split into `MonitorBody` (model) and `Monitor` (adds the live screen), and a
+  shared `ComputerSet` layout used by both the desk and the shelf. A plain scenery shelf is easy to
+  extend later (the real scenery work is still Phase 7).
+- **Working window buttons**: minimise hides the window until a task bar program is picked,
+  maximise makes it fill the screen (toggle), close returns to the assignment (or hides it if you are
+  already there). Their colours, glyphs and order (close first on the light look) come from tokens.
+- **Settings program** (third task bar tab): your record (assignments, characters, best WPM, total
+  earned) and a **Reset game** button. Reset opens an "Are you sure?" box (Escape or Cancel backs out)
+  with a red `variant="danger"` button, then erases progress; autosave overwrites the saved game.
+- New shared pieces: `Window` (title bar and body), `ConfirmDialog`, and a danger style on `Button`.
+- Known gap: the game captures every key (it has to, to type), so buttons cannot be reached or
+  pressed with the keyboard, only with the mouse or touch. Worth fixing before real players (for
+  example only capture keys when nothing is open).
+- **HUD moved onto the monitor** (the 2D HUD is now just a "Look around / Back to desk" button, plus the whole
+  desktop on touch devices). Where things went: credits and live WPM in a **tray** in the task bar;
+  accuracy, time, Caps Lock warning and the "You typed" box inside the assignment window; highest WPM
+  (renamed from Best WPM), job, characters to promotion, and the sound toggle in **Settings**.
+  Because the monitor cannot see React context, the sound setting is now a Zustand store
+  (`audioStore.ts`), key sounds are a context-free `KeySounds` component, and Caps Lock travels inside
+  the assignment object.
+- **Two camera views** (`viewStore`, `CameraRig`, `cameraViews.ts`): Desk (close, screen fills about
+  two thirds of the width, keyboard along the bottom) is the default, and Office (pulled back to see the
+  shelf, name plate and whole desk). The camera glides between them; between moves the player can
+  orbit and zoom. The monitor leans back about 11 degrees so the screen faces the camera.
+- **Name plate** (`NamePlate.tsx`, `nameplateLooks.ts`): a wedge on the desk showing your job title.
+  It upgrades with **promotion, not money** (plain grey plastic for the Intern, through wood, black
+  acrylic, bronze, steel and brass, to a big glowing gold plate for the Chief Typing Executive).
+- **Cursors**: each OS look has its own mouse pointer (arrow and pointing hand), set by the
+  `--cursor-default` and `--cursor-pointer` tokens (small inline SVGs): black arrow and white glove for the
+  90s look, white arrow for the blue one, clean black arrow for the light one, glowing cyan and orange
+  for the last two. Buttons use the hand.
 - Not done on purpose: no keyboard or other upgrade categories yet, and no sound for the room (ambience) or promotions.
 
 ## Phase 5 - Jobs and promotions

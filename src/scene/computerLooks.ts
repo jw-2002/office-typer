@@ -54,3 +54,10 @@ export const computerLooks = {
     pcCase: { kind: "toaster", color: "#cfd5de", size: [0.26, 0.18, 0.18], glow: "#ffb347" },
   },
 } as const satisfies Record<ComputerId, ComputerLook>;
+
+const looksById: Readonly<Record<string, ComputerLook>> = computerLooks;
+
+/** The look for a computer id, falling back to the first computer for an unknown one. */
+export function computerLook(id: string | undefined): ComputerLook {
+  return (id !== undefined && looksById[id]) || computerLooks["beige-box"];
+}

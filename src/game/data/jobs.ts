@@ -29,3 +29,5 @@ export const jobs = [
     assignmentTier: 2,
   },
 ] as const satisfies readonly Job[];
+
+export type JobId = (typeof jobs)[number]["id"];

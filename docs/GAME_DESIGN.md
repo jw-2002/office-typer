@@ -63,11 +63,20 @@ Active typing should always out-earn it early on so typing stays the main verb.
 Key sound depends on the equipped switch. Later: ambient office noise, promotion fanfare,
 printer sounds. Audio is behind a provider so it can be muted and settings persisted.
 
-## HUD
+## Desk name plate
 
-- Live **WPM** counter (rolling window, not whole-session average) always visible.
-- Currency, job title, current assignment progress.
-- Best-ever WPM stored in the save (and later the leaderboard).
+A wedge on the desk shows the player's job title, and it is upgraded by promotion, not by buying anything:
+plain plastic for the Intern, up to a big gold plate for the Chief Typing Executive.
+
+## Screen and HUD
+
+Almost everything is on the 3D monitor, in the fake OS: credits and live WPM in the task bar tray, accuracy,
+time and the "You typed" box in the assignment window, and the highest WPM, career progress and sound in
+Settings. The only 2D overlay is a button to switch between the Desk view (close to the screen) and the Office
+view (pulled back). On touch devices the same desktop sits in the HUD instead.
+
+- Live **WPM** is a rolling window, not a whole-session average.
+- The highest WPM is stored in the save (and later the leaderboard).
 
 ## Future (not in the prototype)
 

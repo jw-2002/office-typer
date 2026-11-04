@@ -1,5 +1,7 @@
 // Everything inside the <Canvas>: lights, the office and the camera controls. App.tsx owns the Canvas itself.
 import { OrbitControls } from "@react-three/drei";
+import CameraRig from "./CameraRig";
+import { cameraPoses } from "./cameraViews";
 import Office from "./Office";
 import { palette } from "./palette";
 import { useFitCamera } from "./useFitCamera";
@@ -19,15 +21,16 @@ export default function Scene() {
       {/* Orbiting is limited so you stay at the desk: a little look around, no walking behind the monitor. */}
       <OrbitControls
         makeDefault
-        target={[0, 0.93, -0.08]}
+        target={[...cameraPoses.desk.target]}
         enablePan={false}
-        minDistance={0.4}
+        minDistance={0.35}
         maxDistance={1.6}
         minAzimuthAngle={-0.7}
         maxAzimuthAngle={0.7}
         minPolarAngle={0.6}
         maxPolarAngle={1.75}
       />
+      <CameraRig />
     </>
   );
 }

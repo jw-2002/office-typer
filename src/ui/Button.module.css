@@ -3,7 +3,8 @@
   /* Sits above the transparent touch typing field, so buttons stay tappable. */
   position: relative;
   z-index: 1;
-  padding: var(--space-1) var(--space-3);
+  /* A container can set --button-padding-x to make its buttons tighter. */
+  padding: var(--space-1) var(--button-padding-x, var(--space-3));
   border: var(--button-border-width) solid;
   border-color: var(--button-border-color);
   border-radius: var(--button-radius);
@@ -11,7 +12,7 @@
   box-shadow: var(--button-shadow);
   color: var(--color-text);
   font: inherit;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   /* The HUD container ignores the pointer so the 3D scene stays draggable; buttons opt back in. */
   pointer-events: auto;
 }
@@ -24,10 +25,21 @@
 
 .button:disabled {
   color: var(--color-muted);
-  cursor: not-allowed;
+  cursor: var(--cursor-default);
 }
 
 .button:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+/* Red, for things that cannot be undone. The same red in every OS look, so it always reads as a warning. */
+.danger {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-weight: 700;
+}
+
+.danger:hover:not(:disabled) {
+  background: var(--danger-bg-hover);
 }

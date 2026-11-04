@@ -19,6 +19,8 @@ type GameStore = Progress & {
   buy: (upgradeId: string) => void;
   /** Switches to an upgrade already owned, such as an older computer. */
   equip: (upgradeId: string) => void;
+  /** Erases everything and starts again. Autosave then overwrites the saved game. */
+  reset: () => void;
   /** Replaces progress with a loaded save. */
   load: (progress: Progress) => void;
 };
@@ -37,6 +39,7 @@ export const useGameStore = create<GameStore>()((set, get) => ({
   },
   buy: (upgradeId) => set(buyUpgrade(progressOf(get()), upgradeId)),
   equip: (upgradeId) => set(equipUpgrade(progressOf(get()), upgradeId)),
+  reset: () => set({ ...newProgress(), lastReward: null }),
   load: (progress) => set({ ...progressOf(progress), lastReward: null }),
 }));
 

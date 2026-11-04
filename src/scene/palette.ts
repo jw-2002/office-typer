@@ -14,3 +14,6 @@ export const DESK_HEIGHT = 0.75;
 
 /** One keycap unit in the keyboard layout is about 19 mm, so the keyboard group is scaled by this. */
 export const KEY_UNIT = 0.019;
+
+/** Rough centre (x, z) of a computer set, for placing a scaled copy of it, for example on the shelf. */
+export const SET_CENTER = { x: 0.1, z: -0.25 } as const;

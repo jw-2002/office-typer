@@ -1,5 +1,4 @@
-/* Styles for the HUD layout, stats and panel. */
-/* Sits over the canvas. Only the panel and its buttons take pointer events, so the 3D scene stays draggable. */
+/* Sits over the canvas. Only the buttons and the touch desktop take pointer events, so the 3D scene stays draggable. */
 .hud {
   position: fixed;
   inset: 0;
@@ -8,82 +7,20 @@
   justify-content: space-between;
   gap: var(--space-3);
   padding: var(--space-3);
-  /* Lifts the panel above the on-screen keyboard where the browser lets it cover the page. */
+  /* Lifts the desktop above the on-screen keyboard where the browser lets it cover the page. */
   padding-bottom: calc(var(--space-3) + var(--keyboard-inset, 0px));
   box-sizing: border-box;
   pointer-events: none;
 }
 
-.stats {
+.corner {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.warning {
-  margin: 0;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius);
-  background: var(--color-surface);
-  color: var(--color-error);
-  font-weight: 700;
-}
-
-.stat {
-  composes: raised from "./surface.module.css";
-  border-radius: var(--hud-radius);
-  display: flex;
-  flex-direction: column;
-  min-width: 5rem;
-  padding: var(--space-2) var(--space-3);
-}
-
-.statValue {
-  font-size: 1.75rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.statLabel {
-  font-size: 0.75rem;
-  color: var(--color-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  justify-content: flex-end;
 }
 
 .desktop {
   /* A fixed height for the window, so switching tabs does not make the HUD jump. */
-  height: 22rem;
+  height: min(75dvh, 34rem);
   overflow: hidden;
   border-radius: var(--hud-radius);
-}
-
-.bottom {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  width: min(100%, 46rem);
-  margin-inline: auto;
-}
-
-/* Smaller stat tiles on phones, so they take two rows instead of four. */
-@media (max-width: 600px) {
-  .stats {
-    gap: var(--space-1);
-  }
-
-  .stat {
-    min-width: 0;
-    padding: var(--space-1) var(--space-2);
-  }
-
-  .statValue {
-    font-size: 1.1rem;
-  }
-
-  .statLabel {
-    font-size: 0.6rem;
-  }
 }

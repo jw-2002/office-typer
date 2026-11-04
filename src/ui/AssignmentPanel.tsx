@@ -1,12 +1,14 @@
-// The assignment itself: length choice, the text, and the result line. It sits inside the Desktop window.
+// The assignment itself: length choice, live readout, the text, what you typed, and the result line. Sits in the Desktop window.
 import type { ReactNode } from "react";
 import { LENGTH_TARGETS, type AssignmentLength } from "@/game/assignments";
 import { CURRENCY } from "@/game/currency";
 import { formatNumber } from "@/game/economy";
+import { accuracy, elapsedMs } from "@/game/typing";
 import { useGameStore } from "@/state/gameStore";
 import type { CurrentAssignment } from "@/state/useCurrentAssignment";
 import AssignmentText from "./AssignmentText";
 import Button from "./Button";
+import TypedInput from "./TypedInput";
 import styles from "./AssignmentPanel.module.css";
 
 const lengths = Object.keys(LENGTH_TARGETS) as AssignmentLength[];
@@ -21,7 +23,7 @@ type AssignmentPanelProps = {
 };
 
 export default function AssignmentPanel({ current, children }: AssignmentPanelProps) {
-  const { typing, length, finished, chooseLength, next } = current;
+  const { typing, now, length, finished, capsLock, chooseLength, next } = current;
   const lastReward = useGameStore((state) => state.lastReward);
 
   const hint =
@@ -34,15 +36,28 @@ export default function AssignmentPanel({ current, children }: AssignmentPanelPr
 
   return (
     <section className={styles.panel}>
-      <div className={styles.lengths} role="group" aria-label="Assignment length">
-        {lengths.map((option) => (
-          <Button key={option} aria-pressed={option === length} onClick={() => chooseLength(option)}>
-            {capitalise(option)}
-          </Button>
-        ))}
+      <div className={styles.top}>
+        <div className={styles.lengths} role="group" aria-label="Assignment length">
+          {lengths.map((option) => (
+            <Button key={option} aria-pressed={option === length} onClick={() => chooseLength(option)}>
+              {capitalise(option)}
+            </Button>
+          ))}
+        </div>
+        <p className={styles.readout}>
+          <span>Accuracy {Math.round(accuracy(typing) * 100)}%</span>
+          <span>Time {(elapsedMs(typing, now) / 1000).toFixed(1)}s</span>
+        </p>
       </div>
 
+      {capsLock && (
+        <p className={styles.warning} role="status">
+          Caps Lock is on
+        </p>
+      )}
+
       <AssignmentText typing={typing} />
+      <TypedInput typing={typing} />
 
       <div className={styles.footer}>
         <p className={styles.hint} aria-live="polite">

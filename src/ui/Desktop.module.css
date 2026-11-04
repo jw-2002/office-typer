@@ -1,5 +1,7 @@
-/* Styles for the fake desktop: wallpaper, window with title bar, and task bar. Everything comes from OS theme tokens. */
+/* Styles for the fake desktop: wallpaper, the window, hint text and the task bar. Everything comes from OS theme tokens. */
 .desktop {
+  /* The confirmation box is positioned against this. */
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -11,69 +13,29 @@
   pointer-events: auto;
 }
 
+/* Maximised: the window fills the whole screen, with no wallpaper around it. */
+.desktop[data-maximised="true"] {
+  padding: 0;
+  /* Square corners, since the window now reaches the edge of the screen. */
+  --titlebar-radius: 0;
+}
+
+.desktop[data-maximised="true"] .window {
+  border-radius: 0;
+}
+
 .window {
-  composes: raised from "./surface.module.css";
-  display: flex;
   flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
-  /* The title bar's rounded corners must not poke out past the window's own. */
-  overflow: hidden;
 }
 
-.titlebar {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--titlebar-radius);
-  background: var(--titlebar-bg);
-  color: var(--titlebar-text);
-}
-
-.title {
+.hint {
+  flex: 1 1 auto;
   margin: 0;
-  overflow: hidden;
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.controls {
-  display: flex;
-  gap: 0.25rem;
-  order: var(--controls-order);
-}
-
-.control {
-  width: var(--control-size);
-  height: var(--control-size);
-  box-sizing: border-box;
-  border: 1px solid;
-  border-color: var(--control-border-color);
-  border-radius: var(--control-radius);
-}
-
-.control:nth-child(1) {
-  background: var(--control-1);
-}
-
-.control:nth-child(2) {
-  background: var(--control-2);
-}
-
-.control:nth-child(3) {
-  background: var(--control-3);
-}
-
-.body {
-  flex: 1 1 auto;
-  min-height: 0;
-  padding: var(--space-2);
-  overflow-y: auto;
+  display: grid;
+  place-items: center;
+  color: var(--color-text);
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .page {
@@ -99,8 +61,25 @@
   order: var(--taskbar-order);
 }
 
+.desktop[data-maximised="true"] .taskbar {
+  margin: 0;
+}
+
 .os {
-  margin-left: auto;
   font-size: 0.8rem;
   opacity: 0.85;
+}
+
+/* On phones the task bar has to fit three programs and the tray, so it gets tighter and drops the OS name. */
+@media (max-width: 600px) {
+  .taskbar {
+    gap: var(--space-1);
+    padding-inline: var(--space-2);
+    --button-padding-x: var(--space-2);
+    margin-inline: calc(-1 * var(--space-3));
+  }
+
+  .os {
+    display: none;
+  }
 }

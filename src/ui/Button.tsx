@@ -2,6 +2,12 @@
 import type { ButtonHTMLAttributes } from "react";
 import styles from "./Button.module.css";
 
-export default function Button(props: ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button type="button" className={styles.button} onMouseDown={(event) => event.preventDefault()} {...props} />;
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  /** "danger" is a red button for actions that cannot be undone. */
+  variant?: "danger";
+};
+
+export default function Button({ variant, ...props }: ButtonProps) {
+  const className = variant === "danger" ? `${styles.button} ${styles.danger}` : styles.button;
+  return <button type="button" className={className} onMouseDown={(event) => event.preventDefault()} {...props} />;
 }

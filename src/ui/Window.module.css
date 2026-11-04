@@ -1,0 +1,44 @@
+/* Styles for a window: raised frame, title bar and scrolling body. Everything comes from OS theme tokens. */
+.window {
+  composes: raised from "./surface.module.css";
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* The title bar's rounded corners must not poke out past the window's own. */
+  overflow: hidden;
+}
+
+.titlebar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--titlebar-radius);
+  background: var(--titlebar-bg);
+  color: var(--titlebar-text);
+}
+
+.title {
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.controls {
+  display: flex;
+  gap: 0.25rem;
+  /* Puts the buttons on the right of the title bar, or on the left for the light look. */
+  order: var(--controls-order);
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--space-2);
+  overflow-y: auto;
+}

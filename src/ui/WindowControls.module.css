@@ -1,0 +1,56 @@
+/* Styles for the window buttons. Colours, order and corner shape come from OS theme tokens. */
+.control {
+  display: grid;
+  place-items: center;
+  width: var(--control-size);
+  height: var(--control-size);
+  box-sizing: border-box;
+  padding: 0;
+  border: 1px solid;
+  border-color: var(--control-border-color);
+  border-radius: var(--control-radius);
+  color: var(--control-glyph);
+  font: inherit;
+  font-size: calc(var(--control-size) * 0.8);
+  font-weight: 700;
+  line-height: 1;
+  cursor: var(--cursor-pointer);
+  pointer-events: auto;
+}
+
+.control:hover {
+  color: var(--control-glyph-hover);
+  filter: brightness(1.1);
+}
+
+.control:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.control[data-role="minimise"] {
+  order: var(--control-order-min);
+  background: var(--control-min);
+}
+
+.control[data-role="maximise"] {
+  order: var(--control-order-max);
+  background: var(--control-max);
+}
+
+.control[data-role="close"] {
+  order: var(--control-order-close);
+  background: var(--control-close);
+}
+
+.control[data-role="minimise"]::before {
+  content: "_";
+}
+
+.control[data-role="maximise"]::before {
+  content: "\25A1";
+}
+
+.control[data-role="close"]::before {
+  content: "\00D7";
+}
