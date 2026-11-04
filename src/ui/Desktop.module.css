@@ -1,0 +1,106 @@
+/* Styles for the fake desktop: wallpaper, window with title bar, and task bar. Everything comes from OS theme tokens. */
+.desktop {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  padding: var(--space-3) var(--space-3) 0;
+  background: var(--wallpaper);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  pointer-events: auto;
+}
+
+.window {
+  composes: raised from "./surface.module.css";
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  /* The title bar's rounded corners must not poke out past the window's own. */
+  overflow: hidden;
+}
+
+.titlebar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--titlebar-radius);
+  background: var(--titlebar-bg);
+  color: var(--titlebar-text);
+}
+
+.title {
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.controls {
+  display: flex;
+  gap: 0.25rem;
+  order: var(--controls-order);
+}
+
+.control {
+  width: var(--control-size);
+  height: var(--control-size);
+  box-sizing: border-box;
+  border: 1px solid;
+  border-color: var(--control-border-color);
+  border-radius: var(--control-radius);
+}
+
+.control:nth-child(1) {
+  background: var(--control-1);
+}
+
+.control:nth-child(2) {
+  background: var(--control-2);
+}
+
+.control:nth-child(3) {
+  background: var(--control-3);
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--space-2);
+  overflow-y: auto;
+}
+
+.page {
+  animation: var(--tab-animation);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    animation: none;
+  }
+}
+
+.taskbar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-3) calc(-1 * var(--space-3)) 0;
+  padding: var(--space-1) var(--space-3);
+  background: var(--taskbar-bg);
+  box-shadow: var(--taskbar-shadow);
+  color: var(--taskbar-text);
+  order: var(--taskbar-order);
+}
+
+.os {
+  margin-left: auto;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}

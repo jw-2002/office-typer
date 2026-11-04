@@ -2,6 +2,7 @@
 import { useEffect, type ReactNode } from "react";
 import { startAutosave } from "./autosave";
 import AssignmentProvider from "./AssignmentProvider";
+import AudioProvider from "./AudioProvider";
 import KeyInputProvider from "./KeyInputProvider";
 import { createLocalSaveRepository } from "./localSaveRepository";
 
@@ -10,7 +11,9 @@ export default function AppProviders({ children }: { children: ReactNode }) {
   useEffect(() => startAutosave(createLocalSaveRepository()), []);
   return (
     <KeyInputProvider>
-      <AssignmentProvider>{children}</AssignmentProvider>
+      <AudioProvider>
+        <AssignmentProvider>{children}</AssignmentProvider>
+      </AudioProvider>
     </KeyInputProvider>
   );
 }

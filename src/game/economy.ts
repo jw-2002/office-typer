@@ -1,6 +1,6 @@
 // The money rules: payout per assignment, upgrade and job multipliers, and number formatting. Pure, no React.
 import { jobs, type Job } from "./data/jobs";
-import { upgrades, type Upgrade } from "./data/upgrades";
+import { upgradeCategories, upgrades, type Upgrade } from "./data/upgrades";
 
 /** Credits earned per correct character before any multiplier. */
 export const BASE_PAYOUT_PER_CHAR = 0.25;
@@ -11,14 +11,18 @@ export function accuracyMultiplier(accuracy: number): number {
   return clamped * clamped;
 }
 
+/** The best (highest tier) upgrade owned in a category. Tiers are listed in order in the data. */
+export function bestOwned(ownedIds: readonly string[], category: Upgrade["category"]): Upgrade | undefined {
+  const owned: readonly Upgrade[] = upgrades.filter((u) => u.category === category && ownedIds.includes(u.id));
+  return owned[owned.length - 1];
+}
+
 /** Combined multiplier from owned upgrades: the best one in each category, multiplied together. */
 export function upgradeMultiplier(ownedIds: readonly string[]): number {
-  const bestByCategory = new Map<Upgrade["category"], number>();
-  for (const upgrade of upgrades) {
-    if (!ownedIds.includes(upgrade.id)) continue;
-    bestByCategory.set(upgrade.category, Math.max(bestByCategory.get(upgrade.category) ?? 1, upgrade.payoutMultiplier));
-  }
-  return [...bestByCategory.values()].reduce((product, multiplier) => product * multiplier, 1);
+  return upgradeCategories.reduce(
+    (product, category) => product * (bestOwned(ownedIds, category)?.payoutMultiplier ?? 1),
+    1,
+  );
 }
 
 export type PayoutInput = { characters: number; accuracy: number; job: Job; ownedUpgradeIds: readonly string[] };

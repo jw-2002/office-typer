@@ -1,11 +1,18 @@
 /* Global styles: design tokens (colours, spacing, fonts) as CSS variables, plus the reset. */
+/* The tokens below are the defaults. osThemes.css overrides them per operating system. */
+@import "./ui/osThemes.css";
+
 :root {
   --color-bg: #111827;
   --color-surface: #1f2937;
   --color-surface-raised: #374151;
+  /* Text boxes and the assignment text sit on this. */
+  --color-field: #111827;
   --color-text: #e5e7eb;
   --color-muted: #9ca3af;
   --color-accent: #f59e0b;
+  /* Text drawn on top of the accent or error colour. */
+  --color-on-accent: #111827;
   --color-correct: #34d399;
   --color-error: #f87171;
 
@@ -14,9 +21,50 @@
   --space-3: 1rem;
   --space-4: 1.5rem;
   --radius: 0.5rem;
+  /* Corner radius of the HUD tiles and text box over the 3D scene. Old operating systems are square. */
+  --hud-radius: var(--radius);
 
   --font-ui: system-ui, sans-serif;
   --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* Raised panels and sunken text fields. Border colours can list four sides (top right bottom left). */
+  --surface-border-width: 0;
+  --surface-border-color: transparent;
+  --surface-shadow: none;
+  --field-border-color: transparent;
+
+  --button-bg: var(--color-surface);
+  --button-border-width: 1px;
+  --button-border-color: var(--color-surface-raised);
+  --button-shadow: none;
+  --button-radius: var(--radius);
+  --button-pressed-bg: var(--button-bg);
+  --button-pressed-text: var(--color-accent);
+  --button-pressed-border-color: var(--color-accent);
+
+  /* The fake window around the assignment and the shop. */
+  --titlebar-bg: var(--color-surface-raised);
+  --titlebar-text: var(--color-text);
+  --titlebar-radius: var(--radius) var(--radius) 0 0;
+  --control-size: 0.7rem;
+  --control-radius: 50%;
+  --control-1: var(--color-muted);
+  --control-2: var(--color-muted);
+  --control-3: var(--color-muted);
+  --control-border-color: transparent;
+  /* 1 puts the window buttons on the right of the title bar, -1 on the left. */
+  --controls-order: 1;
+
+  --taskbar-bg: var(--color-surface);
+  --taskbar-text: var(--color-text);
+  --taskbar-shadow: none;
+  /* 1 puts the task bar below the window, -1 above it. */
+  --taskbar-order: 1;
+
+  --wallpaper: var(--color-bg);
+
+  /* How the window content appears when you change tab. Each OS defines its own keyframes in osThemes.css. */
+  --tab-animation: none;
 }
 
 html,

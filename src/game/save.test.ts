@@ -40,6 +40,29 @@ describe("migrate", () => {
     expect(result?.stats).toEqual({ totalChars: 0, assignmentsCompleted: 0, bestWpm: 80, totalEarned: 0 });
   });
 
+  it("upgrades a version 1 save, which had no equipped choice, to the best owned", () => {
+    const old = {
+      version: 1,
+      savedAt: 5,
+      player: { currency: 12 },
+      upgrades: ["beige-box", "grey-tower", "mushy", "strawberry"],
+      stats: { totalChars: 10, assignmentsCompleted: 1, bestWpm: 40, totalEarned: 30 },
+    };
+    const result = migrate(old);
+    expect(result?.version).toBe(SAVE_VERSION);
+    expect(result?.equipped).toEqual({ computer: "grey-tower", switches: "strawberry" });
+    expect(result?.player.currency).toBe(12);
+  });
+
+  it("keeps a valid equipped choice and repairs an invalid one", () => {
+    const base = { version: SAVE_VERSION, upgrades: ["beige-box", "grey-tower", "mushy"] };
+    expect(migrate({ ...base, equipped: { computer: "beige-box", switches: "mushy" } })?.equipped.computer).toBe(
+      "beige-box",
+    );
+    expect(migrate({ ...base, equipped: { computer: "gaming-rig" } })?.equipped.computer).toBe("grey-tower");
+    expect(migrate({ ...base, equipped: "nonsense" })?.equipped.computer).toBe("grey-tower");
+  });
+
   it("always includes the free starting upgrades", () => {
     expect(migrate({ version: SAVE_VERSION, upgrades: [] })?.upgrades).toEqual(["beige-box", "mushy"]);
   });

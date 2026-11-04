@@ -1,0 +1,18 @@
+/* Shared panel looks that follow the operating system theme. Other modules use them with `composes`. */
+
+/* A raised panel: the HUD tiles, windows and cards. */
+.raised {
+  border: var(--surface-border-width) solid;
+  border-color: var(--surface-border-color);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--surface-shadow);
+}
+
+/* A sunken field: where text is shown. */
+.sunken {
+  border: var(--surface-border-width) solid;
+  border-color: var(--field-border-color);
+  border-radius: var(--radius);
+  background: var(--color-field);
+}

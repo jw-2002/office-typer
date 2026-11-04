@@ -1,6 +1,8 @@
 // The upgrade catalogue. Every upgrade is one object; the shop and the payout maths read this list.
 // Within a category the upgrades are tiers: each one needs the one before it. Costs are placeholders to balance later.
 
+import type { OsId } from "./os";
+
 export type UpgradeCategory = "computer" | "switches";
 
 export type Upgrade = {
@@ -11,6 +13,8 @@ export type Upgrade = {
   cost: number;
   /** Multiplies every payout. Only the best owned upgrade in each category counts. */
   payoutMultiplier: number;
+  /** Computers only: the operating system, which sets how the whole UI looks. */
+  os?: OsId;
 };
 
 export const categoryLabels: Readonly<Record<UpgradeCategory, string>> = {
@@ -18,10 +22,13 @@ export const categoryLabels: Readonly<Record<UpgradeCategory, string>> = {
   switches: "Key switches",
 };
 
+export const upgradeCategories = Object.keys(categoryLabels) as UpgradeCategory[];
+
 export const upgrades = [
   {
     id: "beige-box",
     category: "computer",
+    os: "classic",
     name: "Dusty Beige Box",
     description: "It works. Mostly.",
     cost: 0,
@@ -30,6 +37,7 @@ export const upgrades = [
   {
     id: "grey-tower",
     category: "computer",
+    os: "sky",
     name: "Grey Tower",
     description: "Has a fan you can hear from space.",
     cost: 100,
@@ -38,6 +46,7 @@ export const upgrades = [
   {
     id: "silver-laptop",
     category: "computer",
+    os: "pear",
     name: "Slim Silver Laptop",
     description: "Thin, light and very sure of itself.",
     cost: 500,
@@ -46,6 +55,7 @@ export const upgrades = [
   {
     id: "gaming-rig",
     category: "computer",
+    os: "neon",
     name: "Gaming Rig",
     description: "Glows. Nobody knows why a spreadsheet needs that.",
     cost: 2500,
@@ -54,6 +64,7 @@ export const upgrades = [
   {
     id: "quantum-toaster",
     category: "computer",
+    os: "quantum",
     name: "Quantum Toaster",
     description: "Both finishes and does not finish your work.",
     cost: 12000,
@@ -94,6 +105,8 @@ export const upgrades = [
 ] as const satisfies readonly Upgrade[];
 
 export type UpgradeId = (typeof upgrades)[number]["id"];
+export type ComputerId = Extract<(typeof upgrades)[number], { category: "computer" }>["id"];
+export type SwitchId = Extract<(typeof upgrades)[number], { category: "switches" }>["id"];
 
 /** Upgrades the player starts with: everything that costs nothing. */
 export const startingUpgradeIds: readonly string[] = upgrades

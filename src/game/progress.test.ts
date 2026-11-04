@@ -1,7 +1,18 @@
 // Tests for finishing assignments and buying upgrades.
 import { describe, expect, it } from "vitest";
 import { upgrades } from "./data/upgrades";
-import { buyStatus, buyUpgrade, completeAssignment, currentJob, newProgress, type Progress } from "./progress";
+import {
+  buyStatus,
+  buyUpgrade,
+  completeAssignment,
+  currentJob,
+  equippedUpgrade,
+  equipUpgrade,
+  newProgress,
+  normaliseEquipped,
+  progressChanged,
+  type Progress,
+} from "./progress";
 
 const perfect = (characters: number) => ({ characters, accuracy: 1, wpm: 60 });
 const upgrade = (id: string) => upgrades.find((candidate) => candidate.id === id)!;
@@ -77,5 +88,56 @@ describe("buyStatus and buyUpgrade", () => {
     expect(buyStatus(progress, upgrade("chestnut"))).toBe("ok");
     progress = buyUpgrade(progress, "chestnut");
     expect(progress.upgrades).toContain("chestnut");
+  });
+});
+
+describe("equipping", () => {
+  it("starts with the free upgrades in use", () => {
+    const progress = newProgress();
+    expect(equippedUpgrade(progress, "computer")?.id).toBe("beige-box");
+    expect(equippedUpgrade(progress, "switches")?.id).toBe("mushy");
+  });
+
+  it("puts a new purchase to use straight away", () => {
+    const bought = buyUpgrade(withCredits(100), "grey-tower");
+    expect(bought.equipped.computer).toBe("grey-tower");
+    expect(bought.equipped.switches).toBe("mushy");
+  });
+
+  it("swaps between owned upgrades without changing what is owned or paid", () => {
+    const bought = buyUpgrade(withCredits(100), "grey-tower");
+    const back = equipUpgrade(bought, "beige-box");
+    expect(back.equipped.computer).toBe("beige-box");
+    expect(back.upgrades).toEqual(bought.upgrades);
+    expect(back.player.currency).toBe(bought.player.currency);
+  });
+
+  it("will not equip something not owned, unknown, or already in use", () => {
+    const start = newProgress();
+    expect(equipUpgrade(start, "gaming-rig")).toBe(start);
+    expect(equipUpgrade(start, "nope")).toBe(start);
+    expect(equipUpgrade(start, "beige-box")).toBe(start);
+  });
+
+  it("normaliseEquipped repairs missing, unknown and unowned choices with the best owned", () => {
+    const owned = ["beige-box", "grey-tower", "mushy"];
+    expect(normaliseEquipped(owned, {})).toEqual({ computer: "grey-tower", switches: "mushy" });
+    expect(normaliseEquipped(owned, { computer: "beige-box", switches: "blueberry" })).toEqual({
+      computer: "beige-box",
+      switches: "mushy",
+    });
+    // A switch is not a valid computer, even though it is owned.
+    expect(normaliseEquipped(owned, { computer: "mushy" }).computer).toBe("grey-tower");
+  });
+});
+
+describe("progressChanged", () => {
+  it("notices a change to any saved part, including what is equipped", () => {
+    const start = newProgress();
+    expect(progressChanged(start, { ...start })).toBe(false);
+    expect(progressChanged(start, { ...start, player: { currency: 1 } })).toBe(true);
+    expect(progressChanged(start, { ...start, stats: { ...start.stats } })).toBe(true);
+    expect(progressChanged(start, { ...start, equipped: { ...start.equipped } })).toBe(true);
+    expect(progressChanged(start, equipUpgrade(buyUpgrade(withCredits(100), "grey-tower"), "beige-box"))).toBe(true);
   });
 });

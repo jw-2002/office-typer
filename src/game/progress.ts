@@ -1,7 +1,7 @@
 // The player's progress (money, upgrades, stats) and the pure steps that change it: finish an assignment, buy an upgrade.
 import type { Job } from "./data/jobs";
-import { startingUpgradeIds, upgrades, type Upgrade } from "./data/upgrades";
-import { jobFor, payout } from "./economy";
+import { startingUpgradeIds, upgradeCategories, upgrades, type Upgrade, type UpgradeCategory } from "./data/upgrades";
+import { bestOwned, jobFor, payout } from "./economy";
 import { accuracy, finalWpm, type TypingState } from "./typing";
 
 export type Stats = {
@@ -18,8 +18,37 @@ export type Progress = {
   player: { currency: number };
   /** Ids of owned upgrades. */
   upgrades: readonly string[];
+  /**
+   * The upgrade in use in each category. It only changes how things look and sound: payouts always use the
+   * best upgrade owned, so swapping back to an old computer costs nothing.
+   */
+  equipped: Readonly<Record<UpgradeCategory, string>>;
   stats: Stats;
 };
+
+/**
+ * Works out the equipped upgrade for each category. A choice that is missing, unknown or not owned is
+ * replaced by the best upgrade owned in that category.
+ */
+export function normaliseEquipped(
+  ownedIds: readonly string[],
+  wanted: Partial<Record<UpgradeCategory, unknown>>,
+): Record<UpgradeCategory, string> {
+  const pickFor = (category: UpgradeCategory): string => {
+    const choice = wanted[category];
+    const valid = upgrades.some((u) => u.id === choice && u.category === category) && ownedIds.includes(String(choice));
+    return valid ? String(choice) : (bestOwned(ownedIds, category)?.id ?? "");
+  };
+  return Object.fromEntries(upgradeCategories.map((category) => [category, pickFor(category)])) as Record<
+    UpgradeCategory,
+    string
+  >;
+}
+
+/** The upgrade in use in a category, which the scene and the UI draw. */
+export function equippedUpgrade(progress: Pick<Progress, "equipped">, category: UpgradeCategory): Upgrade | undefined {
+  return upgrades.find((upgrade) => upgrade.id === progress.equipped[category]);
+}
 
 /** What a finished assignment looked like. Built from the typing state by the caller. */
 export type AssignmentResult = { characters: number; accuracy: number; wpm: number };
@@ -35,6 +64,7 @@ export function newProgress(): Progress {
   return {
     player: { currency: 0 },
     upgrades: startingUpgradeIds,
+    equipped: normaliseEquipped(startingUpgradeIds, {}),
     stats: { totalChars: 0, assignmentsCompleted: 0, bestWpm: 0, totalEarned: 0 },
   };
 }
@@ -88,5 +118,24 @@ export function buyUpgrade(progress: Progress, upgradeId: string): Progress {
     ...progress,
     player: { currency: progress.player.currency - upgrade.cost },
     upgrades: [...progress.upgrades, upgrade.id],
+    // A new purchase is put to use straight away.
+    equipped: { ...progress.equipped, [upgrade.category]: upgrade.id },
   };
+}
+
+/** Switches to an owned upgrade (for example an older computer). Returns the same object if it cannot. */
+export function equipUpgrade(progress: Progress, upgradeId: string): Progress {
+  const upgrade: Upgrade | undefined = upgrades.find((candidate) => candidate.id === upgradeId);
+  if (!upgrade || !progress.upgrades.includes(upgrade.id) || progress.equipped[upgrade.category] === upgrade.id) {
+    return progress;
+  }
+  return { ...progress, equipped: { ...progress.equipped, [upgrade.category]: upgrade.id } };
+}
+
+// Taken from newProgress, so a field added to Progress is automatically noticed by autosave.
+const progressKeys = Object.keys(newProgress()) as (keyof Progress)[];
+
+/** Whether any saved part of the progress is a different object, so it needs saving again. */
+export function progressChanged(before: Progress, after: Progress): boolean {
+  return progressKeys.some((key) => before[key] !== after[key]);
 }

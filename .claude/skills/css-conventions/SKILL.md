@@ -48,7 +48,20 @@ and the content shown on the in-world monitor via `<Html>`.
 - Content inside `<Html transform>` is scaled by the 3D transform. Size it with a fixed
   design resolution (for example 640x400) via CSS, and let `distanceFactor`/`scale` fit it to
   the monitor. Do not rely on viewport units there.
-- Match the screen's look to the computer tier (a theme class per tier that only swaps tokens).
+- The screen's look follows the computer's operating system. See the next section.
+
+## OS themes (the whole UI restyles per computer)
+
+- `<html data-os="...">` is set from the best computer owned, and `src/ui/osThemes.css` has one block
+  per OS that only overrides tokens. Components must style through tokens (`--color-*`,
+  `--button-*`, `--surface-*`, `--titlebar-*`, `--taskbar-*`, `--wallpaper`, `--radius`, fonts),
+  never hard-coded colours, or they will look wrong in some OS.
+- Panels and text fields use `composes: raised` / `composes: sunken` from `surface.module.css`
+  instead of repeating border and shadow rules. Buttons use the shared `Button` component.
+- A new token must be added to **every** OS block (a test enforces this). A new OS is a new block,
+  an id in `src/game/data/os.ts`, and a computer that points at it.
+- Four-value `border-color` tokens (top right bottom left) make bevels. Use `border: <width> solid`
+  plus a separate `border-color`.
 
 ## Accessibility
 

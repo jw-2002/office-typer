@@ -1,9 +1,12 @@
 /* Styles for the assignment text. */
 .text {
+  composes: sunken from "./surface.module.css";
   margin: 0;
+  padding: var(--space-3);
   font-family: var(--font-mono);
-  font-size: 1.25rem;
-  line-height: 1.7;
+  /* The monitor sets this smaller, because its screen is a fixed size. */
+  font-size: var(--assignment-font-size, 1.25rem);
+  line-height: 1.6;
   white-space: pre-wrap;
 }
 
@@ -18,7 +21,7 @@
 .current,
 .error {
   border-radius: 0.2rem;
-  color: var(--color-bg);
+  color: var(--color-on-accent);
 }
 
 .current {

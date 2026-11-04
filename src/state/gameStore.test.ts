@@ -24,7 +24,20 @@ describe("game store", () => {
     expect(useGameStore.getState().player.currency).toBe(40);
   });
 
+  it("equips an owned computer and ignores one that is not owned", () => {
+    useGameStore.getState().load({ ...newProgress(), upgrades: ["beige-box", "grey-tower", "mushy"] });
+    useGameStore.getState().equip("grey-tower");
+    expect(useGameStore.getState().equipped.computer).toBe("grey-tower");
+    useGameStore.getState().equip("gaming-rig");
+    expect(useGameStore.getState().equipped.computer).toBe("grey-tower");
+  });
+
   it("progressOf leaves out actions and the last reward", () => {
-    expect(Object.keys(progressOf(useGameStore.getState())).sort()).toEqual(["player", "stats", "upgrades"]);
+    expect(Object.keys(progressOf(useGameStore.getState())).sort()).toEqual([
+      "equipped",
+      "player",
+      "stats",
+      "upgrades",
+    ]);
   });
 });

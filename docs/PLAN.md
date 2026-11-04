@@ -110,11 +110,43 @@ tiers with dynamic `import()` so only the current tier is downloaded.
 - Known rough edges: the open Shop panel covers the right of the monitor (it moves in Phase 4);
   the monitor's perspective looks tall and stretched at the default camera, and the room is bare.
 
-## Phase 4 - Upgrades you can see and hear
+## Phase 4 - Upgrades you can see and hear (done)
 
-- Computer tiers change the monitor model and stats.
-- Switch types change key sound and feel (Web Audio, one sample per switch type, pitch jitter).
-- Shop UI (decide: a tab on the monitor, or clickable objects in the room).
+- **Shop is a tab on the monitor** (decided). The monitor shows a fake desktop (`src/ui/Desktop.tsx`):
+  one window with a title bar, and a task bar with Assignment and Shop tabs. On touch devices the
+  same desktop sits in the HUD. The old floating shop panel and Shop button are gone.
+- **OS themes**: each computer upgrade has an `os` (`src/game/data/upgrades.ts`). The best computer
+  owned sets `<html data-os="...">` (`useOsTheme`), and `src/ui/osThemes.css` restyles everything
+  through CSS tokens: HUD tiles, buttons, text boxes, the window, title bar, task bar and wallpaper.
+  Beige Box = grey bevelled 90s style ("Wundows 95"), Grey Tower = blue and green ("Wundows XQ", id
+  `sky`), Silver Laptop = light and rounded with traffic-light buttons and a top menu bar ("Pear OS"),
+  Gaming Rig = dark with cyan and magenta glow ("Neon OS"), Quantum Toaster = glassy, warm and
+  pill-shaped ("Quantum OS"). A test checks every theme sets the same tokens. Adding an OS means a
+  new block in that file plus an entry in `src/game/data/os.ts`.
+- **3D computers**: `src/scene/computerLooks.ts` (keyed by computer id, so a new computer will not
+  compile without a look) sets the monitor frame (a deep CRT for the Beige Box, slim for later
+  ones) and the PC case beside it (beige tower, grey tower, black tower with a glow strip, a toaster;
+  laptops have none).
+- **Key sounds**: `src/audio/switchSounds.ts` has a synthesis recipe per switch (clack, thock, and
+  a click for tactile and clicky ones) and `keyClicker.ts` plays it with Web Audio, with random pitch
+  jitter, so there are no sound files. `AudioProvider` plays it for every typed key using the best
+  switches owned, and holds the mute setting (a Sound button in the HUD, remembered in localStorage).
+  Checked in a headless browser that sounds are created, Shift is silent, and mute works. **How it
+  actually sounds has not been heard yet.**
+- Also fixed: the Time readout showed a negative number just after the first keystroke.
+- **Switch colours** (`src/scene/keyboard/switchColors.ts`): the switch housing shows under each
+  keycap, and a pressed key flashes the same colour (Mushy yellow, Strawberry red, Chestnut brown,
+  Blueberry blue).
+- **Swapping**: the player can switch between any computers and switches they own (the shop shows
+  Use / In use). `Progress.equipped` holds the choice per category and is saved (save version 2,
+  with a migration from 1). It only changes looks and sound: **pay always uses the best upgrade
+  owned**, so going back to an old computer costs nothing. Buying something equips it at once.
+- **Tab change animation** per OS (`--tab-animation` token plus keyframes in `osThemes.css`): the
+  90s window redraws top down in steps, the blue one pops open, the light one settles with a spring,
+  the neon one glitches, the glassy one comes into focus. Turned off for `prefers-reduced-motion`.
+- **HUD corners** follow `--hud-radius`, which is square for the first two looks.
+- The first computer is now a flat 90s desktop case under a CRT (not a tower).
+- Not done on purpose: no keyboard or other upgrade categories yet, and no sound for the room (ambience) or promotions.
 
 ## Phase 5 - Jobs and promotions
 

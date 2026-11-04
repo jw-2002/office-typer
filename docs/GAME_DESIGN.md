@@ -42,6 +42,15 @@ Names below are placeholders that avoid real trademarks.
 - **Scenery**: plants, posters, a window, better chair, desk lamp, a cat, bigger office.
 - **AI assistant** (auto-worker, see below).
 
+## Operating systems
+
+Each computer runs its own fake OS, and the whole UI (HUD, the monitor desktop, the shop) looks like
+it: Wundows 95 (grey, bevelled), Wundows XQ (blue and green, glossy), Pear OS (light, rounded, menu bar
+on top), Neon OS (dark with glowing edges), Quantum OS (glassy and warm). Names are parodies.
+Upgrading the computer is therefore also a style change, which is part of the reward. Old computers
+and switches stay owned and can be swapped back to at any time (looks and sound only; pay always uses
+the best owned).
+
 ## AI assistant (idle income)
 
 A subscription the player buys and upgrades. It gets its own tab on the monitor and types

@@ -1,23 +1,21 @@
-// The upgrade shop: every upgrade grouped by category, bought through one generic action.
-import { categoryLabels, upgrades, type UpgradeCategory } from "@/game/data/upgrades";
+// The upgrade shop, shown as a program in the desktop window: every upgrade grouped by category.
+import { categoryLabels, upgradeCategories, upgrades } from "@/game/data/upgrades";
 import { buyStatus } from "@/game/progress";
 import { useGameStore } from "@/state/gameStore";
 import UpgradeCard from "./UpgradeCard";
 import styles from "./ShopPanel.module.css";
 
-const categories = Object.keys(categoryLabels) as UpgradeCategory[];
-
 export default function ShopPanel() {
   // The store state is a valid Progress, so it can go straight into the rules.
   const progress = useGameStore();
   const buy = useGameStore((state) => state.buy);
+  const equip = useGameStore((state) => state.equip);
 
   return (
-    <section className={styles.shop} aria-label="Shop">
-      <h2 className={styles.title}>Shop</h2>
-      {categories.map((category) => (
-        <div key={category}>
-          <h3 className={styles.category}>{categoryLabels[category]}</h3>
+    <div className={styles.shop}>
+      {upgradeCategories.map((category) => (
+        <section key={category}>
+          <h2 className={styles.category}>{categoryLabels[category]}</h2>
           <ul className={styles.list}>
             {upgrades
               .filter((upgrade) => upgrade.category === category)
@@ -26,12 +24,14 @@ export default function ShopPanel() {
                   key={upgrade.id}
                   upgrade={upgrade}
                   status={buyStatus(progress, upgrade)}
+                  equipped={progress.equipped[upgrade.category] === upgrade.id}
                   onBuy={() => buy(upgrade.id)}
+                  onEquip={() => equip(upgrade.id)}
                 />
               ))}
           </ul>
-        </div>
+        </section>
       ))}
-    </section>
+    </div>
   );
 }

@@ -1,8 +1,8 @@
 // The save file format: one versioned object, how to build it, and how to read old or damaged ones safely.
 import { startingUpgradeIds, upgrades } from "./data/upgrades";
-import type { Progress } from "./progress";
+import { normaliseEquipped, type Progress } from "./progress";
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 export type SaveData = Progress & {
   version: number;
@@ -24,7 +24,10 @@ export function toSave(progress: Progress, now: number): SaveData {
 }
 
 // Each entry upgrades a save from version N to N + 1. Add one here when SAVE_VERSION goes up.
-const migrations: Readonly<Record<number, (old: Record<string, unknown>) => Record<string, unknown>>> = {};
+const migrations: Readonly<Record<number, (old: Record<string, unknown>) => Record<string, unknown>>> = {
+  // 1 -> 2 added `equipped`. It needs no change here: validation below fills it in from the upgrades owned.
+  1: (old) => old,
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -60,12 +63,16 @@ export function migrate(raw: unknown): SaveData | null {
     ? current.upgrades.filter((id): id is string => typeof id === "string" && known.has(id))
     : [];
 
+  // The free starting upgrades are always owned; a Set drops duplicates.
+  const ownedIds = [...new Set([...startingUpgradeIds, ...owned])];
+  const equipped = isRecord(current.equipped) ? current.equipped : {};
+
   return {
     version: SAVE_VERSION,
     savedAt: count(current.savedAt),
     player: { currency: count(player.currency) },
-    // The free starting upgrades are always owned; a Set drops duplicates.
-    upgrades: [...new Set([...startingUpgradeIds, ...owned])],
+    upgrades: ownedIds,
+    equipped: normaliseEquipped(ownedIds, equipped),
     stats: {
       totalChars: count(stats.totalChars),
       assignmentsCompleted: count(stats.assignmentsCompleted),

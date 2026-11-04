@@ -1,11 +1,11 @@
 /* Styles for the typed-text box. */
 .input {
+  composes: sunken from "./surface.module.css";
+  border-radius: var(--hud-radius);
   display: flex;
   align-items: baseline;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius);
-  background: var(--color-surface);
   font-family: var(--font-mono);
   font-size: 1.125rem;
 }
@@ -36,7 +36,7 @@
 /* Spaces typed by mistake would be invisible, so the red background is what shows them. */
 .wrong {
   background: var(--color-error);
-  color: var(--color-bg);
+  color: var(--color-on-accent);
   text-decoration: underline;
 }
 

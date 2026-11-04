@@ -1,5 +1,4 @@
-// The 2D overlay: stats, shop and the typed-text box. On touch devices it also holds the assignment panel.
-import { useState } from "react";
+// The 2D overlay: stats and the typed-text box. On touch devices it also holds the desktop (assignment and shop).
 import { CURRENCY } from "@/game/currency";
 import { formatNumber, nextJob } from "@/game/economy";
 import { currentJob } from "@/game/progress";
@@ -7,11 +6,11 @@ import { accuracy, elapsedMs, liveWpm } from "@/game/typing";
 import { useCapsLock } from "@/hooks/useCapsLock";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useKeyboardInset } from "@/hooks/useKeyboardInset";
+import { useAudio } from "@/state/useAudio";
 import { useGameStore } from "@/state/gameStore";
 import { useCurrentAssignment } from "@/state/useCurrentAssignment";
-import AssignmentPanel from "./AssignmentPanel";
 import Button from "./Button";
-import ShopPanel from "./ShopPanel";
+import Desktop from "./Desktop";
 import TypedInput from "./TypedInput";
 import TypingSink from "./TypingSink";
 import styles from "./Hud.module.css";
@@ -35,8 +34,8 @@ export default function Hud() {
   const current = useCurrentAssignment();
   const { typing, now } = current;
   const capsLock = useCapsLock();
+  const { muted, setMuted } = useAudio();
   const touch = useCoarsePointer();
-  const [shopOpen, setShopOpen] = useState(false);
   useKeyboardInset();
   const seconds = elapsedMs(typing, now) / 1000;
 
@@ -50,24 +49,22 @@ export default function Hud() {
         <Stat label="Accuracy" value={`${Math.round(accuracy(typing) * 100)}%`} />
         <Stat label="Time" value={`${seconds.toFixed(1)}s`} />
         <Stat label="Best WPM" value={Math.round(bestWpm).toString()} />
+        <Button aria-pressed={!muted} onClick={() => setMuted(!muted)}>
+          Sound
+        </Button>
         {capsLock && (
           <p className={styles.warning} role="status">
             Caps Lock is on
           </p>
         )}
-        <Button aria-pressed={shopOpen} onClick={() => setShopOpen((open) => !open)}>
-          Shop
-        </Button>
       </div>
 
-      {shopOpen && <ShopPanel />}
-
       <div className={styles.bottom}>
-        {/* Phones cannot use the 3D monitor for typing, so the panel (with its touch field) sits here instead. */}
+        {/* Phones cannot use the 3D monitor for typing, so the desktop (with its touch field) sits here instead. */}
         {touch && (
-          <AssignmentPanel current={current}>
-            <TypingSink />
-          </AssignmentPanel>
+          <div className={styles.desktop}>
+            <Desktop current={current} typingField={<TypingSink />} />
+          </div>
         )}
         <TypedInput typing={typing} />
       </div>

@@ -1,9 +1,11 @@
 // Tests for payouts, multipliers, promotions and number formatting.
 import { describe, expect, it } from "vitest";
 import { jobs } from "./data/jobs";
+import { upgrades } from "./data/upgrades";
 import {
   BASE_PAYOUT_PER_CHAR,
   accuracyMultiplier,
+  bestOwned,
   formatNumber,
   jobFor,
   nextJob,
@@ -21,6 +23,23 @@ describe("accuracyMultiplier", () => {
   it("clamps out-of-range values", () => {
     expect(accuracyMultiplier(2)).toBe(1);
     expect(accuracyMultiplier(-1)).toBe(0);
+  });
+});
+
+describe("bestOwned", () => {
+  it("gives the highest tier owned in a category", () => {
+    expect(bestOwned(["beige-box", "grey-tower", "mushy"], "computer")?.id).toBe("grey-tower");
+    expect(bestOwned(["beige-box", "mushy", "strawberry"], "switches")?.id).toBe("strawberry");
+  });
+
+  it("gives undefined when nothing in the category is owned", () => {
+    expect(bestOwned([], "computer")).toBeUndefined();
+  });
+});
+
+describe("computers", () => {
+  it("each has an operating system", () => {
+    for (const upgrade of upgrades.filter((u) => u.category === "computer")) expect(upgrade.os).toBeDefined();
   });
 });
 

@@ -1,52 +1,66 @@
 // The 3D keyboard: renders every key from the layout and animates the ones being pressed.
-import { useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox, Text } from "@react-three/drei";
-import { Color, MathUtils, type Group, type MeshStandardMaterial } from "three";
+import { BoxGeometry, Color, MathUtils, MeshStandardMaterial, type Group } from "three";
+import { useEquipped } from "@/state/gameStore";
 import { useKeyInput } from "@/state/useKeyInput";
 import { keys, layoutDepth, layoutWidth, type KeyDef } from "./layout";
+import { DEFAULT_SWITCH_COLOR, switchColors } from "./switchColors";
 
-const KEY_HEIGHT = 0.6;
+const KEY_HEIGHT = 0.55;
 const TRAVEL = 0.25;
+// How far the bottom of a resting keycap is above the keyboard case. The switch housing fills this gap, and
+// shows underneath the keycap when you look at the keyboard from above and in front.
+const LIFT = 0.3;
 const REST = new Color("#e5e7eb");
-const DOWN = new Color("#f59e0b");
+
+// One shared shape for every switch housing, so the GPU holds one copy instead of 87.
+const HOUSING = new BoxGeometry(1, LIFT, 0.7);
 
 type Pressed = Set<string>;
 
-function Key({ def, pressed }: { def: KeyDef; pressed: Pressed }) {
-  const group = useRef<Group>(null!);
+type KeyProps = { def: KeyDef; pressed: Pressed; pressColor: Color; housing: MeshStandardMaterial };
+
+function Key({ def, pressed, pressColor, housing }: KeyProps) {
+  const cap = useRef<Group>(null!);
   const material = useRef<MeshStandardMaterial>(null!);
 
   useFrame((_, delta) => {
     const down = pressed.has(def.code);
     // damp() eases toward the target independent of frame rate.
-    group.current.position.y = MathUtils.damp(
-      group.current.position.y,
-      down ? KEY_HEIGHT / 2 - TRAVEL : KEY_HEIGHT / 2 + 0.05,
+    cap.current.position.y = MathUtils.damp(
+      cap.current.position.y,
+      LIFT + KEY_HEIGHT / 2 - (down ? TRAVEL : 0),
       30,
       delta,
     );
-    material.current.color.lerp(down ? DOWN : REST, 1 - Math.exp(-20 * delta));
+    // The keycap flashes the colour of the switch under it.
+    material.current.color.lerp(down ? pressColor : REST, 1 - Math.exp(-20 * delta));
   });
 
   const press = (e: { stopPropagation: () => void }) => (e.stopPropagation(), pressed.add(def.code));
   const release = () => pressed.delete(def.code);
 
   return (
-    <group ref={group} position={[def.x, KEY_HEIGHT / 2 + 0.05, def.z]}>
-      <RoundedBox
-        args={[def.w - 0.1, KEY_HEIGHT, 0.9]}
-        radius={0.08}
-        smoothness={3}
-        onPointerDown={press}
-        onPointerUp={release}
-        onPointerOut={release}
-      >
-        <meshStandardMaterial ref={material} color={REST} roughness={0.5} />
-      </RoundedBox>
-      <Text position={[0, KEY_HEIGHT / 2 + 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.28} color="#1f2937">
-        {def.label}
-      </Text>
+    <group position={[def.x, 0, def.z]}>
+      {/* The switch does not move; only the keycap above it does. Scaling the shared 1-wide box sets its width. */}
+      <mesh geometry={HOUSING} material={housing} position={[0, LIFT / 2, 0]} scale={[def.w - 0.3, 1, 1]} />
+      <group ref={cap} position={[0, LIFT + KEY_HEIGHT / 2, 0]}>
+        <RoundedBox
+          args={[def.w - 0.1, KEY_HEIGHT, 0.9]}
+          radius={0.08}
+          smoothness={3}
+          onPointerDown={press}
+          onPointerUp={release}
+          onPointerOut={release}
+        >
+          <meshStandardMaterial ref={material} color={REST} roughness={0.5} />
+        </RoundedBox>
+        <Text position={[0, KEY_HEIGHT / 2 + 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.28} color="#1f2937">
+          {def.label}
+        </Text>
+      </group>
     </group>
   );
 }
@@ -54,6 +68,13 @@ function Key({ def, pressed }: { def: KeyDef; pressed: Pressed }) {
 export default function Keyboard() {
   // A Set mutated in place by the key input provider: useFrame reads it, so pressing a key never re-renders React.
   const { pressed } = useKeyInput();
+  const switchId = useEquipped("switches")?.id;
+  const colorHex = (switchId && switchColors[switchId]) || DEFAULT_SWITCH_COLOR;
+
+  // Built once per switch colour and shared by every key. We create these ourselves, so we also dispose them.
+  const pressColor = useMemo(() => new Color(colorHex), [colorHex]);
+  const housing = useMemo(() => new MeshStandardMaterial({ color: colorHex, roughness: 0.6 }), [colorHex]);
+  useEffect(() => () => housing.dispose(), [housing]);
 
   return (
     // Centre the board on the origin.
@@ -66,7 +87,7 @@ export default function Keyboard() {
         <meshStandardMaterial color="#1f2937" roughness={0.7} />
       </RoundedBox>
       {keys.map((def) => (
-        <Key key={def.code} def={def} pressed={pressed} />
+        <Key key={def.code} def={def} pressed={pressed} pressColor={pressColor} housing={housing} />
       ))}
     </group>
   );

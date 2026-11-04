@@ -1,4 +1,4 @@
-// The assignment itself: title, length choice, the text, and the result line. Shown on the monitor, or in the HUD on touch.
+// The assignment itself: length choice, the text, and the result line. It sits inside the Desktop window.
 import type { ReactNode } from "react";
 import { LENGTH_TARGETS, type AssignmentLength } from "@/game/assignments";
 import { CURRENCY } from "@/game/currency";
@@ -21,7 +21,7 @@ type AssignmentPanelProps = {
 };
 
 export default function AssignmentPanel({ current, children }: AssignmentPanelProps) {
-  const { assignment, typing, length, finished, chooseLength, next } = current;
+  const { typing, length, finished, chooseLength, next } = current;
   const lastReward = useGameStore((state) => state.lastReward);
 
   const hint =
@@ -34,16 +34,13 @@ export default function AssignmentPanel({ current, children }: AssignmentPanelPr
 
   return (
     <section className={styles.panel}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>{assignment.title}</h1>
-        <div className={styles.lengths}>
-          {lengths.map((option) => (
-            <Button key={option} aria-pressed={option === length} onClick={() => chooseLength(option)}>
-              {capitalise(option)}
-            </Button>
-          ))}
-        </div>
-      </header>
+      <div className={styles.lengths} role="group" aria-label="Assignment length">
+        {lengths.map((option) => (
+          <Button key={option} aria-pressed={option === length} onClick={() => chooseLength(option)}>
+            {capitalise(option)}
+          </Button>
+        ))}
+      </div>
 
       <AssignmentText typing={typing} />
 

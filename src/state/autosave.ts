@@ -1,6 +1,7 @@
 // Loads the saved game into the store, then saves again a few seconds after each change and when the tab is hidden.
 import type { SaveRepository } from "@/game/save";
 import { toSave } from "@/game/save";
+import { progressChanged } from "@/game/progress";
 import { progressOf, useGameStore } from "./gameStore";
 
 /** Minimum gap between saves while the player is typing. */
@@ -29,9 +30,7 @@ export function startAutosave(repository: SaveRepository): () => void {
     if (save) useGameStore.getState().load(save);
     // Subscribe only after loading, so the load itself is not saved straight back.
     unsubscribe = useGameStore.subscribe((state, previous) => {
-      if (state.player === previous.player && state.upgrades === previous.upgrades && state.stats === previous.stats) {
-        return;
-      }
+      if (!progressChanged(state, previous)) return;
       dirty = true;
       timer ??= setTimeout(flush, AUTOSAVE_INTERVAL_MS);
     });

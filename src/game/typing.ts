@@ -96,7 +96,8 @@ export function accuracy(state: TypingState): number {
 
 export function elapsedMs(state: TypingState, now: number): number {
   if (state.startedAt === null) return 0;
-  return (state.finishedAt ?? now) - state.startedAt;
+  // `now` can be a few hundred ms old (the HUD clock ticks), so it may be earlier than the first keystroke.
+  return Math.max(0, (state.finishedAt ?? now) - state.startedAt);
 }
 
 /** Whole-assignment speed. Use this for the result screen and best-ever WPM. */

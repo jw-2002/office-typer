@@ -5,6 +5,7 @@ import {
   accuracy,
   applyKey,
   createTyping,
+  elapsedMs,
   finalWpm,
   isFinished,
   liveWpm,
@@ -17,6 +18,15 @@ import {
 function type(state: TypingState, keys: readonly string[], start = 0): TypingState {
   return keys.reduce((s, key, i) => applyKey(s, key, start + i * 1000), state);
 }
+
+describe("elapsedMs", () => {
+  it("is 0 before typing starts, and never negative when the clock reading is older than the first key", () => {
+    expect(elapsedMs(createTyping("hi"), 5000)).toBe(0);
+    const started = applyKey(createTyping("hi"), "h", 5000);
+    expect(elapsedMs(started, 4000)).toBe(0);
+    expect(elapsedMs(started, 5600)).toBe(600);
+  });
+});
 
 describe("applyKey", () => {
   it("advances on correct keys and finishes at the end", () => {

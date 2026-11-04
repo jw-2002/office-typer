@@ -1,0 +1,351 @@
+/* The operating-system looks. Each block overrides the tokens in index.css, and <html data-os="..."> picks one.
+   The page is styled only through these tokens, so a new OS is one new block. */
+
+/* A 90s grey desktop: square, bevelled, navy title bars. */
+:root[data-os="classic"] {
+  --color-bg: #008080;
+  --color-surface: #c0c0c0;
+  --color-surface-raised: #dfdfdf;
+  --color-field: #ffffff;
+  --color-text: #000000;
+  --color-muted: #404040;
+  --color-accent: #000080;
+  --color-on-accent: #ffffff;
+  --color-correct: #006400;
+  --color-error: #c00000;
+  --radius: 0;
+  --hud-radius: 0;
+  --font-ui: "MS Sans Serif", Tahoma, Arial, sans-serif;
+  --font-mono: "Courier New", Courier, monospace;
+
+  --surface-border-width: 2px;
+  --surface-border-color: #ffffff #404040 #404040 #ffffff;
+  --surface-shadow: 1px 1px 0 #000000;
+  --field-border-color: #404040 #ffffff #ffffff #404040;
+
+  --button-bg: #c0c0c0;
+  --button-border-width: 2px;
+  --button-border-color: #ffffff #404040 #404040 #ffffff;
+  --button-shadow: 1px 1px 0 #000000;
+  --button-radius: 0;
+  --button-pressed-bg: #e0e0e0;
+  --button-pressed-text: #000000;
+  --button-pressed-border-color: #404040 #ffffff #ffffff #404040;
+
+  --titlebar-bg: linear-gradient(90deg, #000080, #1084d0);
+  --titlebar-text: #ffffff;
+  --titlebar-radius: 0;
+  --control-size: 1rem;
+  --control-radius: 0;
+  --control-1: #c0c0c0;
+  --control-2: #c0c0c0;
+  --control-3: #c0c0c0;
+  --control-border-color: #ffffff #404040 #404040 #ffffff;
+  --controls-order: 1;
+
+  --taskbar-bg: #c0c0c0;
+  --taskbar-text: #000000;
+  --taskbar-shadow: inset 0 2px 0 #ffffff;
+  --taskbar-order: 1;
+
+  --wallpaper: #008080;
+
+  /* The window redraws from the top down, in visible steps, like a slow old machine. */
+  --tab-animation: os-classic-redraw 0.3s steps(8) both;
+}
+
+/* A bright blue and green desktop: rounded blue title bars, creamy panels, glossy buttons. */
+:root[data-os="sky"] {
+  --color-bg: #3a6ea5;
+  --color-surface: #ece9d8;
+  --color-surface-raised: #f5f4ea;
+  --color-field: #ffffff;
+  --color-text: #111111;
+  --color-muted: #555555;
+  --color-accent: #316ac5;
+  --color-on-accent: #ffffff;
+  --color-correct: #1a7f1a;
+  --color-error: #d02020;
+  --radius: 0.4rem;
+  --hud-radius: 0;
+  --font-ui: Tahoma, Verdana, sans-serif;
+  --font-mono: "Lucida Console", Consolas, monospace;
+
+  --surface-border-width: 1px;
+  --surface-border-color: #7f9db9;
+  --surface-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --field-border-color: #7f9db9;
+
+  --button-bg: linear-gradient(#ffffff, #ecebe5 85%, #d6d0c5);
+  --button-border-width: 1px;
+  --button-border-color: #003c74;
+  --button-shadow: none;
+  --button-radius: 3px;
+  --button-pressed-bg: linear-gradient(#ffefc4, #f8b330);
+  --button-pressed-text: #111111;
+  --button-pressed-border-color: #e68b2c;
+
+  --titlebar-bg: linear-gradient(#0a5fd8, #3d95ff 8%, #0a5fd8 40%, #0553cc 88%, #0a4fc0);
+  --titlebar-text: #ffffff;
+  --titlebar-radius: 0.5rem 0.5rem 0 0;
+  --control-size: 1.2rem;
+  --control-radius: 3px;
+  --control-1: #3a7bf5;
+  --control-2: #3a7bf5;
+  --control-3: #d9462b;
+  --control-border-color: #ffffff;
+  --controls-order: 1;
+
+  --taskbar-bg: linear-gradient(#245edb, #3a82f5 10%, #245edb 40%, #1941a5);
+  --taskbar-text: #ffffff;
+  --taskbar-shadow: none;
+  --taskbar-order: 1;
+
+  --wallpaper: radial-gradient(ellipse at 50% 135%, #4f9a22 0 38%, transparent 39%), linear-gradient(#2a6fd6, #9ccbf7);
+
+  /* The window pops open with a quick fade and zoom. */
+  --tab-animation: os-sky-open 0.2s ease-out both;
+}
+
+/* A soft, light, rounded look: traffic-light window buttons on the left and a menu bar on top. */
+:root[data-os="pear"] {
+  --color-bg: #cfd3e6;
+  --color-surface: #f5f5f7;
+  --color-surface-raised: #e8e8ed;
+  --color-field: #ffffff;
+  --color-text: #1d1d1f;
+  --color-muted: #6e6e73;
+  --color-accent: #0a84ff;
+  --color-on-accent: #ffffff;
+  --color-correct: #1c9b4a;
+  --color-error: #d70015;
+  --radius: 0.75rem;
+  --hud-radius: 0.75rem;
+  --font-ui: system-ui, "Helvetica Neue", Helvetica, sans-serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+
+  --surface-border-width: 1px;
+  --surface-border-color: rgba(0, 0, 0, 0.08);
+  --surface-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  --field-border-color: rgba(0, 0, 0, 0.12);
+
+  --button-bg: #ffffff;
+  --button-border-width: 1px;
+  --button-border-color: rgba(0, 0, 0, 0.15);
+  --button-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  --button-radius: 0.5rem;
+  --button-pressed-bg: #0a84ff;
+  --button-pressed-text: #ffffff;
+  --button-pressed-border-color: #0a84ff;
+
+  --titlebar-bg: linear-gradient(#ececec, #d6d6d6);
+  --titlebar-text: #3a3a3c;
+  --titlebar-radius: 0.75rem 0.75rem 0 0;
+  --control-size: 0.75rem;
+  --control-radius: 50%;
+  --control-1: #ff5f57;
+  --control-2: #febc2e;
+  --control-3: #28c840;
+  --control-border-color: rgba(0, 0, 0, 0.15);
+  --controls-order: -1;
+
+  --taskbar-bg: rgba(255, 255, 255, 0.6);
+  --taskbar-text: #1d1d1f;
+  --taskbar-shadow: none;
+  --taskbar-order: -1;
+
+  --wallpaper: linear-gradient(135deg, #b9c6e8, #e8c9e0 60%, #f4dcc8);
+
+  /* A soft springy rise, as if the window settles into place. */
+  --tab-animation: os-pear-settle 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+
+/* Dark with glowing cyan and magenta edges. */
+:root[data-os="neon"] {
+  --color-bg: #05070d;
+  --color-surface: #0f1424;
+  --color-surface-raised: #1a2140;
+  --color-field: #080b16;
+  --color-text: #e6f1ff;
+  --color-muted: #8aa0c0;
+  --color-accent: #00e5ff;
+  --color-on-accent: #001018;
+  --color-correct: #39ff88;
+  --color-error: #ff3b6b;
+  --radius: 0.25rem;
+  --hud-radius: 0.25rem;
+  --font-ui: system-ui, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --surface-border-width: 1px;
+  --surface-border-color: rgba(0, 229, 255, 0.4);
+  --surface-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+  --field-border-color: rgba(255, 43, 214, 0.4);
+
+  --button-bg: #0f1424;
+  --button-border-width: 1px;
+  --button-border-color: #00e5ff;
+  --button-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+  --button-radius: 0.25rem;
+  --button-pressed-bg: #00e5ff;
+  --button-pressed-text: #001018;
+  --button-pressed-border-color: #00e5ff;
+
+  --titlebar-bg: linear-gradient(90deg, #ff2bd6, #00e5ff);
+  --titlebar-text: #001018;
+  --titlebar-radius: 0.25rem 0.25rem 0 0;
+  --control-size: 0.7rem;
+  --control-radius: 2px;
+  --control-1: rgba(0, 16, 24, 0.55);
+  --control-2: rgba(0, 16, 24, 0.55);
+  --control-3: rgba(0, 16, 24, 0.55);
+  --control-border-color: transparent;
+  --controls-order: 1;
+
+  --taskbar-bg: #0a0e1c;
+  --taskbar-text: #e6f1ff;
+  --taskbar-shadow: inset 0 1px 0 #00e5ff;
+  --taskbar-order: 1;
+
+  --wallpaper:
+    radial-gradient(circle at 20% 20%, rgba(130, 40, 220, 0.45), transparent 50%),
+    radial-gradient(circle at 80% 85%, rgba(0, 150, 200, 0.4), transparent 50%), #070a14;
+
+  /* A short digital glitch: the content jitters sideways and flickers in. */
+  --tab-animation: os-neon-glitch 0.35s linear both;
+}
+
+/* Glassy and warm: translucent panels, pill buttons and an orange glow. */
+:root[data-os="quantum"] {
+  --color-bg: #0a0612;
+  --color-surface: rgba(32, 20, 62, 0.82);
+  --color-surface-raised: rgba(70, 45, 120, 0.7);
+  --color-field: rgba(10, 5, 25, 0.7);
+  --color-text: #fff4e6;
+  --color-muted: #c3b3d9;
+  --color-accent: #ffb347;
+  --color-on-accent: #1a0b00;
+  --color-correct: #7dffb2;
+  --color-error: #ff6b8a;
+  --radius: 1rem;
+  --hud-radius: 1rem;
+  --font-ui: system-ui, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --surface-border-width: 1px;
+  --surface-border-color: rgba(255, 200, 120, 0.35);
+  --surface-shadow: 0 0 24px rgba(255, 150, 60, 0.25);
+  --field-border-color: rgba(255, 200, 120, 0.2);
+
+  --button-bg: rgba(255, 255, 255, 0.08);
+  --button-border-width: 1px;
+  --button-border-color: rgba(255, 200, 120, 0.5);
+  --button-shadow: none;
+  --button-radius: 999px;
+  --button-pressed-bg: #ffb347;
+  --button-pressed-text: #1a0b00;
+  --button-pressed-border-color: #ffb347;
+
+  --titlebar-bg: linear-gradient(90deg, rgba(255, 150, 60, 0.5), rgba(150, 90, 255, 0.5));
+  --titlebar-text: #ffffff;
+  --titlebar-radius: 1rem 1rem 0 0;
+  --control-size: 0.7rem;
+  --control-radius: 50%;
+  --control-1: #ffb347;
+  --control-2: #ffffff;
+  --control-3: #7dffb2;
+  --control-border-color: transparent;
+  --controls-order: 1;
+
+  --taskbar-bg: rgba(20, 10, 40, 0.75);
+  --taskbar-text: #fff4e6;
+  --taskbar-shadow: none;
+  --taskbar-order: 1;
+
+  --wallpaper:
+    radial-gradient(circle at 50% 115%, rgba(255, 154, 60, 0.45), transparent 55%),
+    linear-gradient(160deg, #1a0b3a, #06182a);
+
+  /* The content comes into focus out of a blur. */
+  --tab-animation: os-quantum-focus 0.45s ease-out both;
+}
+
+/* Tab change animations. Each OS picks one through --tab-animation. */
+@keyframes os-classic-redraw {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes os-sky-open {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes os-pear-settle {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes os-neon-glitch {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+    filter: hue-rotate(90deg);
+  }
+
+  25% {
+    opacity: 1;
+    transform: translateX(8px);
+    clip-path: inset(30% 0 40% 0);
+  }
+
+  50% {
+    transform: translateX(-4px);
+    clip-path: inset(0 0 0 0);
+    filter: hue-rotate(-60deg);
+  }
+
+  75% {
+    opacity: 0.6;
+    transform: translateX(3px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes os-quantum-focus {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+    filter: blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
