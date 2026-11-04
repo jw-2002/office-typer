@@ -1,21 +1,63 @@
-// Things on the back wall: a window that shows the sky (so you can see the time of day), curtains, a cork board with
+// Things on the back wall: a window that shows the sky (the sun and moon cross it, and stars come out at night), curtains, a cork board with
 // sticky notes, and a goblin poster. The board and poster hang low, where the seated camera can see them.
 import { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Text } from "@react-three/drei";
-import type { Color, MeshBasicMaterial } from "three";
+import {
+  Color as ThreeColor,
+  MathUtils,
+  type Color,
+  type Group,
+  type MeshBasicMaterial,
+  type PointsMaterial,
+} from "three";
+import { timeOfDay } from "@/game/time";
+import { useGameStore } from "@/state/gameStore";
+import { nightness, skySpot } from "./daylight";
+import GoblinPoster from "./GoblinPoster";
 import { palette } from "./palette";
 
 const WALL_Z = -1.94;
 const trim = <meshStandardMaterial color={palette.trim} roughness={0.7} />;
 
+/** Stars at fixed spots on the glass, so the night sky looks the same every time. x and y are from -1 to 1. */
+const STAR_COUNT = 40;
+const STARS = (() => {
+  const positions = new Float32Array(STAR_COUNT * 3);
+  for (let i = 0; i < STAR_COUNT; i++) {
+    // A simple repeatable scatter (no Math.random), spread over the window.
+    positions[i * 3] = (((i * 0.6180339) % 1) * 2 - 1) * 0.6;
+    positions[i * 3 + 1] = (((i * 0.7548776) % 1) * 2 - 1) * 0.33;
+    positions[i * 3 + 2] = 0.004;
+  }
+  return positions;
+})();
+
+/** How far across and up the window the sun or moon can go, in metres from its middle. */
+const SKY_REACH = { x: 0.5, low: -0.2, high: 0.24 } as const;
+const SUN_COLOUR = new ThreeColor("#fff1b8").multiplyScalar(4);
+
 function SkyWindow({ x, y }: { x: number; y: number }) {
   const glass = useRef<MeshBasicMaterial>(null!);
+  const stars = useRef<PointsMaterial>(null!);
+  const sun = useRef<Group>(null!);
+  const moon = useRef<Group>(null!);
   const scene = useThree((state) => state.scene);
 
-  // The glass is the colour of the sky, which the Sun component changes through the day.
-  useFrame(() => {
+  useFrame((state, delta) => {
+    // The glass is the colour of the sky, which the Sun component changes through the day.
     if (scene.background) glass.current.color.copy(scene.background as Color);
+
+    // The sun and moon cross the window in the same direction the light comes from, so the shadows agree with them.
+    const minutes = timeOfDay(useGameStore.getState().stats.secondsPlayed);
+    const spot = skySpot(minutes);
+    const body = spot.body === "sun" ? sun.current : moon.current;
+    sun.current.visible = spot.body === "sun";
+    moon.current.visible = spot.body === "moon";
+    body.position.x = spot.across * SKY_REACH.x;
+    body.position.y = MathUtils.lerp(SKY_REACH.low, SKY_REACH.high, spot.height);
+
+    // Stars come out as it gets dark, and twinkle a little.
+    stars.current.opacity = nightness(minutes) * (0.75 + 0.25 * Math.sin(state.clock.elapsedTime * 2 + delta));
   });
 
   return (
@@ -25,6 +67,49 @@ function SkyWindow({ x, y }: { x: number; y: number }) {
         {/* Basic material ignores lights, so the sky looks bright by day and dark at night. */}
         <meshBasicMaterial ref={glass} color="#8ab8e8" />
       </mesh>
+      {/* Stars: fixed dots of light, only visible at night. */}
+      <points raycast={() => null}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[STARS, 3]} />
+        </bufferGeometry>
+        <pointsMaterial
+          ref={stars}
+          size={2.5}
+          sizeAttenuation={false}
+          color="#ffffff"
+          transparent
+          opacity={0}
+          depthWrite={false}
+        />
+      </points>
+      {/* The sun: a bright blocky disc with a soft square glow. It is brighter than white, so it blooms. */}
+      <group ref={sun} position={[0, 0, 0.006]}>
+        <mesh>
+          <boxGeometry args={[0.11, 0.11, 0.002]} />
+          <meshBasicMaterial color={SUN_COLOUR} toneMapped={false} />
+        </mesh>
+        <mesh position={[0, 0, -0.001]}>
+          <boxGeometry args={[0.2, 0.2, 0.002]} />
+          <meshBasicMaterial color="#ffe9a0" transparent opacity={0.3} depthWrite={false} />
+        </mesh>
+      </group>
+      {/* The moon: a pale disc with a few darker craters. */}
+      <group ref={moon} position={[0, 0, 0.006]}>
+        <mesh>
+          <boxGeometry args={[0.08, 0.08, 0.002]} />
+          <meshBasicMaterial color="#e6ecfa" />
+        </mesh>
+        {[
+          [-0.015, 0.012, 0.016],
+          [0.017, -0.012, 0.012],
+          [0.008, 0.024, 0.008],
+        ].map(([cx, cy, size]) => (
+          <mesh key={cx} position={[cx, cy, 0.0015]}>
+            <boxGeometry args={[size, size, 0.001]} />
+            <meshBasicMaterial color="#b9c4de" />
+          </mesh>
+        ))}
+      </group>
       {/* Frame: top, bottom, sides and a cross. */}
       {[
         [0, 0.4, 1.46, 0.07],
@@ -85,42 +170,6 @@ function CorkBoard({ x, y }: { x: number; y: number }) {
           </mesh>
         </group>
       ))}
-    </group>
-  );
-}
-
-function GoblinPoster({ x, y }: { x: number; y: number }) {
-  const green = <meshStandardMaterial color="#5fa33f" roughness={0.8} />;
-  return (
-    <group position={[x, y, WALL_Z]}>
-      <mesh castShadow position={[0, 0, 0.008]}>
-        <boxGeometry args={[0.3, 0.34, 0.012]} />
-        <meshStandardMaterial color={palette.paper} roughness={0.9} />
-      </mesh>
-      {/* A blocky goblin face: head, big ears, eyes and a nose. */}
-      <mesh position={[0, 0.02, 0.016]}>
-        <boxGeometry args={[0.1, 0.09, 0.006]} />
-        {green}
-      </mesh>
-      {[-1, 1].map((side) => (
-        <mesh key={side} position={[side * 0.075, 0.035, 0.016]} rotation={[0, 0, side * 0.5]}>
-          <boxGeometry args={[0.06, 0.02, 0.006]} />
-          {green}
-        </mesh>
-      ))}
-      {[-0.022, 0.022].map((px) => (
-        <mesh key={px} position={[px, 0.035, 0.02]}>
-          <boxGeometry args={[0.02, 0.02, 0.004]} />
-          <meshStandardMaterial color="#111827" />
-        </mesh>
-      ))}
-      <mesh position={[0, 0.01, 0.02]}>
-        <boxGeometry args={[0.02, 0.03, 0.004]} />
-        {green}
-      </mesh>
-      <Text position={[0, -0.11, 0.017]} fontSize={0.024} color="#1f2937" anchorX="center" anchorY="middle">
-        {"GOBLIN\nOF THE MONTH"}
-      </Text>
     </group>
   );
 }

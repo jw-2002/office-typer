@@ -1,11 +1,11 @@
-// Specks of dust that drift slowly through the air and show up in daylight, like dust in a sunbeam. They fade out at night.
+// Sparkling specks that drift slowly through the air, only at night. They fade in at dusk and out at dawn.
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { MathUtils, type BufferAttribute, type PointsMaterial } from "three";
 import { timeOfDay } from "@/game/time";
 import { useDisplayStore } from "@/state/displayStore";
 import { useGameStore } from "@/state/gameStore";
-import { isDark } from "./daylight";
+import { nightness } from "./daylight";
 
 const COUNT = 40;
 /** The box the dust floats in: around the desk, from desk height up to above the monitor. */
@@ -51,8 +51,8 @@ export default function DustMotes() {
     }
     geometryAttribute.current.needsUpdate = true;
 
-    const dark = isDark(timeOfDay(useGameStore.getState().stats.secondsPlayed));
-    material.current.opacity = MathUtils.damp(material.current.opacity, dark ? 0 : 0.4, 2, delta);
+    const night = nightness(timeOfDay(useGameStore.getState().stats.secondsPlayed));
+    material.current.opacity = MathUtils.damp(material.current.opacity, night * 0.5, 2, delta);
   });
 
   // No drifting dust when motion is reduced.

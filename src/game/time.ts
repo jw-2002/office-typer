@@ -13,6 +13,11 @@ export function timeOfDay(secondsPlayed: number): number {
   return ((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
 }
 
+/** Which day of the game it is (0 for the first one, which runs from the 8:00 start to midnight). */
+export function dayNumber(secondsPlayed: number): number {
+  return Math.floor((START_MINUTES + secondsPlayed * CLOCK_MINUTES_PER_SECOND) / MINUTES_PER_DAY);
+}
+
 /** 485 -> "08:05". */
 export function formatClock(minutes: number): string {
   const whole = Math.floor(((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY);

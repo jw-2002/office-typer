@@ -317,6 +317,27 @@ Done so far:
 - **Ending recap** names you, counts characters typed and gives a leaving gift.
 - **More scenarios**: `scenarios.ts` is now just the types and pools. The everyday ones are split by tier
   (`scenariosEveryday1/2/3.ts`), beside `scenariosWild.ts` and the new `scenariosExtra.ts` (15 more odd ones).
+- **Goblin mode (easter egg)**: poke the "Goblin of the month" poster on the back wall. For 40 seconds the screen glows
+  green, all the typing is green, the assignments are goblin emails (`scenariosGoblin.ts` plus the other goblin scenarios, still
+  following your job's tier) and every goblin assignment pays x10 (`GOBLIN_MULTIPLIER`). It can be used once every 5 minutes,
+  counted from the start. While it cannot, a green loading symbol spins on the poster, and poking it shows a green "not
+  yet". In goblin mode the poster goblin glows, has red eyes and teeth, and shouts something different. Rules are in
+  `progress.ts` (`startGoblinMode`, timers in `Progress.goblin`, counted down by `tickGame`, saved and capped); the number of
+  uses is `stats.goblinUses`, shown in green in Settings and the redundancy notice, with a hint to the easter egg
+  (`GoblinHint`).
+- **Goblin mode music**: while goblin mode is on, an original frantic battle theme replaces any song (172 BPM, two bars:
+  galloping saw bass, pounding kick, hats on every step and a wobbling, out-of-tune square-wave lead that races up and
+  down). `TrackSpec` gained an optional `lead` and patterns may be several bars long. Muting silences it; your own song
+  comes back when goblin mode ends.
+- **Sun, moon and stars**: the window shows the sun by day and the moon by night, crossing the window on the same path as
+  the light, so the shadows agree (sun on the right means shadows fall left). Stars twinkle at night
+  (`skySpot` and `nightness` in `daylight.ts`). The floating sparkles (dust) now only appear at night.
+- **Document of the day**: the first assignment of each in-game day is marked and pays +50% (`FEATURED_MULTIPLIER`). It is
+  not saved, so reloading can show one again.
+- **Settings layout**: the left column is your record and "Start again"; sound, music and display are on the right.
+- **Mouse hand and laptop fixed**: the glove has separate fingers with bent tips, a thumb, a cuff and a sleeve running back
+  toward you. The laptop base is shallower and sits back so the whole laptop is in frame, with a trackpad and a key well
+  that fits the keyboard.
 - **Left out on purpose**: the seated camera sway, because the seated view is meant to feel locked.
 
 Still to do: play it start to finish by hand (the pacing so far comes from the simulator), and check performance on a

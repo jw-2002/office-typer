@@ -68,6 +68,44 @@ const LOWEST = 22 * DEGREES;
 /** How far from straight ahead the light swings, east to west. Kept modest, because it all has to come through the window. */
 const SWING = 50 * DEGREES;
 
+/** Where the sun (or the moon) is at an hour of the day. */
+function celestial(hour: number) {
+  // The sun crosses the sky from 6 to 18. At night the moon crosses the other way, so the light never jumps: at
+  // 6 and 18 the sun and the moon are both on the horizon, in the same place.
+  const daytime = hour >= 6 && hour < 18;
+  const progress = daytime ? (hour - 6) / 12 : ((((hour - 18) % 24) + 24) % 24) / 12;
+  const arc = Math.sin(Math.min(1, progress) * Math.PI);
+  const elevation = Math.max(LOWEST, arc * (daytime ? SUN_HIGHEST : MOON_HIGHEST));
+  const azimuth = (daytime ? -1 + 2 * progress : 1 - 2 * Math.min(1, progress)) * SWING;
+  return { daytime, azimuth, elevation };
+}
+
+const hourOf = (minutes: number) => (((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY) / 60;
+
+/** Where the sun or moon appears in the window, which is the same place the light (and so the shadows) comes from. */
+export type SkySpot = {
+  body: "sun" | "moon";
+  /** From -1 (left edge of its path) to 1 (right edge). The light's sideways direction, so shadows fall the other way. */
+  across: number;
+  /** From 0 (as low as it goes) to 1 (highest). */
+  height: number;
+};
+
+export function skySpot(minutes: number): SkySpot {
+  const { daytime, azimuth, elevation } = celestial(hourOf(minutes));
+  const highest = daytime ? SUN_HIGHEST : MOON_HIGHEST;
+  return { body: daytime ? "sun" : "moon", across: azimuth / SWING, height: (elevation - LOWEST) / (highest - LOWEST) };
+}
+
+/** How night-like it is, from 0 (day) to 1 (full night), fading through dusk and dawn. For stars and the night sparkles. */
+export function nightness(minutes: number): number {
+  const hour = hourOf(minutes);
+  const ramp = (from: number, to: number) => Math.min(1, Math.max(0, (hour - from) / (to - from)));
+  // Dark until 5, fading out to 6.5; day until 18, fading in to 20.
+  if (hour < 12) return 1 - ramp(5, 6.5);
+  return ramp(18, 20);
+}
+
 /** The light at a time of day, given in minutes since midnight. */
 export function daylightAt(minutes: number): Daylight {
   const hour = (((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY) / 60;
@@ -82,13 +120,7 @@ export function daylightAt(minutes: number): Daylight {
   const fade = (a: string, b: string) => toHex(mix(rgb(a), rgb(b), smooth));
   const blend = (a: number, b: number) => a + (b - a) * smooth;
 
-  // The sun crosses the sky from 6 to 18. At night the moon crosses the other way, so the light never jumps: at
-  // 6 and 18 the sun and the moon are both on the horizon, in the same place.
-  const daytime = hour >= 6 && hour < 18;
-  const progress = daytime ? (hour - 6) / 12 : ((((hour - 18) % 24) + 24) % 24) / 12;
-  const arc = Math.sin(Math.min(1, progress) * Math.PI);
-  const elevation = Math.max(LOWEST, arc * (daytime ? SUN_HIGHEST : MOON_HIGHEST));
-  const azimuth = (daytime ? -1 + 2 * progress : 1 - 2 * Math.min(1, progress)) * SWING;
+  const { azimuth, elevation } = celestial(hour);
 
   // The window is in the back wall, so the light comes from behind the desk (negative z, away from the player) and
   // above, swinging a little left to right. Shadows fall toward the player and across the desk.

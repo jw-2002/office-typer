@@ -1,6 +1,6 @@
 // The save file format: one versioned object, how to build it, and how to read old or damaged ones safely.
 import { startingUpgradeIds, upgrades } from "./data/upgrades";
-import { cleanPlayerName, normaliseEquipped, type Progress } from "./progress";
+import { GOBLIN_COOLDOWN_SECONDS, GOBLIN_SECONDS, cleanPlayerName, normaliseEquipped, type Progress } from "./progress";
 
 export const SAVE_VERSION = 3;
 
@@ -69,6 +69,7 @@ export function migrate(raw: unknown): SaveData | null {
   const ownedIds = [...new Set([...startingUpgradeIds, ...owned])];
   const equipped = isRecord(current.equipped) ? current.equipped : {};
   const finale = isRecord(current.finale) ? current.finale : {};
+  const goblin = isRecord(current.goblin) ? current.goblin : {};
 
   return {
     version: SAVE_VERSION,
@@ -83,6 +84,11 @@ export function migrate(raw: unknown): SaveData | null {
       stage: finale.stage === "pending" || finale.stage === "redundant" ? finale.stage : "none",
       seconds: count(finale.seconds),
     },
+    // The timers are capped, so editing a save cannot give a longer goblin mode or a cooldown that never ends.
+    goblin: {
+      active: Math.min(count(goblin.active), GOBLIN_SECONDS),
+      cooldown: Math.min(count(goblin.cooldown), GOBLIN_COOLDOWN_SECONDS),
+    },
     stats: {
       totalChars: count(stats.totalChars),
       assignmentsCompleted: count(stats.assignmentsCompleted),
@@ -90,6 +96,7 @@ export function migrate(raw: unknown): SaveData | null {
       totalEarned: count(stats.totalEarned),
       secondsPlayed: count(stats.secondsPlayed),
       streak: Math.floor(count(stats.streak)),
+      goblinUses: Math.floor(count(stats.goblinUses)),
     },
   };
 }

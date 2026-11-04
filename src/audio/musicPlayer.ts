@@ -1,6 +1,6 @@
 // Plays a song from tracks.ts with the Web Audio API: a squelchy filtered bass plus drums made from tones and noise.
 // It schedules a little ahead of the clock, which keeps the beat steady even when the page is busy drawing.
-import { STEPS, hitAt, type TrackSpec } from "./tracks";
+import { hitAt, type TrackSpec } from "./tracks";
 
 /** The parts of the audio setup the player needs. */
 export type MusicAudio = { ctx: AudioContext; noise: AudioBuffer; musicBus: GainNode };
@@ -98,6 +98,54 @@ function bassNote(
   oscillator.stop(at + seconds + 0.02);
 }
 
+/** One note of the lead tune: two slightly out-of-tune square waves with a vibrato wobble, like a cheap brass section. */
+function leadNote(
+  audio: MusicAudio,
+  track: TrackSpec,
+  at: number,
+  seconds: number,
+  semitones: number,
+  previous: number | null,
+  level: number,
+) {
+  const { ctx } = audio;
+  const frequency = track.rootHz * 2 ** (semitones / 12);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, at);
+  gain.gain.linearRampToValueAtTime(0.1 * level * track.level, at + 0.01);
+  gain.gain.setValueAtTime(0.1 * level * track.level, at + seconds * 0.7);
+  gain.gain.linearRampToValueAtTime(0.0001, at + seconds);
+  const filter = ctx.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.value = 3500;
+  gain.connect(filter).connect(audio.musicBus);
+
+  // The wobble: a slow oscillator that nudges the pitch of both voices (in cents) up and down.
+  const wobble = ctx.createOscillator();
+  wobble.frequency.value = 6.5;
+  const wobbleDepth = ctx.createGain();
+  wobbleDepth.gain.value = 18;
+  wobble.connect(wobbleDepth);
+  wobble.start(at);
+  wobble.stop(at + seconds + 0.02);
+
+  [-9, 9].forEach((detune) => {
+    const voice = ctx.createOscillator();
+    voice.type = "square";
+    voice.detune.value = detune;
+    wobbleDepth.connect(voice.detune);
+    if (previous !== null) {
+      voice.frequency.setValueAtTime(track.rootHz * 2 ** (previous / 12), at);
+      voice.frequency.exponentialRampToValueAtTime(frequency, at + seconds * 0.4);
+    } else {
+      voice.frequency.setValueAtTime(frequency, at);
+    }
+    voice.connect(gain);
+    voice.start(at);
+    voice.stop(at + seconds + 0.02);
+  });
+}
+
 export function createMusicPlayer(getAudio: () => MusicAudio | null): MusicPlayer {
   let timer: ReturnType<typeof setInterval> | null = null;
 
@@ -116,15 +164,23 @@ export function createMusicPlayer(getAudio: () => MusicAudio | null): MusicPlaye
       let step = 0;
       let nextAt = audio.ctx.currentTime + 0.05;
       let lastNote: number | null = null;
+      let lastLead: number | null = null;
 
       const schedule = (index: number, base: number) => {
         // Every second step is a little late: that is the swing.
         const at = base + (index % 2 === 1 ? track.swing * stepSeconds : 0);
-        const slot = index % STEPS;
+        const slot = index % track.bass.length;
         if (hitAt(track.kick, slot)) kick(audio, at, track.level);
         if (hitAt(track.hat, slot)) noise(audio, at, "highpass", 7500, 0.07 * track.level, 0.04);
         if (hitAt(track.openHat, slot)) noise(audio, at, "highpass", 6500, 0.08 * track.level, 0.14);
         if (hitAt(track.clap, slot)) clap(audio, at, track.level);
+
+        const tune = track.lead?.notes[slot] ?? null;
+        if (track.lead && tune !== null) {
+          const glide = hitAt(track.lead.slides, slot) && lastLead !== null;
+          leadNote(audio, track, at, stepSeconds * 0.9, tune, glide ? lastLead : null, track.lead.level);
+        }
+        lastLead = tune;
 
         const semitones = track.bass[slot];
         if (semitones === null) {

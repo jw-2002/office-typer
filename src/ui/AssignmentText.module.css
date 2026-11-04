@@ -1,4 +1,5 @@
 /* Styles for the assignment text. */
+/* In goblin mode (see index.css) it is bright green on dark green. */
 .text {
   composes: sunken from "./surface.module.css";
   margin: 0;
@@ -31,4 +32,12 @@
 .error {
   background: var(--color-error);
   text-decoration: underline;
+}
+
+:global(html[data-goblin="true"]) .text {
+  background: var(--goblin-dark);
+  --color-correct: var(--goblin-green);
+  --color-muted: var(--goblin-dim);
+  --color-accent: var(--goblin-green);
+  --color-on-accent: var(--goblin-dark);
 }

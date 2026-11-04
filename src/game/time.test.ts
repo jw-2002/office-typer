@@ -1,6 +1,6 @@
 // Tests for the fast office clock.
 import { describe, expect, it } from "vitest";
-import { MINUTES_PER_DAY, START_MINUTES, formatClock, timeOfDay } from "./time";
+import { MINUTES_PER_DAY, START_MINUTES, dayNumber, formatClock, timeOfDay } from "./time";
 
 describe("timeOfDay", () => {
   it("starts at eight in the morning", () => {
@@ -36,5 +36,14 @@ describe("formatClock", () => {
   it("wraps past midnight and drops fractions", () => {
     expect(formatClock(1440 + 61.9)).toBe("01:01");
     expect(formatClock(-1)).toBe("23:59");
+  });
+});
+
+describe("dayNumber", () => {
+  it("counts days from the 8:00 start, changing at midnight", () => {
+    expect(dayNumber(0)).toBe(0);
+    expect(dayNumber(16 * 60 - 1)).toBe(0);
+    expect(dayNumber(16 * 60)).toBe(1);
+    expect(dayNumber(16 * 60 + MINUTES_PER_DAY)).toBe(2);
   });
 });

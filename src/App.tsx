@@ -5,6 +5,7 @@ import { createCanvasEvents } from "@/scene/canvasEvents";
 import Scene from "@/scene/Scene";
 import { useDisplayTheme, useOsTheme } from "@/hooks/useOsTheme";
 import { useDisplayStore } from "@/state/displayStore";
+import GoblinOverlay from "@/ui/GoblinOverlay";
 import Hud from "@/ui/Hud";
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
         <Scene />
       </Canvas>
       <Hud />
+      <GoblinOverlay />
     </>
   );
 }

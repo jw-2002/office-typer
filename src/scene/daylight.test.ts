@@ -1,6 +1,6 @@
 // Tests for the time-of-day lighting.
 import { describe, expect, it } from "vitest";
-import { daylightAt, isDark } from "./daylight";
+import { daylightAt, isDark, nightness, skySpot } from "./daylight";
 
 const hour = (h: number) => h * 60;
 const brightness = (hex: string) =>
@@ -78,5 +78,41 @@ describe("isDark", () => {
     expect(isDark(hour(23))).toBe(true);
     expect(isDark(hour(12))).toBe(false);
     expect(isDark(hour(9))).toBe(false);
+  });
+});
+
+describe("skySpot", () => {
+  it("is the sun by day and the moon by night", () => {
+    expect(skySpot(hour(12)).body).toBe("sun");
+    expect(skySpot(hour(2)).body).toBe("moon");
+    expect(skySpot(hour(20)).body).toBe("moon");
+  });
+
+  it("moves left to right across the sky by day, and matches the side the light comes from", () => {
+    expect(skySpot(hour(7)).across).toBeLessThan(skySpot(hour(12)).across);
+    expect(skySpot(hour(12)).across).toBeLessThan(skySpot(hour(17)).across);
+    for (let minutes = 0; minutes < 1440; minutes += 20) {
+      const { across } = skySpot(minutes);
+      const light = daylightAt(minutes).direction[0];
+      // The sun is on the same side of the window as the light's sideways direction.
+      if (Math.abs(across) > 0.15) expect(Math.sign(across), `minute ${minutes}`).toBe(Math.sign(light));
+    }
+  });
+
+  it("is highest at noon and low at dawn and dusk", () => {
+    expect(skySpot(hour(12)).height).toBeCloseTo(1, 1);
+    expect(skySpot(hour(6.5)).height).toBeLessThan(0.3);
+    expect(skySpot(hour(17.5)).height).toBeLessThan(0.3);
+  });
+});
+
+describe("nightness", () => {
+  it("is 0 by day, 1 at night, and fades in between", () => {
+    expect(nightness(hour(12))).toBe(0);
+    expect(nightness(hour(1))).toBe(1);
+    expect(nightness(hour(23))).toBe(1);
+    const dusk = nightness(hour(19));
+    expect(dusk).toBeGreaterThan(0);
+    expect(dusk).toBeLessThan(1);
   });
 });

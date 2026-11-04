@@ -82,6 +82,7 @@ describe("game store", () => {
     expect(Object.keys(progressOf(useGameStore.getState())).sort()).toEqual([
       "equipped",
       "finale",
+      "goblin",
       "player",
       "stats",
       "upgrades",

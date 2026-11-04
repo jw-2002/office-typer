@@ -22,6 +22,8 @@ Placeholder: **Credits**. Candidate: **Billable Hours**. Defined in one constant
 - The player chooses a length per assignment: Tiny / Short / Standard / Long. Tiny is a single line and pays
   25% less per character; Short is the base rate; longer ones pay clearly more (+25% and +50%), so it is a real choice
   rather than a free upgrade.
+- **Goblin mode** (hidden): poke the goblin poster for 40 seconds of goblin emails, a green screen and x10 pay on goblin
+  assignments. Once every 5 minutes. **Document of the day**: the first assignment each day pays +50%.
 - **Clean streak**: finishing assignments at 98% accuracy or better in a row adds 4% pay per assignment, up to +40%. One
   sloppy assignment resets it. The streak shows next to the accuracy and a rising ping plays as it grows.
 - Difficulty rises with job level: longer text, punctuation, capitals, numbers, harder words.

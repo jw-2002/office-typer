@@ -206,6 +206,14 @@ export const upgrades = [
     payoutMultiplier: 1,
   },
   {
+    id: "track-hold",
+    category: "music",
+    name: "Please Hold",
+    description: "Gentle lift music. It plays whether you want it or not.",
+    cost: 0,
+    payoutMultiplier: 1,
+  },
+  {
     id: "track-upbeat",
     category: "music",
     name: "Cubicle Acid",

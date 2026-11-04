@@ -9,14 +9,14 @@ import {
   slotBase,
   type AssignmentLength,
 } from "./assignments";
-import { scenarioPools } from "./data/scenarios";
+import { goblinPools, goblinScenarios, scenarioPools } from "./data/scenarios";
 import { slots } from "./data/slots";
 import { createRng } from "./random";
 
 const PRINTABLE_ASCII = /^[\x20-\x7e]+$/;
 const lengths = Object.keys(LENGTH_TARGETS) as AssignmentLength[];
 const usedSlots = (template: string) => [...template.matchAll(/\{(\w+)\}/g)].map((match) => match[1]);
-const allScenarios = scenarioPools.flat();
+const allScenarios = [...scenarioPools.flat(), ...goblinScenarios.flat()];
 
 // Turns "Hi {name}." into a regex that matches any filled-in version of it.
 const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -204,5 +204,31 @@ describe("generateAssignment", () => {
 
   it("treats negative tiers as the easiest", () => {
     expect(generateAssignment(-3, "short", createRng(1))).toEqual(generateAssignment(0, "short", createRng(1)));
+  });
+});
+
+describe("goblin assignments", () => {
+  it("come only from goblin scenarios, at the right tier", () => {
+    for (let tier = 0; tier < goblinPools.length; tier++) {
+      const ids = goblinPools[tier].map((scenario) => scenario.id);
+      for (let seed = 0; seed < 30; seed++) {
+        const { scenarioId } = generateAssignment(tier, "standard", createRng(seed), [], true);
+        expect(ids).toContain(scenarioId);
+        expect(scenarioId).toContain("goblin");
+      }
+    }
+  });
+
+  it("have a few scenarios in every tier, and are about goblins", () => {
+    for (const pool of goblinPools) expect(pool.length).toBeGreaterThanOrEqual(4);
+    for (const pool of goblinPools) {
+      for (const scenario of pool) expect(JSON.stringify(scenario).toLowerCase()).toContain("goblin");
+    }
+  });
+
+  it("differ from normal assignments", () => {
+    const normal = generateAssignment(0, "standard", createRng(5));
+    const goblin = generateAssignment(0, "standard", createRng(5), [], true);
+    expect(goblin.text).not.toBe(normal.text);
   });
 });

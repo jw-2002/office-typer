@@ -6,6 +6,8 @@ import { currentJob } from "@/game/progress";
 import { useGameStore } from "@/state/gameStore";
 import { useRecordsStore } from "@/state/recordsStore";
 import Button from "./Button";
+import GoblinHint from "./GoblinHint";
+import GoblinText from "./GoblinText";
 import Money from "./Money";
 import Dialog, { DialogActions, DialogText } from "./Dialog";
 import styles from "./RedundancyDialog.module.css";
@@ -57,6 +59,10 @@ export default function RedundancyDialog() {
         <dd>
           <Money amount={stats.totalEarned} />
         </dd>
+        <dt>Goblin mode used</dt>
+        <dd>
+          <GoblinText>{stats.goblinUses} times</GoblinText>
+        </dd>
         <dt>Leaving gift</dt>
         <dd>{leavingGift(stats.totalChars)}</dd>
         <dt>Fastest redundancy</dt>
@@ -65,6 +71,7 @@ export default function RedundancyDialog() {
           {newRecord && " (new record!)"}
         </dd>
       </dl>
+      <GoblinHint />
       <DialogActions>
         <Button onClick={reset}>Start a new career</Button>
       </DialogActions>

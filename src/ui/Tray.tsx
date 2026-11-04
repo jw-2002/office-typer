@@ -1,6 +1,6 @@
 // The status tray at the end of the task bar: always-visible credits and live typing speed.
 import { formatMultiplier, formatRate, overallMultiplier } from "@/game/economy";
-import { assistantRate, currentJob } from "@/game/progress";
+import { assistantRate, currentJob, goblinActive } from "@/game/progress";
 import { liveWpm } from "@/game/typing";
 import { useGameStore } from "@/state/gameStore";
 import type { CurrentAssignment } from "@/state/useCurrentAssignment";
@@ -14,14 +14,15 @@ export default function Tray({ current }: { current: CurrentAssignment }) {
   const job = useGameStore(currentJob);
   const owned = useGameStore((state) => state.upgrades);
   const streak = useGameStore((state) => state.stats.streak);
-  const multiplier = overallMultiplier(job, owned, streak);
+  const goblin = useGameStore(goblinActive);
+  const multiplier = overallMultiplier(job, owned, streak, goblin);
 
   return (
     <div className={styles.tray}>
       <span className={styles.item}>
         <Money amount={currency} />
       </span>
-      <span className={styles.item} title="Your pay multiplier: job, upgrades and clean streak together">
+      <span className={styles.item} title="Your pay multiplier: job, upgrades, clean streak and goblin mode together">
         x{formatMultiplier(multiplier)}
       </span>
       {rate > 0 && (

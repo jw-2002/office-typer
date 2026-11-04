@@ -121,3 +121,11 @@ html[data-reduced-motion="true"] *::after {
   animation: none !important;
   transition: none !important;
 }
+
+/* Goblin mode: all the typing turns green. The assignment text and the typed line get a dark green terminal look, so the
+   bright green reads on every operating system look. */
+html[data-goblin="true"] {
+  --goblin-green: #39ff14;
+  --goblin-dim: #1ea83a;
+  --goblin-dark: #04200a;
+}

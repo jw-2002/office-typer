@@ -8,7 +8,7 @@ describe("save round trip", () => {
     const progress = {
       ...newProgress(),
       player: { name: "", currency: 42 },
-      upgrades: ["beige-box", "mushy", "strawberry"],
+      upgrades: ["beige-box", "mushy", "track-hold", "strawberry"],
     };
     const saved = toSave(progress, 1234);
     expect(saved.version).toBe(SAVE_VERSION);
@@ -40,7 +40,7 @@ describe("migrate", () => {
     });
     expect(result).not.toBeNull();
     expect(result?.player.currency).toBe(0);
-    expect(result?.upgrades).toEqual(["beige-box", "mushy", "strawberry"]);
+    expect(result?.upgrades).toEqual(["beige-box", "mushy", "track-hold", "strawberry"]);
     expect(result?.stats).toEqual({
       totalChars: 0,
       assignmentsCompleted: 0,
@@ -48,6 +48,7 @@ describe("migrate", () => {
       totalEarned: 0,
       secondsPlayed: 0,
       streak: 0,
+      goblinUses: 0,
     });
   });
 
@@ -91,7 +92,7 @@ describe("migrate", () => {
   });
 
   it("always includes the free starting upgrades", () => {
-    expect(migrate({ version: SAVE_VERSION, upgrades: [] })?.upgrades).toEqual(["beige-box", "mushy"]);
+    expect(migrate({ version: SAVE_VERSION, upgrades: [] })?.upgrades).toEqual(["beige-box", "mushy", "track-hold"]);
   });
 
   it("repairs a missing or bad player name", () => {
@@ -99,5 +100,13 @@ describe("migrate", () => {
     expect(migrate(base)?.player.name).toBe("");
     expect(migrate({ ...base, player: { currency: 5, name: 42 } })?.player.name).toBe("");
     expect(migrate({ ...base, player: { currency: 5, name: "  Kevin " } })?.player.name).toBe("Kevin");
+  });
+
+  it("keeps goblin mode timers but caps them, and repairs nonsense", () => {
+    const save = (goblin: unknown) => migrate({ version: 3, savedAt: 1, player: {}, upgrades: [], stats: {}, goblin });
+    expect(save({ active: 10, cooldown: 100 })?.goblin).toEqual({ active: 10, cooldown: 100 });
+    expect(save({ active: 99999, cooldown: 99999 })?.goblin).toEqual({ active: 40, cooldown: 300 });
+    expect(save({ active: "x", cooldown: -5 })?.goblin).toEqual({ active: 0, cooldown: 0 });
+    expect(save(undefined)?.goblin).toEqual({ active: 0, cooldown: 0 });
   });
 });

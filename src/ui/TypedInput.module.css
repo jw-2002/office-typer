@@ -47,3 +47,11 @@
   vertical-align: text-bottom;
   background: var(--color-accent);
 }
+
+:global(html[data-goblin="true"]) .input {
+  background: var(--goblin-dark);
+  color: var(--goblin-green);
+  --color-text: var(--goblin-green);
+  --color-correct: var(--goblin-green);
+  --color-muted: var(--goblin-dim);
+}

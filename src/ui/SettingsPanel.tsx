@@ -6,6 +6,8 @@ import { useAudioStore } from "@/state/audioStore";
 import { useDisplayStore } from "@/state/displayStore";
 import { useGameStore } from "@/state/gameStore";
 import Button from "./Button";
+import GoblinHint from "./GoblinHint";
+import GoblinText from "./GoblinText";
 import Money from "./Money";
 import styles from "./SettingsPanel.module.css";
 
@@ -31,23 +33,39 @@ export default function SettingsPanel({ onRequestReset }: SettingsPanelProps) {
 
   return (
     <div className={styles.settings}>
-      <section>
-        <h3 className={styles.heading}>Your record</h3>
-        <dl className={styles.stats}>
-          <dt>Time played</dt>
-          <dd>{formatDuration(stats.secondsPlayed)}</dd>
-          <dt>Assignments finished</dt>
-          <dd>{formatNumber(stats.assignmentsCompleted)}</dd>
-          <dt>Characters typed</dt>
-          <dd>{formatNumber(stats.totalChars)}</dd>
-          <dt>Highest WPM</dt>
-          <dd>{Math.round(stats.bestWpm)}</dd>
-          <dt>Earned in total</dt>
-          <dd>
-            <Money amount={stats.totalEarned} />
-          </dd>
-        </dl>
-      </section>
+      <div className={styles.column}>
+        <section>
+          <h3 className={styles.heading}>Your record</h3>
+          <dl className={styles.stats}>
+            <dt>Time played</dt>
+            <dd>{formatDuration(stats.secondsPlayed)}</dd>
+            <dt>Assignments finished</dt>
+            <dd>{formatNumber(stats.assignmentsCompleted)}</dd>
+            <dt>Characters typed</dt>
+            <dd>{formatNumber(stats.totalChars)}</dd>
+            <dt>Highest WPM</dt>
+            <dd>{Math.round(stats.bestWpm)}</dd>
+            <dt>Earned in total</dt>
+            <dd>
+              <Money amount={stats.totalEarned} />
+            </dd>
+            <dt>Goblin mode used</dt>
+            <dd>
+              <GoblinText>{stats.goblinUses} times</GoblinText>
+            </dd>
+          </dl>
+          <GoblinHint className={styles.hint} />
+        </section>
+
+        <section>
+          <h3 className={styles.heading}>Start again</h3>
+          <p className={styles.text}>
+            Erases your {CURRENCY.name}, upgrades, promotions and record, and starts over as an Intern. Your game is
+            saved in this browser automatically, so this is the only way to wipe it.
+          </p>
+          <Button onClick={onRequestReset}>Reset game...</Button>
+        </section>
+      </div>
 
       <div className={styles.column}>
         <section>
@@ -109,15 +127,6 @@ export default function SettingsPanel({ onRequestReset }: SettingsPanelProps) {
               Graphics: {display.quality === "low" ? "low" : "high"}
             </Button>
           </div>
-        </section>
-
-        <section>
-          <h3 className={styles.heading}>Start again</h3>
-          <p className={styles.text}>
-            Erases your {CURRENCY.name}, upgrades, promotions and record, and starts over as an Intern. Your game is
-            saved in this browser automatically, so this is the only way to wipe it.
-          </p>
-          <Button onClick={onRequestReset}>Reset game...</Button>
         </section>
       </div>
     </div>

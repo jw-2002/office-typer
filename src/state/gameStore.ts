@@ -10,6 +10,7 @@ import {
   equipUpgrade,
   newProgress,
   setPlayerName,
+  startGoblinMode,
   type AssignmentResult,
   type Progress,
   type Reward,
@@ -26,6 +27,8 @@ type GameStore = Progress & {
   dismissPromotion: () => void;
   /** Switches to an upgrade already owned, such as an older computer. */
   equip: (upgradeId: string) => void;
+  /** Starts goblin mode, if it is ready. */
+  startGoblin: () => void;
   /** Sets the player's name, and sends the camera from the intro to the desk. */
   setName: (name: string) => void;
   /** Erases everything and starts again. Autosave then overwrites the saved game. */
@@ -35,8 +38,8 @@ type GameStore = Progress & {
 };
 
 /** Just the saved part of the store. */
-export function progressOf({ player, upgrades, equipped, finale, stats }: Progress): Progress {
-  return { player, upgrades, equipped, finale, stats };
+export function progressOf({ player, upgrades, equipped, finale, goblin, stats }: Progress): Progress {
+  return { player, upgrades, equipped, finale, goblin, stats };
 }
 
 export const useGameStore = create<GameStore>()((set, get) => ({
@@ -53,6 +56,7 @@ export const useGameStore = create<GameStore>()((set, get) => ({
     set(buyUpgrade(progressOf(get()), upgradeId));
   },
   tick: (seconds) => set(tickGame(progressOf(get()), seconds)),
+  startGoblin: () => set(startGoblinMode(progressOf(get()))),
   equip: (upgradeId) => set(equipUpgrade(progressOf(get()), upgradeId)),
   dismissPromotion: () =>
     set((state) => (state.lastReward ? { lastReward: { ...state.lastReward, promotedTo: null } } : {})),

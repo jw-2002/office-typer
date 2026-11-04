@@ -23,6 +23,11 @@ export function accuracyMultiplier(accuracy: number): number {
   return clamped * clamped;
 }
 
+/** Goblin mode multiplies the pay of the goblin assignments typed while it is on. */
+export const GOBLIN_MULTIPLIER = 10;
+/** The "document of the day" pays this much more. */
+export const FEATURED_MULTIPLIER = 1.5;
+
 /** An assignment finished at this accuracy or better is "clean" and adds to the streak. */
 export const CLEAN_ACCURACY = 0.98;
 /** Each clean assignment in a row adds this much pay, up to `MAX_STREAK` of them. */
@@ -56,11 +61,25 @@ export type PayoutInput = {
   ownedUpgradeIds: readonly string[];
   /** Clean assignments in a row before this one. Leave out for none. */
   streak?: number;
+  /** A goblin assignment, typed in goblin mode. */
+  goblin?: boolean;
+  /** The document of the day. */
+  featured?: boolean;
 };
 
 /** Everything that multiplies your pay at once: job, upgrades and clean streak (not length or accuracy). */
-export function overallMultiplier(job: Job, ownedUpgradeIds: readonly string[], streak = 0): number {
-  return job.payoutMultiplier * upgradeMultiplier(ownedUpgradeIds) * streakMultiplier(streak);
+export function overallMultiplier(
+  job: Job,
+  ownedUpgradeIds: readonly string[],
+  streak = 0,
+  goblinMode = false,
+): number {
+  return (
+    job.payoutMultiplier *
+    upgradeMultiplier(ownedUpgradeIds) *
+    streakMultiplier(streak) *
+    (goblinMode ? GOBLIN_MULTIPLIER : 1)
+  );
 }
 
 /** 3 -> "3", 4.5 -> "4.5", 3.4204 -> "3.42". For showing a multiplier. */
@@ -69,7 +88,16 @@ export function formatMultiplier(multiplier: number): string {
 }
 
 /** Credits for one finished assignment, rounded so the HUD never shows long decimals. */
-export function payout({ characters, accuracy, length, job, ownedUpgradeIds, streak = 0 }: PayoutInput): number {
+export function payout({
+  characters,
+  accuracy,
+  length,
+  job,
+  ownedUpgradeIds,
+  streak = 0,
+  goblin = false,
+  featured = false,
+}: PayoutInput): number {
   const raw =
     BASE_PAYOUT_PER_CHAR *
     characters *
@@ -77,6 +105,8 @@ export function payout({ characters, accuracy, length, job, ownedUpgradeIds, str
     LENGTH_PAY[length] *
     job.payoutMultiplier *
     streakMultiplier(streak) *
+    (goblin ? GOBLIN_MULTIPLIER : 1) *
+    (featured ? FEATURED_MULTIPLIER : 1) *
     upgradeMultiplier(ownedUpgradeIds);
   return Math.round(raw);
 }

@@ -1,0 +1,9 @@
+/* The goblin mode highlight: dark text on bright green, so it reads the same on every operating system look. */
+.goblin {
+  padding: 0 0.3em;
+  border-radius: 0.2em;
+  background: #39ff14;
+  color: #04200a;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}

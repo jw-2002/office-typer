@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import type { OsId } from "@/game/data/os";
 import { useDisplayStore } from "@/state/displayStore";
-import { useEquipped } from "@/state/gameStore";
+import { useEquipped, useGameStore } from "@/state/gameStore";
 
 /** The OS for the computer currently in use. */
 export function useOs(): OsId {
@@ -17,12 +17,14 @@ export function useOsTheme() {
   }, [os]);
 }
 
-/** Sets <html data-reduced-motion> and <html data-large-text> from the display settings, for the CSS to react to. */
+/** Sets <html data-reduced-motion>, <html data-large-text> and <html data-goblin> (goblin mode is on), for the CSS to react to. */
 export function useDisplayTheme() {
   const reducedMotion = useDisplayStore((state) => state.reducedMotion);
   const largeText = useDisplayStore((state) => state.largeText);
+  const goblin = useGameStore((state) => state.goblin.active > 0);
   useEffect(() => {
     document.documentElement.dataset.reducedMotion = String(reducedMotion);
     document.documentElement.dataset.largeText = String(largeText);
-  }, [reducedMotion, largeText]);
+    document.documentElement.dataset.goblin = String(goblin);
+  }, [reducedMotion, largeText, goblin]);
 }

@@ -3,7 +3,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { createKeyClicker } from "@/audio/keyClicker";
 import { switchSounds } from "@/audio/switchSounds";
-import { trackFor } from "@/audio/tracks";
+import { GOBLIN_TRACK_ID, trackFor } from "@/audio/tracks";
 import { ambienceAt } from "@/game/ambience";
 import { upgrades } from "@/game/data/upgrades";
 import { equippedUpgrade } from "@/game/progress";
@@ -13,9 +13,13 @@ import { useGameStore } from "./gameStore";
 import { useKeyInput } from "./useKeyInput";
 import { useViewStore } from "./viewStore";
 
-/** The song that should be playing now: the chosen one, if it is owned and the sound is not muted. Otherwise null. */
+/**
+ * The song that should be playing now: the goblin mode battle theme while goblin mode is on, otherwise the chosen song if
+ * it is owned. Nothing when the sound is muted.
+ */
 function wantedTrack(): string | null {
   const { muted, track } = useAudioStore.getState();
+  if (!muted && useGameStore.getState().goblin.active > 0) return GOBLIN_TRACK_ID;
   return !muted && track !== null && useGameStore.getState().upgrades.includes(track) ? track : null;
 }
 
@@ -69,6 +73,8 @@ export default function KeySounds() {
         // A clean assignment that extends the streak gets a ping. A promotion has its own fanfare.
         else if (state.lastReward !== previous.lastReward && state.lastReward && state.lastReward.streak >= 2)
           clicker.streak(state.lastReward.streak);
+        // Goblin mode starting gets a cackle (the poster click is a gesture, so this works before the first key too).
+        if (state.goblin.active > 0 && previous.goblin.active <= 0) clicker.goblin();
         if (state.finale.stage === "redundant" && previous.finale.stage !== "redundant") clicker.redundancy();
       }),
     [clicker],
@@ -91,6 +97,11 @@ export default function KeySounds() {
       if (state.track !== previous.track || awake.current) syncMusic();
     });
     const stopGame = useGameStore.subscribe((state, previous) => {
+      // Goblin mode starting or ending swaps the battle theme in or out (starting it is a click, so it may start the sound).
+      if (state.goblin.active > 0 !== previous.goblin.active > 0) {
+        syncMusic();
+        return;
+      }
       if (state.upgrades === previous.upgrades) return;
       // A song bought now starts playing, unless one the player owns is already chosen.
       const bought = state.upgrades.find(

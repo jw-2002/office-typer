@@ -51,3 +51,15 @@
   margin: 0;
   color: var(--color-muted);
 }
+
+.banner {
+  margin: 0;
+}
+
+.featured {
+  padding: 0 0.3em;
+  border-radius: 0.2em;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 700;
+}

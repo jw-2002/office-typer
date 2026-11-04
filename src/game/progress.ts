@@ -24,6 +24,8 @@ export type Stats = {
   secondsPlayed: number;
   /** Clean assignments (98% accuracy or better) finished in a row. A sloppy one resets it. */
   streak: number;
+  /** How many times goblin mode has been started. */
+  goblinUses: number;
 };
 
 /**
@@ -34,6 +36,13 @@ export type Finale = { stage: "none" | "pending" | "redundant"; seconds: number 
 
 /** How long the player gets after buying the top assistant, if they stop typing, before they are made redundant. */
 export const FINALE_FALLBACK_SECONDS = 60;
+
+/** Goblin mode: how long it lasts, and how long before it can be used again (counted from when it starts). */
+export const GOBLIN_SECONDS = 40;
+export const GOBLIN_COOLDOWN_SECONDS = 300;
+
+/** Seconds of goblin mode left (0 when off) and seconds until it can be started again (0 when ready). */
+export type Goblin = { active: number; cooldown: number };
 
 export type Progress = {
   /** The player's name (empty until they have introduced themselves) and their money. */
@@ -46,6 +55,7 @@ export type Progress = {
    */
   equipped: Readonly<Record<EquippableCategory, string>>;
   finale: Finale;
+  goblin: Goblin;
   stats: Stats;
 };
 
@@ -77,11 +87,25 @@ export function equippedUpgrade(
 }
 
 /** What a finished assignment looked like. Built from the typing state by the caller. */
-export type AssignmentResult = { characters: number; accuracy: number; wpm: number; length: AssignmentLength };
+export type AssignmentResult = {
+  characters: number;
+  accuracy: number;
+  wpm: number;
+  length: AssignmentLength;
+  /** A goblin assignment (typed in goblin mode) pays much more. */
+  goblin?: boolean;
+  /** The document of the day pays a bit more. */
+  featured?: boolean;
+};
 
 /** Summarises a finished typing run. */
-export function assignmentResult(typing: TypingState, now: number, length: AssignmentLength): AssignmentResult {
-  return { characters: typing.cursor, accuracy: accuracy(typing), wpm: finalWpm(typing, now), length };
+export function assignmentResult(
+  typing: TypingState,
+  now: number,
+  length: AssignmentLength,
+  bonuses: { goblin?: boolean; featured?: boolean } = {},
+): AssignmentResult {
+  return { characters: typing.cursor, accuracy: accuracy(typing), wpm: finalWpm(typing, now), length, ...bonuses };
 }
 
 export type Reward = {
@@ -98,12 +122,38 @@ export function newProgress(): Progress {
     upgrades: startingUpgradeIds,
     equipped: normaliseEquipped(startingUpgradeIds, {}),
     finale: { stage: "none", seconds: 0 },
-    stats: { totalChars: 0, assignmentsCompleted: 0, bestWpm: 0, totalEarned: 0, secondsPlayed: 0, streak: 0 },
+    goblin: { active: 0, cooldown: 0 },
+    stats: {
+      totalChars: 0,
+      assignmentsCompleted: 0,
+      bestWpm: 0,
+      totalEarned: 0,
+      secondsPlayed: 0,
+      streak: 0,
+      goblinUses: 0,
+    },
   };
 }
 
 export function currentJob(progress: Progress): Job {
   return jobFor(progress.stats.totalChars);
+}
+
+/** Whether goblin mode is on right now. */
+export const goblinActive = (progress: Pick<Progress, "goblin">): boolean => progress.goblin.active > 0;
+
+/** Whether goblin mode can be started: it is off and its cooldown is over. */
+export const goblinReady = (progress: Pick<Progress, "goblin">): boolean =>
+  progress.goblin.active <= 0 && progress.goblin.cooldown <= 0;
+
+/** Starts goblin mode if it is ready, otherwise returns the same progress object. Not once made redundant. */
+export function startGoblinMode(progress: Progress): Progress {
+  if (!goblinReady(progress) || progress.finale.stage === "redundant") return progress;
+  return {
+    ...progress,
+    goblin: { active: GOBLIN_SECONDS, cooldown: GOBLIN_COOLDOWN_SECONDS },
+    stats: { ...progress.stats, goblinUses: progress.stats.goblinUses + 1 },
+  };
 }
 
 /** Pays out a finished assignment, updates stats and reports a promotion if the job changed. */
@@ -119,6 +169,8 @@ export function completeAssignment(
     job: before,
     ownedUpgradeIds: progress.upgrades,
     streak: progress.stats.streak,
+    goblin: result.goblin,
+    featured: result.featured,
   });
   const streak = result.accuracy >= CLEAN_ACCURACY ? progress.stats.streak + 1 : 0;
   const next: Progress = {
@@ -131,6 +183,7 @@ export function completeAssignment(
       totalEarned: progress.stats.totalEarned + credits,
       secondsPlayed: progress.stats.secondsPlayed,
       streak,
+      goblinUses: progress.stats.goblinUses,
     },
   };
   // The assignment after buying the top assistant is the player's last.
@@ -206,6 +259,13 @@ export function assistantRate(progress: Progress): number {
 export function tickGame(progress: Progress, seconds: number): Progress {
   if (progress.finale.stage === "redundant" || seconds <= 0) return progress;
   const credits = assistantRate(progress) * seconds;
+  const goblin: Goblin =
+    progress.goblin.active > 0 || progress.goblin.cooldown > 0
+      ? {
+          active: Math.max(0, progress.goblin.active - seconds),
+          cooldown: Math.max(0, progress.goblin.cooldown - seconds),
+        }
+      : progress.goblin;
   const waited = progress.finale.seconds + seconds;
   const finale: Finale =
     progress.finale.stage === "pending"
@@ -217,6 +277,7 @@ export function tickGame(progress: Progress, seconds: number): Progress {
     ...progress,
     player: { ...progress.player, currency: progress.player.currency + credits },
     finale,
+    goblin,
     stats: {
       ...progress.stats,
       totalEarned: progress.stats.totalEarned + credits,

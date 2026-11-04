@@ -18,6 +18,8 @@ export type KeyClicker = {
   crickets: () => void;
   /** A chair creaking, for standing up or sitting down. */
   creak: () => void;
+  /** A gravelly goblin cackle, for the start of goblin mode. */
+  goblin: () => void;
   /** A little rising ping for a clean streak. The longer the streak, the higher it sounds. */
   streak: (count: number) => void;
   /** Plays a song on a loop (replacing any that is playing), or stops the music with null. Needs a first sound before it can start. */
@@ -187,6 +189,17 @@ export function createKeyClicker(): KeyClicker {
       if (!ready) return;
       // Three soft pulses of a lower, gentler note, spaced out so it does not read as a ticking.
       for (let i = 0; i < 3; i++) tone(ready, "sine", 3900, 0.025, 0.05, i * 0.09);
+    },
+
+    goblin() {
+      const ready = start();
+      if (!ready) return;
+      // Five rough square-wave laughs, "heh heh heh heh heeeh", each a little higher than the last.
+      [0, 1, 2, 3, 4].forEach((index) => {
+        const last = index === 4;
+        tone(ready, "sawtooth", 150 + index * 18, 0.22, last ? 0.35 : 0.09, index * 0.11);
+        tone(ready, "square", 300 + index * 36, 0.08, last ? 0.35 : 0.09, index * 0.11);
+      });
     },
 
     streak(count) {

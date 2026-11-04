@@ -2,12 +2,21 @@
 import type { ReactNode } from "react";
 import { LENGTH_TARGETS, type AssignmentLength } from "@/game/assignments";
 import { CURRENCY } from "@/game/currency";
-import { LENGTH_PAY, MAX_STREAK, STREAK_BONUS_STEP, formatNumber, streakMultiplier } from "@/game/economy";
+import {
+  FEATURED_MULTIPLIER,
+  GOBLIN_MULTIPLIER,
+  LENGTH_PAY,
+  MAX_STREAK,
+  STREAK_BONUS_STEP,
+  formatNumber,
+  streakMultiplier,
+} from "@/game/economy";
 import { accuracy, elapsedMs } from "@/game/typing";
 import { useGameStore } from "@/state/gameStore";
 import type { CurrentAssignment } from "@/state/useCurrentAssignment";
 import AssignmentText from "./AssignmentText";
 import Button from "./Button";
+import GoblinText from "./GoblinText";
 import TypedInput from "./TypedInput";
 import styles from "./AssignmentPanel.module.css";
 
@@ -34,7 +43,7 @@ type AssignmentPanelProps = {
 };
 
 export default function AssignmentPanel({ current, children }: AssignmentPanelProps) {
-  const { typing, now, length, finished, capsLock, chooseLength, next } = current;
+  const { typing, now, length, goblin, featured, finished, capsLock, chooseLength, next } = current;
   const lastReward = useGameStore((state) => state.lastReward);
   const streak = useGameStore((state) => state.stats.streak);
 
@@ -74,6 +83,17 @@ export default function AssignmentPanel({ current, children }: AssignmentPanelPr
           <span>Time {(elapsedMs(typing, now) / 1000).toFixed(1)}s</span>
         </p>
       </div>
+
+      {goblin && (
+        <p className={styles.banner}>
+          <GoblinText>Goblin document x{GOBLIN_MULTIPLIER}</GoblinText>
+        </p>
+      )}
+      {featured && !goblin && (
+        <p className={styles.banner}>
+          <span className={styles.featured}>Document of the day +{Math.round((FEATURED_MULTIPLIER - 1) * 100)}%</span>
+        </p>
+      )}
 
       {capsLock && (
         <p className={styles.warning} role="status">

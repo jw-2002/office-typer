@@ -1,5 +1,5 @@
 // Builds an assignment (title and text) from a scenario, a length and a random source. Pure, no React.
-import { scenarioPools, type DocumentKind } from "./data/scenarios";
+import { goblinPools, scenarioPools, type DocumentKind } from "./data/scenarios";
 import { slots } from "./data/slots";
 import { pick, shuffled, type Rng } from "./random";
 
@@ -59,15 +59,17 @@ export function fillSlots(template: string, rng: Rng, chosen = new Map<string, s
  * Builds one coherent document: a scenario from the pool for `tier` (0 is easiest), then its opening,
  * shuffled body sentences up to the length target, and its closing. Tiers beyond the available
  * content reuse the hardest pool. Scenarios listed in `recentIds` are skipped, unless that would
- * leave none. Pass a seeded rng for repeatable output.
+ * leave none. Pass a seeded rng for repeatable output. `goblin` picks from the goblin scenarios instead.
  */
 export function generateAssignment(
   tier: number,
   length: AssignmentLength,
   rng: Rng,
   recentIds: readonly string[] = [],
+  goblin = false,
 ): Assignment {
-  const scenarios = scenarioPools[Math.min(Math.max(tier, 0), scenarioPools.length - 1)];
+  const pools = goblin ? goblinPools : scenarioPools;
+  const scenarios = pools[Math.min(Math.max(tier, 0), pools.length - 1)];
   const fresh = scenarios.filter((candidate) => !recentIds.includes(candidate.id));
   const scenario = pick(rng, fresh.length > 0 ? fresh : scenarios);
   const chosen = new Map<string, string>();

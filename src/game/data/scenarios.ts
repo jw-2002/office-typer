@@ -12,6 +12,7 @@
 import { everydayIntern } from "./scenariosEveryday1";
 import { everydayAssociate } from "./scenariosEveryday2";
 import { everydayManager } from "./scenariosEveryday3";
+import { goblinAssociate, goblinIntern, goblinManager } from "./scenariosGoblin";
 import { extraAssociate, extraIntern, extraManager } from "./scenariosExtra";
 import { wildAssociate, wildIntern, wildManager } from "./scenariosWild";
 
@@ -33,3 +34,15 @@ export const scenarioPools = [
   [...everydayAssociate, ...wildAssociate, ...extraAssociate],
   [...everydayManager, ...wildManager, ...extraManager],
 ] as const satisfies readonly (readonly Scenario[])[];
+
+/** The scenarios only goblin mode uses. */
+export const goblinScenarios = [goblinIntern, goblinAssociate, goblinManager] as const;
+
+/**
+ * What goblin mode types: for each tier, the goblin scenarios of the normal pool plus the ones written just for it, so
+ * the difficulty still follows your job.
+ */
+export const goblinPools: readonly (readonly Scenario[])[] = scenarioPools.map((pool, tier) => [
+  ...pool.filter((scenario) => scenario.id.includes("goblin")),
+  ...goblinScenarios[tier],
+]);
