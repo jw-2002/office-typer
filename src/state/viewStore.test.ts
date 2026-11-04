@@ -10,4 +10,11 @@ describe("view store", () => {
     useViewStore.getState().setView("seated");
     expect(useViewStore.getState().view).toBe("seated");
   });
+
+  it("can jump to a view instantly, and a normal change turns that off", () => {
+    useViewStore.getState().setViewInstantly("intro");
+    expect(useViewStore.getState()).toMatchObject({ view: "intro", instant: true });
+    useViewStore.getState().setView("seated");
+    expect(useViewStore.getState()).toMatchObject({ view: "seated", instant: false });
+  });
 });

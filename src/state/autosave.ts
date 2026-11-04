@@ -3,6 +3,7 @@ import type { SaveRepository } from "@/game/save";
 import { toSave } from "@/game/save";
 import { progressChanged } from "@/game/progress";
 import { progressOf, useGameStore } from "./gameStore";
+import { useViewStore } from "./viewStore";
 
 /** Minimum gap between saves while the player is typing. */
 export const AUTOSAVE_INTERVAL_MS = 5000;
@@ -28,6 +29,8 @@ export function startAutosave(repository: SaveRepository): () => void {
   void repository.load().then((save) => {
     if (stopped) return;
     if (save) useGameStore.getState().load(save);
+    // Someone without a name has not been introduced yet; everyone else starts seated at the desk.
+    useViewStore.getState().setViewInstantly(useGameStore.getState().player.name === "" ? "intro" : "seated");
     // Subscribe only after loading, so the load itself is not saved straight back.
     unsubscribe = useGameStore.subscribe((state, previous) => {
       if (!progressChanged(state, previous)) return;

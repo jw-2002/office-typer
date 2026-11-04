@@ -1,9 +1,10 @@
 // A shelf on the back wall holding the computers you own but are not using. Click one to switch to it.
+import { Outlines } from "@react-three/drei";
 import { upgrades } from "@/game/data/upgrades";
 import { useEquipped, useGameStore } from "@/state/gameStore";
 import ComputerSet from "./ComputerSet";
 import { computerLook } from "./computerLooks";
-import { palette, SET_CENTER } from "./palette";
+import { SET_CENTER, outline, palette } from "./palette";
 
 const SHELF = { width: 4.4, depth: 0.3, thickness: 0.04, y: 1.1, z: -1.8 } as const;
 // The old computers are shown at a fraction of their real size, so a whole row fits on the shelf.
@@ -28,9 +29,10 @@ export default function Shelf() {
 
   return (
     <group>
-      <mesh position={[0, SHELF.y - SHELF.thickness / 2, SHELF.z]}>
+      <mesh castShadow receiveShadow position={[0, SHELF.y - SHELF.thickness / 2, SHELF.z]}>
         <boxGeometry args={[SHELF.width, SHELF.thickness, SHELF.depth]} />
         <meshStandardMaterial color={palette.desk} roughness={0.8} />
+        <Outlines {...outline} />
       </mesh>
 
       {computers

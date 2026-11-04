@@ -3,7 +3,7 @@
 
 import type { OsId } from "./os";
 
-export type UpgradeCategory = "computer" | "switches" | "assistant";
+export type UpgradeCategory = "computer" | "switches" | "assistant" | "extra" | "music";
 
 export type Upgrade = {
   id: string;
@@ -35,9 +35,20 @@ export const categoryLabels: Readonly<Record<UpgradeCategory, string>> = {
   computer: "Computer",
   switches: "Key switches",
   assistant: "AI assistant",
+  extra: "Desk extras",
+  music: "Music",
 };
 
 export const upgradeCategories = Object.keys(categoryLabels) as UpgradeCategory[];
+
+/**
+ * Computers, switches and assistants are tiers you can swap between. Extras and songs are just for fun: each one is bought
+ * on its own, in any order. Which song plays is chosen in the sound settings or the shop, and is not part of the save.
+ */
+export type EquippableCategory = Exclude<UpgradeCategory, "extra" | "music">;
+export const isEquippable = (category: UpgradeCategory): category is EquippableCategory =>
+  category !== "extra" && category !== "music";
+export const equippableCategories = upgradeCategories.filter(isEquippable);
 
 export const upgrades = [
   {
@@ -73,7 +84,7 @@ export const upgrades = [
     os: "neon",
     name: "Gaming Rig",
     description: "Glows. Nobody knows why a spreadsheet needs that.",
-    cost: 2500,
+    cost: 1700,
     payoutMultiplier: 2.3,
   },
   {
@@ -82,7 +93,7 @@ export const upgrades = [
     os: "quantum",
     name: "Quantum Toaster",
     description: "Both finishes and does not finish your work.",
-    cost: 12000,
+    cost: 7000,
     payoutMultiplier: 3.5,
   },
   {
@@ -114,7 +125,7 @@ export const upgrades = [
     category: "switches",
     name: "Blueberry Clicky",
     description: "Your coworkers will hear everything.",
-    cost: 1500,
+    cost: 1000,
     payoutMultiplier: 1.5,
   },
   {
@@ -131,7 +142,7 @@ export const upgrades = [
     category: "assistant",
     name: "Drama Llama 7B",
     description: "Quick, but sulks about every assignment.",
-    cost: 3000,
+    cost: 1800,
     payoutMultiplier: 1,
     assistant: { wpm: 20, accuracy: 0.88 },
   },
@@ -140,7 +151,7 @@ export const upgrades = [
     category: "assistant",
     name: "Gemstone Flash",
     description: "Brilliant, sparkly and easily distracted.",
-    cost: 25000,
+    cost: 14000,
     payoutMultiplier: 1,
     assistant: { wpm: 45, accuracy: 0.94 },
   },
@@ -149,15 +160,81 @@ export const upgrades = [
     category: "assistant",
     name: "Clyde Octet 5",
     description: "Never tires, never complains and never needs you.",
-    cost: 150000,
+    cost: 55000,
     payoutMultiplier: 1,
     assistant: { wpm: 100, accuracy: 0.99 },
     endsGame: true,
+  },
+  {
+    id: "plant",
+    category: "extra",
+    name: "Gerald the Plant",
+    description: "Needs very little. Gives even less.",
+    cost: 80,
+    payoutMultiplier: 1,
+  },
+  {
+    id: "desk-lamp",
+    category: "extra",
+    name: "Desk Lamp",
+    description: "Comes on at night, which is when you are tired.",
+    cost: 200,
+    payoutMultiplier: 1,
+  },
+  {
+    id: "desk-clock",
+    category: "extra",
+    name: "Desk Clock",
+    description: "Shows the time, which passes quickly in here.",
+    cost: 300,
+    payoutMultiplier: 1,
+  },
+  {
+    id: "tiny-goblin",
+    category: "extra",
+    name: "Tiny Goblin",
+    description: "Sits on your desk. Says nothing. Knows everything.",
+    cost: 500,
+    payoutMultiplier: 1,
+  },
+  {
+    id: "helping-hands",
+    category: "extra",
+    name: "Helping Hands",
+    description: "Two gloves that press the keys for you. Nobody asked.",
+    cost: 1500,
+    payoutMultiplier: 1,
+  },
+  {
+    id: "track-upbeat",
+    category: "music",
+    name: "Cubicle Acid",
+    description: "A squelchy, upbeat bass line. Makes the spreadsheets move.",
+    cost: 120,
+    payoutMultiplier: 1,
+  },
+  {
+    id: "track-chill",
+    category: "music",
+    name: "Lunch Break Lo-Fi",
+    description: "Slow and sleepy. For typing very quietly.",
+    cost: 300,
+    payoutMultiplier: 1,
+  },
+  {
+    id: "track-funky",
+    category: "music",
+    name: "Photocopier Funk",
+    description: "Bouncy and a bit sticky. Nobody knows who is playing it.",
+    cost: 700,
+    payoutMultiplier: 1,
   },
 ] as const satisfies readonly Upgrade[];
 
 export type UpgradeId = (typeof upgrades)[number]["id"];
 export type ComputerId = Extract<(typeof upgrades)[number], { category: "computer" }>["id"];
+export type MusicId = Extract<(typeof upgrades)[number], { category: "music" }>["id"];
+export type ExtraId = Extract<(typeof upgrades)[number], { category: "extra" }>["id"];
 export type AssistantId = Extract<(typeof upgrades)[number], { category: "assistant" }>["id"];
 export type SwitchId = Extract<(typeof upgrades)[number], { category: "switches" }>["id"];
 

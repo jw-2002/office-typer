@@ -31,15 +31,21 @@ logic. Assignment text comes from `assignments.ts` + `data/`.
 
 ## Folders
 
-- `src/game` pure rules and data (no React or three.js), with tests beside them. `Progress` has the
+- `src/game` pure rules and data (no React or three.js), with tests beside them. `simulate.ts` plays a whole game with a steady typist to check the pacing. `data/scenarios.ts` holds the types and pools; the scenario text is in `scenariosEveryday1/2/3`, `scenariosWild` and `scenariosExtra`. `Progress` has the
   upgrades owned and which one is `equipped` per category; looks and sounds follow the equipped one.
-- `src/state` providers, the key input, and (later) the store and save repository.
+- `src/state` providers, the key input, the game store and save repository, and the sound and display settings stores (`audioStore`, `displayStore`).
 - `src/hooks` hooks shared by UI.
-- `src/audio` key sound recipes and the Web Audio player (impure; the mute setting is in `src/state`).
+- `src/audio` key sound recipes, the Web Audio player and the song sequencer (`tracks.ts` data, `musicPlayer.ts`); impure. The sound settings are in `src/state`.
 - `src/scene` everything inside `<Canvas>`: `Scene` (lights, controls) holds `Office`, which places
-  `Room`, `Desk`, the live `Computer`, the `Shelf` of old computers, the job `NamePlate` and the
-  keyboard. `CameraRig` moves the camera between the seated and standing views in `cameraViews.ts`, and locks it while seated.
+  `Room`, `Desk`, the live `Computer`, the `Shelf` of old computers, the job `NamePlate`, the desk extras
+  (`extras/`) and the keyboard. `Sun` is the day and night light, driven by `daylight.ts` and the game clock in
+  `src/game/time.ts`. `CameraRig` moves the camera between the seated and standing views in `cameraViews.ts`, and locks it while seated.
   `Solid` makes things block clicks, and `canvasEvents.ts` measures the pointer from the canvas. 1 unit = 1 metre.
+  Scenery: `Floor` (planks, skirting, rug), `WallDecor` (window, cork board, poster), `Chair` (pushed in under the desk when
+  standing), `DeskClutter`, `DustMotes`, `RewardPopups` (floating pay number), and `palette.ts` holds the colours and
+  outline settings. `ui/NameDialog` (the intro), `Peripherals` (keyboard and mouse that match the computer), `Mouse` and `extras/MouseHand`, `LaptopBase`, `keyboard/HelpingHands` and `keyboard/fingers.ts` animate the gloves. `Scene` also adds bloom,
+  vignette and tone mapping through `EffectComposer`. Ambient sounds are in `src/audio/keyClicker.ts`, chosen by
+  `src/game/ambience.ts` and played from `state/KeySounds.tsx`.
 - `src/ui` the DOM overlay. `Desktop` (window + task bar tabs) holds `AssignmentPanel`, `ShopPanel`, `CareerPanel`, `AssistantPanel` and `SettingsPanel`,
   and shows `Dialog`-based messages (`ConfirmDialog`, `PromotionDialog`) over them;
   it appears on the 3D monitor via `MonitorScreen`, or in the HUD on touch. `osThemes.css` restyles it all.

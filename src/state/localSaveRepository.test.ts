@@ -22,7 +22,7 @@ describe("local save repository", () => {
 
   it("saves and loads", async () => {
     const repository = createLocalSaveRepository(fakeStorage());
-    const save = toSave({ ...newProgress(), player: { currency: 77 } }, 5);
+    const save = toSave({ ...newProgress(), player: { name: "", currency: 77 } }, 5);
     await repository.save(save);
     expect(await repository.load()).toEqual(save);
   });

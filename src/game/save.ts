@@ -1,6 +1,6 @@
 // The save file format: one versioned object, how to build it, and how to read old or damaged ones safely.
 import { startingUpgradeIds, upgrades } from "./data/upgrades";
-import { normaliseEquipped, type Progress } from "./progress";
+import { cleanPlayerName, normaliseEquipped, type Progress } from "./progress";
 
 export const SAVE_VERSION = 3;
 
@@ -73,7 +73,10 @@ export function migrate(raw: unknown): SaveData | null {
   return {
     version: SAVE_VERSION,
     savedAt: count(current.savedAt),
-    player: { currency: count(player.currency) },
+    player: {
+      name: typeof player.name === "string" ? cleanPlayerName(player.name) : "",
+      currency: count(player.currency),
+    },
     upgrades: ownedIds,
     equipped: normaliseEquipped(ownedIds, equipped),
     finale: {
@@ -86,6 +89,7 @@ export function migrate(raw: unknown): SaveData | null {
       bestWpm: count(stats.bestWpm),
       totalEarned: count(stats.totalEarned),
       secondsPlayed: count(stats.secondsPlayed),
+      streak: Math.floor(count(stats.streak)),
     },
   };
 }

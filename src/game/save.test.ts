@@ -5,7 +5,11 @@ import { SAVE_VERSION, migrate, toSave } from "./save";
 
 describe("save round trip", () => {
   it("reads back what it wrote", () => {
-    const progress = { ...newProgress(), player: { currency: 42 }, upgrades: ["beige-box", "mushy", "strawberry"] };
+    const progress = {
+      ...newProgress(),
+      player: { name: "", currency: 42 },
+      upgrades: ["beige-box", "mushy", "strawberry"],
+    };
     const saved = toSave(progress, 1234);
     expect(saved.version).toBe(SAVE_VERSION);
     expect(migrate(JSON.parse(JSON.stringify(saved)))).toEqual(saved);
@@ -30,7 +34,7 @@ describe("migrate", () => {
   it("repairs bad fields instead of discarding the save", () => {
     const result = migrate({
       version: SAVE_VERSION,
-      player: { currency: -5 },
+      player: { name: "", currency: -5 },
       upgrades: ["strawberry", "strawberry", "not-real", 7],
       stats: { totalChars: "lots", bestWpm: 80, totalEarned: Infinity },
     });
@@ -43,6 +47,7 @@ describe("migrate", () => {
       bestWpm: 80,
       totalEarned: 0,
       secondsPlayed: 0,
+      streak: 0,
     });
   });
 
@@ -50,7 +55,7 @@ describe("migrate", () => {
     const old = {
       version: 1,
       savedAt: 5,
-      player: { currency: 12 },
+      player: { name: "", currency: 12 },
       upgrades: ["beige-box", "grey-tower", "mushy", "strawberry"],
       stats: { totalChars: 10, assignmentsCompleted: 1, bestWpm: 40, totalEarned: 30 },
     };
@@ -87,5 +92,12 @@ describe("migrate", () => {
 
   it("always includes the free starting upgrades", () => {
     expect(migrate({ version: SAVE_VERSION, upgrades: [] })?.upgrades).toEqual(["beige-box", "mushy"]);
+  });
+
+  it("repairs a missing or bad player name", () => {
+    const base = { version: 3, player: { currency: 5 }, upgrades: [], stats: {} };
+    expect(migrate(base)?.player.name).toBe("");
+    expect(migrate({ ...base, player: { currency: 5, name: 42 } })?.player.name).toBe("");
+    expect(migrate({ ...base, player: { currency: 5, name: "  Kevin " } })?.player.name).toBe("Kevin");
   });
 });

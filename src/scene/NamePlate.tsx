@@ -1,11 +1,12 @@
-// The desk name plate: a wedge with the job title on it. It gets fancier with every promotion, and pops in when it changes.
+// The desk name plate: a wedge with the player's name and job title on it. It gets fancier with every promotion, and pops in when it changes.
 import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Text } from "@react-three/drei";
+import { Outlines, Text } from "@react-three/drei";
 import type { Group } from "three";
 import { currentJob } from "@/game/progress";
 import { useGameStore } from "@/state/gameStore";
 import { nameplateLook } from "./nameplateLooks";
+import { outline } from "./palette";
 
 const HEIGHT = 0.045;
 const DEPTH = 0.05;
@@ -25,6 +26,7 @@ type NamePlateProps = { position: [number, number, number]; rotationY?: number }
 
 export default function NamePlate({ position, rotationY = 0 }: NamePlateProps) {
   const job = useGameStore(currentJob);
+  const name = useGameStore((state) => state.player.name);
   const look = nameplateLook(job.id);
 
   // The pop-in is animation state, not something React draws, so it lives in refs and is applied in useFrame.
@@ -46,12 +48,13 @@ export default function NamePlate({ position, rotationY = 0 }: NamePlateProps) {
     <group position={position} rotation={[0, rotationY, 0]}>
       <group ref={group}>
         {/* The plate: a thin slab tipped back, standing on a small base. */}
-        <mesh position={[0, 0.004, 0]}>
+        <mesh castShadow position={[0, 0.004, 0]}>
           <boxGeometry args={[look.width + 0.01, 0.008, DEPTH]} />
           <meshStandardMaterial color="#1f2937" roughness={0.6} />
+          <Outlines {...outline} />
         </mesh>
         <group position={[0, 0.008 + (HEIGHT / 2) * Math.cos(LEAN), 0]} rotation={[-LEAN, 0, 0]}>
-          <mesh>
+          <mesh castShadow>
             <boxGeometry args={[look.width, HEIGHT, 0.008]} />
             <meshStandardMaterial
               color={look.color}
@@ -61,9 +64,23 @@ export default function NamePlate({ position, rotationY = 0 }: NamePlateProps) {
               emissiveIntensity={look.glow ? 0.35 : 0}
             />
           </mesh>
+          {/* The name is the big line and the job title sits under it. Before a name is given only the title shows. */}
+          {name !== "" && (
+            <Text
+              position={[0, 0.009, 0.0045]}
+              fontSize={0.0115}
+              maxWidth={look.width - 0.02}
+              textAlign="center"
+              anchorX="center"
+              anchorY="middle"
+              color={look.textColor}
+            >
+              {name}
+            </Text>
+          )}
           <Text
-            position={[0, 0, 0.0045]}
-            fontSize={0.0125}
+            position={[0, name !== "" ? -0.009 : 0, 0.0045]}
+            fontSize={name !== "" ? 0.0075 : 0.0125}
             maxWidth={look.width - 0.02}
             textAlign="center"
             anchorX="center"

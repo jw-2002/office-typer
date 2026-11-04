@@ -1,6 +1,6 @@
 # Game Design
 
-Title: **Office Typer**. Tone: light, silly corporate satire. A short game: about 30 to 80 minutes, depending on how
+Title: **Office Typer**. Tone: light, silly corporate satire. A short game: about 20 to 55 minutes, depending on how
 fast you type, ending when an AI assistant takes your job.
 
 ## Core loop
@@ -19,8 +19,11 @@ Placeholder: **Credits**. Candidate: **Billable Hours**. Defined in one constant
 ## Assignments
 
 - Types: emails, memos, reports, spreadsheet notes, "code comments", meeting minutes.
-- The player chooses a length per assignment: Short / Standard / Long. Short is quick; longer ones pay a
-  clearly more per character (+25% and +50%), so it is a real choice rather than a free upgrade.
+- The player chooses a length per assignment: Tiny / Short / Standard / Long. Tiny is a single line and pays
+  25% less per character; Short is the base rate; longer ones pay clearly more (+25% and +50%), so it is a real choice
+  rather than a free upgrade.
+- **Clean streak**: finishing assignments at 98% accuracy or better in a row adds 4% pay per assignment, up to +40%. One
+  sloppy assignment resets it. The streak shows next to the accuracy and a rising ping plays as it grows.
 - Difficulty rises with job level: longer text, punctuation, capitals, numbers, harder words.
 - Payout sketch: `base * characters * accuracyMultiplier * jobMultiplier * upgradeMultiplier`.
 - Text comes from a data file of templates/snippets, not generated on the fly (for now).
@@ -73,6 +76,17 @@ promotions, which are about your own typing. The tiers are parodies, and you can
 Buying Clyde Octet 5 gets you made redundant: after the next assignment you finish (or a minute of waiting), a
 redundancy notice shows your time at the company, assignments, highest WPM, credits earned and fastest ever
 redundancy. "Start a new career" begins again. A faster run (better typing, earlier upgrades) is a better run.
+
+## Time of day
+
+The office has a day and night. The clock runs fast, one real second per minute, so a day is 24 minutes of play (the
+game starts at 8 in the morning). The sun crosses the sky, its shadows move across the desk, light turns orange at
+dawn and dusk, and the room goes blue at night. The desk lamp glows after dark and the desk clock shows the time.
+
+## Desk extras
+
+Things to buy just for fun, in any order, with no effect on pay: Gerald the Plant, a Desk Lamp, a Desk Clock, a Tiny
+Goblin who watches you, and Helping Hands, two gloves that press the keys while you type. Nobody asked for the hands.
 
 ## Audio
 

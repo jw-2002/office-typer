@@ -60,6 +60,8 @@ and the content shown on the in-world monitor via `<Html>`.
   instead of repeating border and shadow rules. Buttons use the shared `Button` component.
 - A new token must be added to **every** OS block (a test enforces this). A new OS is a new block,
   an id in `src/game/data/os.ts`, and a computer that points at it.
+- Every theme must pass `src/ui/themeContrast.test.ts` (4.5:1 for each text and background pair). Run it when you
+  change a colour token. Disabled but selected buttons keep their selected colours.
 - Four-value `border-color` tokens (top right bottom left) make bevels. Use `border: <width> solid`
   plus a separate `border-color`.
 

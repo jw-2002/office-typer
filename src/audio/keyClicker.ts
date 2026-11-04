@@ -1,5 +1,7 @@
 // Plays game sounds with the Web Audio API, built from noise and tones, so there are no sound files to load.
+import { createMusicPlayer } from "./musicPlayer";
 import type { KeySound } from "./switchSounds";
+import type { TrackSpec } from "./tracks";
 
 export type KeyClicker = {
   /** One key press, in the sound of the switches in use. */
@@ -8,6 +10,20 @@ export type KeyClicker = {
   fanfare: () => void;
   /** A slow falling tune for being made redundant. */
   redundancy: () => void;
+  /** Turns the quiet hum of the office on or off. Needs a first sound (a key press) before it can start. */
+  hum: (on: boolean) => void;
+  /** A few quick bird calls. */
+  birds: () => void;
+  /** A short burst of cricket chirps. */
+  crickets: () => void;
+  /** A chair creaking, for standing up or sitting down. */
+  creak: () => void;
+  /** A little rising ping for a clean streak. The longer the streak, the higher it sounds. */
+  streak: (count: number) => void;
+  /** Plays a song on a loop (replacing any that is playing), or stops the music with null. Needs a first sound before it can start. */
+  music: (track: TrackSpec | null) => void;
+  /** Sets the master volume, from 0 to 1. */
+  setVolume: (volume: number) => void;
 };
 
 const NOISE_SECONDS = 0.15;
@@ -20,7 +36,12 @@ const FANFARE_STEP_SECONDS = 0.13;
 const REDUNDANCY_NOTES = [392, 349.23, 311.13, 261.63];
 const REDUNDANCY_STEP_SECONDS = 0.38;
 
-type Audio = { ctx: AudioContext; noise: AudioBuffer; master: GainNode };
+/** The level of the music bus, kept low so it sits under the key sounds. */
+const MUSIC_LEVEL = 0.4;
+/** The master level at full volume. */
+const MASTER_LEVEL = 0.35;
+
+type Audio = { ctx: AudioContext; noise: AudioBuffer; master: GainNode; musicBus: GainNode };
 
 /** A sound that jumps to `gain` and fades out over `seconds`, starting `delay` seconds from now. */
 function fadingGain({ ctx, master }: Audio, gain: number, seconds: number, delay: number): GainNode {
@@ -48,18 +69,25 @@ function tone(audio: Audio, type: OscillatorType, frequency: number, gain: numbe
 export function createKeyClicker(): KeyClicker {
   // Browsers only allow audio after a user gesture, so nothing is created until the first sound.
   let audio: Audio | null = null;
+  // The office hum is one looping noise that stays on until it is switched off.
+  let humSource: AudioBufferSourceNode | null = null;
+  const musicPlayer = createMusicPlayer(() => audio);
+  let volume = 1;
 
   const start = (): Audio | null => {
     if (typeof AudioContext === "undefined") return null;
     if (!audio) {
       const ctx = new AudioContext();
       const master = ctx.createGain();
-      master.gain.value = 0.35;
+      master.gain.value = MASTER_LEVEL * volume;
       master.connect(ctx.destination);
+      const musicBus = ctx.createGain();
+      musicBus.gain.value = MUSIC_LEVEL;
+      musicBus.connect(master);
       const noise = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * NOISE_SECONDS), ctx.sampleRate);
       const samples = noise.getChannelData(0);
       for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
-      audio = { ctx, noise, master };
+      audio = { ctx, noise, master, musicBus };
     }
     if (audio.ctx.state === "suspended") void audio.ctx.resume();
     return audio;
@@ -110,6 +138,92 @@ export function createKeyClicker(): KeyClicker {
         const last = index === REDUNDANCY_NOTES.length - 1;
         tone(ready, "triangle", frequency, 0.45, last ? 1.6 : 0.5, index * REDUNDANCY_STEP_SECONDS);
       });
+    },
+
+    hum(on) {
+      if (!on) {
+        humSource?.stop();
+        humSource = null;
+        return;
+      }
+      if (humSource) return;
+      const ready = start();
+      if (!ready) return;
+      // Looped noise with everything but the low rumble filtered out, and kept very quiet.
+      const source = ready.ctx.createBufferSource();
+      source.buffer = ready.noise;
+      source.loop = true;
+      const filter = ready.ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.value = 140;
+      const level = ready.ctx.createGain();
+      level.gain.value = 0.05;
+      source.connect(filter).connect(level).connect(ready.master);
+      source.start();
+      humSource = source;
+    },
+
+    birds() {
+      const ready = start();
+      if (!ready) return;
+      // Two to four chirps, each a quick upward slide in pitch.
+      const chirps = 2 + Math.floor(Math.random() * 3);
+      const base = 2600 + Math.random() * 900;
+      for (let i = 0; i < chirps; i++) {
+        const delay = i * 0.13;
+        const oscillator = ready.ctx.createOscillator();
+        oscillator.type = "sine";
+        const start = ready.ctx.currentTime + delay;
+        oscillator.frequency.setValueAtTime(base, start);
+        oscillator.frequency.exponentialRampToValueAtTime(base * 1.5, start + 0.07);
+        oscillator.connect(fadingGain(ready, 0.04, 0.09, delay));
+        oscillator.start(start);
+        oscillator.stop(start + 0.12);
+      }
+    },
+
+    crickets() {
+      const ready = start();
+      if (!ready) return;
+      // Three soft pulses of a lower, gentler note, spaced out so it does not read as a ticking.
+      for (let i = 0; i < 3; i++) tone(ready, "sine", 3900, 0.025, 0.05, i * 0.09);
+    },
+
+    streak(count) {
+      const ready = start();
+      if (!ready) return;
+      // Each step up the streak is a semitone higher, so a long streak is clearly a good one.
+      const base = 660 * 1.0595 ** Math.min(count, 12);
+      tone(ready, "triangle", base, 0.18, 0.12, 0);
+      tone(ready, "triangle", base * 1.5, 0.18, 0.2, 0.07);
+    },
+
+    music(track) {
+      // Make sure the audio exists first, because the player takes its clock from it.
+      if (track) start();
+      musicPlayer.play(track);
+    },
+
+    setVolume(next) {
+      volume = Math.min(1, Math.max(0, next));
+      if (audio) audio.master.gain.value = MASTER_LEVEL * volume;
+    },
+
+    creak() {
+      const ready = start();
+      if (!ready) return;
+      // A burst of noise whose pitch sags, like a chair taking weight.
+      const source = ready.ctx.createBufferSource();
+      source.buffer = ready.noise;
+      const filter = ready.ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.Q.value = 6;
+      const now = ready.ctx.currentTime;
+      filter.frequency.setValueAtTime(420, now);
+      filter.frequency.linearRampToValueAtTime(190, now + 0.14);
+      source.connect(filter).connect(fadingGain(ready, 0.35, 0.16, 0));
+      source.start();
+      source.stop(now + 0.18);
     },
   };
 }

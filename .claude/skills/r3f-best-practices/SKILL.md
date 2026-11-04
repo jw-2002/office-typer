@@ -55,6 +55,10 @@ that loop.
 
 ## Lighting and materials
 
+- **Shadows** are on (`<Canvas shadows>`): each mesh must opt in with `castShadow` and/or `receiveShadow`. The sun
+  (`Sun.tsx`) is the only light that casts them, and its shadow camera is a box around the room, so anything placed
+  outside about 2.4 m of the middle gets no shadow. Keep `shadow-bias` and `shadow-normalBias` set, or surfaces stripe.
+- Changing lights each frame: reuse objects (a ref holding the goal vectors and colours) and ease toward the goal.
 - Few lights. One ambient or `<Environment preset=...>` plus one directional is usually enough.
 - Shadows are expensive. Enable only where they sell the scene (desk, keyboard), set a small
   `shadow-mapSize`, and prefer `<ContactShadows>` or `<AccumulativeShadows>` for static scenes.

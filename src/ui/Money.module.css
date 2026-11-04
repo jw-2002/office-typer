@@ -1,0 +1,10 @@
+/* The currency highlight: dark text on yellow, so it reads the same on every operating system look. */
+.money {
+  padding: 0 0.3em;
+  border-radius: 0.2em;
+  background: #ffd84a;
+  color: #1a1a1a;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

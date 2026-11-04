@@ -12,7 +12,7 @@
   --color-accent: #000080;
   --color-on-accent: #ffffff;
   --color-correct: #006400;
-  --color-error: #c00000;
+  --color-error: #8b0000;
   --radius: 0;
   --hud-radius: 0;
   --font-ui: "MS Sans Serif", Tahoma, Arial, sans-serif;
@@ -32,7 +32,7 @@
   --button-pressed-text: #000000;
   --button-pressed-border-color: #404040 #ffffff #ffffff #404040;
 
-  --titlebar-bg: linear-gradient(90deg, #000080, #1084d0);
+  --titlebar-bg: linear-gradient(90deg, #000080, #0b6fb8);
   --titlebar-text: #ffffff;
   --titlebar-radius: 0;
   --control-size: 1rem;
@@ -77,10 +77,10 @@
   --color-field: #ffffff;
   --color-text: #111111;
   --color-muted: #555555;
-  --color-accent: #316ac5;
+  --color-accent: #2a5cb0;
   --color-on-accent: #ffffff;
   --color-correct: #1a7f1a;
-  --color-error: #d02020;
+  --color-error: #bf1a1a;
   --radius: 0.4rem;
   --hud-radius: 0;
   --font-ui: Tahoma, Verdana, sans-serif;
@@ -100,7 +100,7 @@
   --button-pressed-text: #111111;
   --button-pressed-border-color: #e68b2c;
 
-  --titlebar-bg: linear-gradient(#0a5fd8, #3d95ff 8%, #0a5fd8 40%, #0553cc 88%, #0a4fc0);
+  --titlebar-bg: linear-gradient(#0a5fd8, #1f6fe5 8%, #0a5fd8 40%, #0553cc 88%, #0a4fc0);
   --titlebar-text: #ffffff;
   --titlebar-radius: 0.5rem 0.5rem 0 0;
   --control-size: 1.2rem;
@@ -116,7 +116,7 @@
   --control-border-color: #ffffff;
   --controls-order: 1;
 
-  --taskbar-bg: linear-gradient(#245edb, #3a82f5 10%, #245edb 40%, #1941a5);
+  --taskbar-bg: linear-gradient(#245edb, #2a6ee6 10%, #245edb 40%, #1941a5);
   --taskbar-text: #ffffff;
   --taskbar-shadow: none;
   --taskbar-order: 1;
@@ -145,9 +145,9 @@
   --color-field: #ffffff;
   --color-text: #1d1d1f;
   --color-muted: #6e6e73;
-  --color-accent: #0a84ff;
+  --color-accent: #0066d6;
   --color-on-accent: #ffffff;
-  --color-correct: #1c9b4a;
+  --color-correct: #14803a;
   --color-error: #d70015;
   --radius: 0.75rem;
   --hud-radius: 0.75rem;
@@ -164,9 +164,9 @@
   --button-border-color: rgba(0, 0, 0, 0.15);
   --button-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
   --button-radius: 0.5rem;
-  --button-pressed-bg: #0a84ff;
+  --button-pressed-bg: #0066d6;
   --button-pressed-text: #ffffff;
-  --button-pressed-border-color: #0a84ff;
+  --button-pressed-border-color: #0066d6;
 
   --titlebar-bg: linear-gradient(#ececec, #d6d6d6);
   --titlebar-text: #3a3a3c;
@@ -212,7 +212,7 @@
   --color-surface-raised: #1a2140;
   --color-field: #080b16;
   --color-text: #e6f1ff;
-  --color-muted: #8aa0c0;
+  --color-muted: #a9bbd8;
   --color-accent: #00e5ff;
   --color-on-accent: #001018;
   --color-correct: #39ff88;
@@ -282,7 +282,7 @@
   --color-surface-raised: rgba(70, 45, 120, 0.7);
   --color-field: rgba(10, 5, 25, 0.7);
   --color-text: #fff4e6;
-  --color-muted: #c3b3d9;
+  --color-muted: #d9cdea;
   --color-accent: #ffb347;
   --color-on-accent: #1a0b00;
   --color-correct: #7dffb2;
@@ -306,7 +306,7 @@
   --button-pressed-text: #1a0b00;
   --button-pressed-border-color: #ffb347;
 
-  --titlebar-bg: linear-gradient(90deg, rgba(255, 150, 60, 0.5), rgba(150, 90, 255, 0.5));
+  --titlebar-bg: linear-gradient(90deg, rgba(255, 150, 60, 0.3), rgba(150, 90, 255, 0.32));
   --titlebar-text: #ffffff;
   --titlebar-radius: 1rem 1rem 0 0;
   --control-size: 0.7rem;

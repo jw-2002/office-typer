@@ -1,9 +1,10 @@
-// Moves the camera between sitting at the desk and standing up. Seated, the camera is locked in place. Standing, the
+// Moves the camera between the intro, sitting at the desk and standing up. Seated, the camera is locked in place. Standing, the
 // player can look around and zoom a little. Between those, this steers the camera along a smooth path.
 import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { MathUtils, Vector3 } from "three";
-import { useViewStore } from "@/state/viewStore";
+import { MathUtils, Vector3, type Camera } from "three";
+import { useDisplayStore } from "@/state/displayStore";
+import { useViewStore, type CameraView } from "@/state/viewStore";
 import { cameraPoses } from "./cameraViews";
 
 /** How long standing up or sitting down takes, in seconds. */
@@ -25,11 +26,20 @@ function isOrbit(controls: unknown): controls is OrbitLike {
 /** Starts slowly, speeds up, and slows down again. t runs from 0 to 1. */
 const smooth = (t: number) => t * t * (3 - 2 * t);
 
+/** Jumps straight to a view's pose (no move to animate). */
+function snapTo(camera: Camera, controls: OrbitLike, view: CameraView) {
+  const pose = cameraPoses[view];
+  camera.position.set(...pose.position);
+  controls.target.set(...pose.target);
+  camera.lookAt(controls.target);
+}
+
 type Move = { fromPosition: Vector3; fromTarget: Vector3; t: number };
 
 export default function CameraRig() {
   const get = useThree((state) => state.get);
   const move = useRef<Move | null>(null);
+  const started = useRef(false);
 
   // When the view changes, remember where the camera is now. The path to the new pose starts there.
   useEffect(() => {
@@ -37,13 +47,28 @@ export default function CameraRig() {
       if (state.view === previous.view) return;
       const { camera, controls } = get();
       if (!isOrbit(controls)) return;
+      // With reduced motion the camera jumps instead of gliding.
+      if (state.instant || useDisplayStore.getState().reducedMotion) {
+        snapTo(camera, controls, state.view);
+        move.current = null;
+        return;
+      }
       move.current = { fromPosition: camera.position.clone(), fromTarget: controls.target.clone(), t: 0 };
     });
   }, [get]);
 
+  // A negative priority runs this before everything else each frame, so the monitor page (which follows the camera
+  // in its own frame callback) always sees the camera's new position, not last frame's.
   useFrame((_, delta) => {
     const { camera, controls } = get();
     if (!isOrbit(controls)) return;
+    // On the very first frame, start in whichever view the game is already in (the save may have loaded before the
+    // controls existed, so the change could not be applied then).
+    if (!started.current) {
+      started.current = true;
+      snapTo(camera, controls, useViewStore.getState().view);
+      move.current = null;
+    }
     const view = useViewStore.getState().view;
     const current = move.current;
 
@@ -77,7 +102,7 @@ export default function CameraRig() {
     // The controls keep coasting after you let go of a drag. That must stop the moment we take over, or the leftover
     // spin would nudge the camera off its pose after it lands.
     controls.enableDamping = free;
-  });
+  }, -2);
 
   return null;
 }

@@ -1,5 +1,6 @@
 // Tests for finishing assignments and buying upgrades.
 import { describe, expect, it } from "vitest";
+import { jobs } from "./data/jobs";
 import { upgrades } from "./data/upgrades";
 import {
   buyStatus,
@@ -15,11 +16,15 @@ import {
   tickGame,
   FINALE_FALLBACK_SECONDS,
   type Progress,
+  MAX_NAME_LENGTH,
+  cleanPlayerName,
+  setPlayerName,
 } from "./progress";
+import { upgradeMultiplier } from "./economy";
 
 const perfect = (characters: number) => ({ characters, accuracy: 1, wpm: 60, length: "short" as const });
 const upgrade = (id: string) => upgrades.find((candidate) => candidate.id === id)!;
-const withCredits = (currency: number): Progress => ({ ...newProgress(), player: { currency } });
+const withCredits = (currency: number): Progress => ({ ...newProgress(), player: { name: "", currency: currency } });
 
 describe("completeAssignment", () => {
   it("pays out and updates stats", () => {
@@ -32,6 +37,7 @@ describe("completeAssignment", () => {
       bestWpm: 60,
       totalEarned: 30,
       secondsPlayed: 0,
+      streak: 1,
     });
     expect(reward.promotedTo).toBeNull();
   });
@@ -48,8 +54,9 @@ describe("completeAssignment", () => {
   });
 
   it("promotes when total characters cross a threshold, once", () => {
-    let progress = completeAssignment(newProgress(), perfect(180)).progress;
-    const promoted = completeAssignment(progress, perfect(120));
+    const threshold = jobs[1].minChars;
+    let progress = completeAssignment(newProgress(), perfect(threshold - 20)).progress;
+    const promoted = completeAssignment(progress, perfect(40));
     expect(promoted.reward.promotedTo?.id).toBe("data-entry-clerk");
     expect(currentJob(promoted.progress).id).toBe("data-entry-clerk");
 
@@ -150,7 +157,7 @@ describe("progressChanged", () => {
   it("notices a change to any saved part, including what is equipped", () => {
     const start = newProgress();
     expect(progressChanged(start, { ...start })).toBe(false);
-    expect(progressChanged(start, { ...start, player: { currency: 1 } })).toBe(true);
+    expect(progressChanged(start, { ...start, player: { name: "", currency: 1 } })).toBe(true);
     expect(progressChanged(start, { ...start, stats: { ...start.stats } })).toBe(true);
     expect(progressChanged(start, { ...start, equipped: { ...start.equipped } })).toBe(true);
     expect(progressChanged(start, equipUpgrade(buyUpgrade(withCredits(100), "grey-tower"), "beige-box"))).toBe(true);
@@ -160,7 +167,7 @@ describe("progressChanged", () => {
 describe("AI assistants", () => {
   const withAssistant = (id: string, currency = 0): Progress => ({
     ...newProgress(),
-    player: { currency },
+    player: { name: "", currency: currency },
     upgrades: [...newProgress().upgrades, id],
     equipped: { ...newProgress().equipped, assistant: id },
   });
@@ -202,7 +209,7 @@ describe("AI assistants", () => {
 describe("the ending", () => {
   const top: Progress = {
     ...newProgress(),
-    player: { currency: 200_000 },
+    player: { name: "", currency: 200_000 },
     upgrades: [...newProgress().upgrades, "gippity-1", "drama-llama-7b", "gemstone-flash"],
   };
 
@@ -230,5 +237,72 @@ describe("the ending", () => {
     const redundant = tickGame(buyUpgrade(top, "clyde-octet-5"), FINALE_FALLBACK_SECONDS + 1);
     expect(redundant.finale.stage).toBe("redundant");
     expect(tickGame(redundant, 100)).toBe(redundant);
+  });
+});
+
+describe("desk extras", () => {
+  const extras = ["plant", "desk-lamp", "desk-clock", "tiny-goblin", "helping-hands"];
+
+  it("can be bought in any order, with no tiers to unlock", () => {
+    for (const id of extras) expect(buyStatus(withCredits(99999), upgrade(id)), id).toBe("ok");
+    expect(buyStatus(withCredits(10), upgrade("helping-hands"))).toBe("too-expensive");
+  });
+
+  it("are owned once bought, and do not change what is in use or the pay", () => {
+    const start = withCredits(1000);
+    const bought = buyUpgrade(start, "tiny-goblin");
+    expect(bought.upgrades).toContain("tiny-goblin");
+    expect(bought.equipped).toEqual(start.equipped);
+    expect(buyStatus(bought, upgrade("tiny-goblin"))).toBe("owned");
+    expect(upgradeMultiplier(bought.upgrades)).toBe(upgradeMultiplier(start.upgrades));
+  });
+
+  it("have nothing to switch to", () => {
+    const bought = buyUpgrade(withCredits(1000), "plant");
+    expect(equipUpgrade(bought, "plant")).toBe(bought);
+  });
+
+  it("are not bought twice", () => {
+    const once = buyUpgrade(withCredits(1000), "plant");
+    expect(buyUpgrade(once, "plant")).toBe(once);
+  });
+
+  it("do not stop the game ending, and are all cheap compared with the top assistant", () => {
+    for (const id of extras) expect(upgrade(id).cost).toBeLessThan(upgrade("clyde-octet-5").cost / 10);
+  });
+});
+
+describe("player name", () => {
+  it("starts empty and is tidied when set", () => {
+    expect(newProgress().player.name).toBe("");
+    expect(cleanPlayerName("  Mary   Jane  ")).toBe("Mary Jane");
+    expect(cleanPlayerName("Zo\u00eb")).toBe("Zo");
+    expect(cleanPlayerName("x".repeat(50))).toHaveLength(MAX_NAME_LENGTH);
+  });
+
+  it("sets a name, ignores an empty one, and keeps the money", () => {
+    const rich = { ...newProgress(), player: { name: "", currency: 40 } };
+    const named = setPlayerName(rich, " Dolores ");
+    expect(named.player).toEqual({ name: "Dolores", currency: 40 });
+    expect(setPlayerName(named, "   ")).toBe(named);
+  });
+});
+
+describe("clean streak", () => {
+  const clean = (characters: number) => ({ characters, accuracy: 0.99, wpm: 60, length: "short" as const });
+  const sloppy = (characters: number) => ({ characters, accuracy: 0.9, wpm: 60, length: "short" as const });
+
+  it("grows with each clean assignment and pays the bonus from the next one", () => {
+    const first = completeAssignment(newProgress(), clean(400));
+    expect(first.progress.stats.streak).toBe(1);
+    expect(first.reward).toMatchObject({ streak: 1, bonusStreak: 0 });
+    const second = completeAssignment(first.progress, clean(400));
+    expect(second.progress.stats.streak).toBe(2);
+    expect(second.reward.payout).toBeGreaterThan(first.reward.payout);
+  });
+
+  it("resets after a sloppy assignment", () => {
+    const warm = completeAssignment(completeAssignment(newProgress(), clean(100)).progress, clean(100)).progress;
+    expect(completeAssignment(warm, sloppy(100)).progress.stats.streak).toBe(0);
   });
 });

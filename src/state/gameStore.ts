@@ -1,6 +1,7 @@
 // The game store (Zustand): the player's progress plus the actions that change it. Rules live in src/game.
 import { create } from "zustand";
-import type { Upgrade, UpgradeCategory } from "@/game/data/upgrades";
+import { useViewStore } from "./viewStore";
+import type { EquippableCategory, Upgrade } from "@/game/data/upgrades";
 import {
   buyUpgrade,
   completeAssignment,
@@ -8,6 +9,7 @@ import {
   equippedUpgrade,
   equipUpgrade,
   newProgress,
+  setPlayerName,
   type AssignmentResult,
   type Progress,
   type Reward,
@@ -24,6 +26,8 @@ type GameStore = Progress & {
   dismissPromotion: () => void;
   /** Switches to an upgrade already owned, such as an older computer. */
   equip: (upgradeId: string) => void;
+  /** Sets the player's name, and sends the camera from the intro to the desk. */
+  setName: (name: string) => void;
   /** Erases everything and starts again. Autosave then overwrites the saved game. */
   reset: () => void;
   /** Replaces progress with a loaded save. */
@@ -52,11 +56,20 @@ export const useGameStore = create<GameStore>()((set, get) => ({
   equip: (upgradeId) => set(equipUpgrade(progressOf(get()), upgradeId)),
   dismissPromotion: () =>
     set((state) => (state.lastReward ? { lastReward: { ...state.lastReward, promotedTo: null } } : {})),
-  reset: () => set({ ...newProgress(), lastReward: null }),
+  setName: (name) => {
+    set(setPlayerName(progressOf(get()), name));
+    // The first name ends the intro: the camera pans to the player sitting at the desk.
+    if (get().player.name !== "" && useViewStore.getState().view === "intro") useViewStore.getState().setView("seated");
+  },
+  reset: () => {
+    set({ ...newProgress(), lastReward: null });
+    // A new game starts with the introduction again.
+    useViewStore.getState().setView("intro");
+  },
   load: (progress) => set({ ...progressOf(progress), lastReward: null }),
 }));
 
 /** The upgrade in use in a category (the computer on the desk, the switches under the keys). */
-export function useEquipped(category: UpgradeCategory): Upgrade | undefined {
+export function useEquipped(category: EquippableCategory): Upgrade | undefined {
   return useGameStore((state) => equippedUpgrade(state, category));
 }

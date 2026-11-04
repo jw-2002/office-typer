@@ -6,6 +6,7 @@ import { assistantRate, currentJob } from "@/game/progress";
 import { useAssistantTyping } from "@/hooks/useAssistantTyping";
 import { useEquipped, useGameStore } from "@/state/gameStore";
 import Button from "./Button";
+import Money from "./Money";
 import styles from "./AssistantPanel.module.css";
 
 /** The live typing view. Remounted for each assistant (by its key), so a new one starts fresh. */
@@ -53,8 +54,7 @@ export default function AssistantPanel({ onOpenShop }: AssistantPanelProps) {
           <dd>{Math.round(upgrade.assistant.accuracy * 100)}%</dd>
           <dt>Earning</dt>
           <dd>
-            {CURRENCY.symbol}
-            {formatRate(rate)}/s
+            <Money amount={rate} text={`${formatRate(rate)}/s`} />
           </dd>
         </dl>
       </div>

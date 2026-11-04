@@ -52,6 +52,8 @@ export function useAssignment(tier: number) {
 
   // An effect event always sees the latest game state without re-subscribing to the input on every keystroke.
   const onKey = useEffectEvent((key: string) => {
+    // Nothing is typed into the assignment until the player has given their name.
+    if (useGameStore.getState().player.name === "") return;
     if (!finished) dispatch({ type: "key", key, now: performance.now() });
     else if (key === "Enter") start(game.length);
   });

@@ -10,6 +10,7 @@ import AssistantPanel from "./AssistantPanel";
 import Button from "./Button";
 import CareerPanel from "./CareerPanel";
 import ConfirmDialog from "./ConfirmDialog";
+import NameDialog from "./NameDialog";
 import PromotionDialog from "./PromotionDialog";
 import RedundancyDialog from "./RedundancyDialog";
 import SettingsPanel from "./SettingsPanel";
@@ -45,6 +46,7 @@ export default function Desktop({ current, typingField }: DesktopProps) {
   const promotion = useGameStore((state) => state.lastReward?.promotedTo ?? null);
   const dismissPromotion = useGameStore((state) => state.dismissPromotion);
   const redundant = useGameStore((state) => state.finale.stage === "redundant");
+  const introduced = useGameStore((state) => state.player.name !== "");
   const os = useOs();
 
   const title = tab === "assignment" ? current.assignment.title : tabs.find((t) => t.id === tab)?.label;
@@ -104,6 +106,8 @@ export default function Desktop({ current, typingField }: DesktopProps) {
       {promotion && !redundant && <PromotionDialog job={promotion} onClose={dismissPromotion} />}
 
       {redundant && <RedundancyDialog />}
+
+      {!introduced && <NameDialog />}
 
       {confirmingReset && (
         <ConfirmDialog

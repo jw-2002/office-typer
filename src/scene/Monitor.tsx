@@ -1,13 +1,15 @@
 // The monitor: a plastic frame on a stand with dark glass. MonitorBody is just the model (used for the old
 // computers on the shelf); Monitor adds the live desktop on the glass.
 import type { ReactNode } from "react";
-import { Html, RoundedBox } from "@react-three/drei";
+import { Html, Outlines, RoundedBox } from "@react-three/drei";
+import { CustomBlending, DoubleSide, ZeroFactor } from "three";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useCurrentAssignment } from "@/state/useCurrentAssignment";
 import MonitorScreen from "@/ui/MonitorScreen";
 import { SCREEN_PX } from "@/ui/screenSize";
 import type { ComputerLook } from "./computerLooks";
-import { palette } from "./palette";
+import { tiltClearance } from "./monitorGeometry";
+import { outline, palette } from "./palette";
 
 const SCREEN = { width: 0.64, height: 0.36 } as const;
 // Centre of the glass above the desk. The same for every monitor, so the camera framing never changes.
@@ -19,6 +21,19 @@ const TILT = 0.2;
 // DOM page exactly as wide as the screen.
 const DISTANCE_FACTOR = (SCREEN.width / SCREEN_PX.width) * 400;
 
+// The glass as the 3D scene sees it: a surface that blends to nothing (zero colour, zero opacity), so the canvas is
+// transparent there and the web page behind it shows through. It still hides whatever is behind it.
+const HOLE = (
+  <meshBasicMaterial
+    side={DoubleSide}
+    blending={CustomBlending}
+    blendSrc={ZeroFactor}
+    blendDst={ZeroFactor}
+    blendSrcAlpha={ZeroFactor}
+    blendDstAlpha={ZeroFactor}
+  />
+);
+
 type MonitorBodyProps = {
   look: ComputerLook;
   /** Drawn on the glass. Its origin is the centre of the screen, facing out. */
@@ -27,7 +42,10 @@ type MonitorBodyProps = {
 
 export function MonitorBody({ look, children }: MonitorBodyProps) {
   const frame = { width: SCREEN.width + look.bezel * 2, height: SCREEN.height + look.bezel * 2, depth: look.depth };
-  const frameBottom = SCREEN_Y - frame.height / 2;
+  const screenY = look.screenY ?? SCREEN_Y;
+  const frameBottom = screenY - frame.height / 2;
+  // Leaning back swings the back-bottom edge of a deep monitor down, which would push it into the case under it.
+  const lift = tiltClearance(frame.height, frame.depth, TILT);
   // The glass sits just in front of the frame, so the two do not fight.
   const screenZ = frame.depth / 2 + 0.0005;
   const material = <meshStandardMaterial color={look.frameColor} roughness={0.5} />;
@@ -36,9 +54,10 @@ export function MonitorBody({ look, children }: MonitorBodyProps) {
     <group>
       {/* The frame, glass and screen tilt together about the middle of the screen. Real monitors lean back a
           little, and it makes the screen face a camera that looks down at it. */}
-      <group position={[0, SCREEN_Y, 0]} rotation={[-TILT, 0, 0]}>
-        <RoundedBox args={[frame.width, frame.height, frame.depth]} radius={0.006}>
+      <group position={[0, screenY + lift, 0]} rotation={[-TILT, 0, 0]}>
+        <RoundedBox castShadow args={[frame.width, frame.height, frame.depth]} radius={0.006}>
           {material}
+          <Outlines {...outline} />
         </RoundedBox>
 
         {/* The dark glass. meshBasicMaterial ignores lights, which is right for something that glows. */}
@@ -51,16 +70,18 @@ export function MonitorBody({ look, children }: MonitorBodyProps) {
       </group>
 
       {/* Stand: a neck behind the frame and a flat foot. Monitors whose frame already reaches the desk have none. */}
-      {frameBottom > 0.03 && (
-        <mesh position={[0, frameBottom / 2, -0.035]}>
+      {!look.laptop && frameBottom > 0.03 && (
+        <mesh castShadow position={[0, frameBottom / 2, -0.035]}>
           <boxGeometry args={[0.05, frameBottom, 0.025]} />
           {material}
         </mesh>
       )}
-      <mesh position={[0, 0.005, -0.01]}>
-        <boxGeometry args={[0.24, 0.01, 0.17]} />
-        {material}
-      </mesh>
+      {!look.laptop && (
+        <mesh castShadow receiveShadow position={[0, 0.005, -0.01]}>
+          <boxGeometry args={[0.24, 0.01, 0.17]} />
+          {material}
+        </mesh>
+      )}
     </group>
   );
 }
@@ -75,8 +96,10 @@ export default function Monitor({ look }: { look: ComputerLook }) {
     <MonitorBody look={look}>
       {!touch && (
         // transform makes the DOM follow the 3D object, tilting and shrinking with the camera. A low
-        // zIndexRange keeps the page beneath the 2D HUD.
-        <Html transform distanceFactor={DISTANCE_FACTOR} zIndexRange={[0, 0]}>
+        // zIndexRange keeps the page beneath the 2D HUD. occlude="blending" puts the page BEHIND the canvas and cuts a
+        // see-through hole in the 3D picture where the glass is. Anything in front of the screen (a hand, a mug, the
+        // dust) is drawn over the hole, so the page can never appear in front of 3D objects.
+        <Html transform occlude="blending" material={HOLE} distanceFactor={DISTANCE_FACTOR} zIndexRange={[0, 0]}>
           <MonitorScreen current={current} />
         </Html>
       )}

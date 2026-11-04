@@ -12,6 +12,7 @@
   box-shadow: var(--button-shadow);
   color: var(--color-text);
   font: inherit;
+  white-space: nowrap;
   cursor: var(--cursor-pointer);
   /* The HUD container ignores the pointer so the 3D scene stays draggable; buttons opt back in. */
   pointer-events: auto;
@@ -26,6 +27,11 @@
 .button:disabled {
   color: var(--color-muted);
   cursor: var(--cursor-default);
+}
+
+/* A selected button that cannot be pressed again ("In use") is not greyed out, or its text would fade into its fill. */
+.button:disabled[aria-pressed="true"] {
+  color: var(--button-pressed-text);
 }
 
 .button:focus-visible {

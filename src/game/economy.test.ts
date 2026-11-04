@@ -6,6 +6,10 @@ import {
   BASE_PAYOUT_PER_CHAR,
   accuracyMultiplier,
   LENGTH_PAY,
+  formatMultiplier,
+  overallMultiplier,
+  MAX_STREAK,
+  streakMultiplier,
   assistantIncome,
   formatDuration,
   formatRate,
@@ -83,8 +87,9 @@ describe("payout", () => {
   });
 
   it("pays clearly more per character for longer assignments, but not so much that Short is pointless", () => {
-    const paid = (length: "short" | "standard" | "long") =>
+    const paid = (length: "tiny" | "short" | "standard" | "long") =>
       payout({ characters: 1000, accuracy: 1, job: jobs[0], length, ownedUpgradeIds: [] });
+    expect(paid("tiny")).toBe(188); // 250 x 0.75, rounded
     expect(paid("short")).toBe(250);
     expect(paid("standard")).toBe(313); // 250 x 1.25, rounded
     expect(paid("long")).toBe(375);
@@ -104,8 +109,8 @@ describe("jobs", () => {
 
   it("jobFor picks the highest job whose threshold is reached", () => {
     expect(jobFor(0).id).toBe("intern");
-    expect(jobFor(199).id).toBe("intern");
-    expect(jobFor(200).id).toBe("data-entry-clerk");
+    expect(jobFor(jobs[1].minChars - 1).id).toBe("intern");
+    expect(jobFor(jobs[1].minChars).id).toBe("data-entry-clerk");
     expect(jobFor(10_000_000).id).toBe("chief-typing-executive");
   });
 
@@ -122,12 +127,16 @@ describe("jobs", () => {
 
 describe("promotionProgress", () => {
   it("measures the way to the next job", () => {
-    expect(promotionProgress(0)).toMatchObject({ fraction: 0, remaining: 200 });
+    const [, clerk, junior] = jobs;
+    expect(promotionProgress(0)).toMatchObject({ fraction: 0, remaining: clerk.minChars });
     expect(promotionProgress(0).next?.id).toBe("data-entry-clerk");
-    expect(promotionProgress(100).fraction).toBe(0.5);
-    // Just promoted: the bar starts again for the following job (200 to 600).
-    expect(promotionProgress(200)).toMatchObject({ fraction: 0, remaining: 400 });
-    expect(promotionProgress(200).job.id).toBe("data-entry-clerk");
+    expect(promotionProgress(clerk.minChars / 2).fraction).toBe(0.5);
+    // Just promoted: the bar starts again for the following job.
+    expect(promotionProgress(clerk.minChars)).toMatchObject({
+      fraction: 0,
+      remaining: junior.minChars - clerk.minChars,
+    });
+    expect(promotionProgress(clerk.minChars).job.id).toBe("data-entry-clerk");
   });
 
   it("is full, with nothing left, at the top of the ladder", () => {
@@ -188,5 +197,35 @@ describe("formatNumber", () => {
     expect(formatNumber(45_678)).toBe("45.6K");
     expect(formatNumber(123_456)).toBe("123K");
     expect(formatNumber(3_400_000)).toBe("3.4M");
+  });
+});
+
+describe("clean streak", () => {
+  it("adds a few percent of pay for each clean assignment in a row, up to a cap", () => {
+    expect(streakMultiplier(0)).toBe(1);
+    expect(streakMultiplier(5)).toBeCloseTo(1.2);
+    expect(streakMultiplier(MAX_STREAK)).toBeCloseTo(1.4);
+    expect(streakMultiplier(MAX_STREAK + 50)).toBeCloseTo(1.4);
+    expect(streakMultiplier(-3)).toBe(1);
+  });
+
+  it("raises the payout", () => {
+    const base = { characters: 1000, accuracy: 1, job: jobs[0], length: "short" as const, ownedUpgradeIds: [] };
+    expect(payout({ ...base, streak: 5 })).toBe(Math.round(250 * 1.2));
+    expect(payout(base)).toBe(250);
+  });
+});
+
+describe("overallMultiplier", () => {
+  it("combines the job, the best upgrades and the clean streak", () => {
+    expect(overallMultiplier(jobs[0], [])).toBe(1);
+    expect(overallMultiplier(jobs[3], ["grey-tower"])).toBeCloseTo(jobs[3].payoutMultiplier * 1.3);
+    expect(overallMultiplier(jobs[0], [], 5)).toBeCloseTo(1.2);
+  });
+
+  it("is shown without trailing zeros", () => {
+    expect(formatMultiplier(3)).toBe("3");
+    expect(formatMultiplier(4.5)).toBe("4.5");
+    expect(formatMultiplier(3.4204)).toBe("3.42");
   });
 });

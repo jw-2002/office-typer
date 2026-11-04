@@ -18,7 +18,7 @@ describe("game store", () => {
     useGameStore.getState().buy("strawberry");
     expect(useGameStore.getState().upgrades).not.toContain("strawberry");
 
-    useGameStore.getState().load({ ...newProgress(), player: { currency: 100 } });
+    useGameStore.getState().load({ ...newProgress(), player: { name: "", currency: 100 } });
     useGameStore.getState().buy("strawberry");
     expect(useGameStore.getState().upgrades).toContain("strawberry");
     expect(useGameStore.getState().player.currency).toBe(40);
@@ -43,7 +43,7 @@ describe("game store", () => {
   it("reset erases progress, upgrades and the last reward", () => {
     useGameStore
       .getState()
-      .load({ ...newProgress(), player: { currency: 500 }, upgrades: ["beige-box", "grey-tower", "mushy"] });
+      .load({ ...newProgress(), player: { name: "", currency: 500 }, upgrades: ["beige-box", "grey-tower", "mushy"] });
     useGameStore.getState().finishAssignment({ characters: 120, accuracy: 1, wpm: 50, length: "short" });
     useGameStore.getState().reset();
     const state = useGameStore.getState();
@@ -68,7 +68,7 @@ describe("game store", () => {
   it("once made redundant, nothing pays out or can be bought", () => {
     useGameStore
       .getState()
-      .load({ ...newProgress(), player: { currency: 500 }, finale: { stage: "redundant", seconds: 0 } });
+      .load({ ...newProgress(), player: { name: "", currency: 500 }, finale: { stage: "redundant", seconds: 0 } });
     useGameStore.getState().finishAssignment({ characters: 120, accuracy: 1, wpm: 50, length: "short" });
     useGameStore.getState().buy("strawberry");
     useGameStore.getState().tick(10);

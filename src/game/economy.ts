@@ -7,15 +7,31 @@ import { upgradeCategories, upgrades, type AssistantSpec, type Upgrade } from ".
 export const BASE_PAYOUT_PER_CHAR = 0.25;
 
 /**
- * Longer assignments pay clearly more per character, so choosing one is a real trade-off: a Short one is quick and
- * easy to finish, a Long one needs sustained focus (one slip costs accuracy over many more characters) but earns more.
+ * Longer assignments pay clearly more per character, so choosing one is a real trade-off: a Tiny one is over in a
+ * breath but pays a quarter less, a Short one is quick and easy to finish, a Long one needs sustained focus (one slip costs accuracy over many more characters) but earns more.
  */
-export const LENGTH_PAY: Readonly<Record<AssignmentLength, number>> = { short: 1, standard: 1.25, long: 1.5 };
+export const LENGTH_PAY: Readonly<Record<AssignmentLength, number>> = {
+  tiny: 0.75,
+  short: 1,
+  standard: 1.25,
+  long: 1.5,
+};
 
 /** Squared, so sloppy typing costs real money: 90% accuracy pays 81%. */
 export function accuracyMultiplier(accuracy: number): number {
   const clamped = Math.min(1, Math.max(0, accuracy));
   return clamped * clamped;
+}
+
+/** An assignment finished at this accuracy or better is "clean" and adds to the streak. */
+export const CLEAN_ACCURACY = 0.98;
+/** Each clean assignment in a row adds this much pay, up to `MAX_STREAK` of them. */
+export const STREAK_BONUS_STEP = 0.04;
+export const MAX_STREAK = 10;
+
+/** Pay multiplier for a run of clean assignments: 1 with none, 1.4 at the cap of ten in a row. */
+export function streakMultiplier(streak: number): number {
+  return 1 + STREAK_BONUS_STEP * Math.min(Math.max(Math.floor(streak), 0), MAX_STREAK);
 }
 
 /** The best (highest tier) upgrade owned in a category. Tiers are listed in order in the data. */
@@ -38,16 +54,29 @@ export type PayoutInput = {
   length: AssignmentLength;
   job: Job;
   ownedUpgradeIds: readonly string[];
+  /** Clean assignments in a row before this one. Leave out for none. */
+  streak?: number;
 };
 
+/** Everything that multiplies your pay at once: job, upgrades and clean streak (not length or accuracy). */
+export function overallMultiplier(job: Job, ownedUpgradeIds: readonly string[], streak = 0): number {
+  return job.payoutMultiplier * upgradeMultiplier(ownedUpgradeIds) * streakMultiplier(streak);
+}
+
+/** 3 -> "3", 4.5 -> "4.5", 3.4204 -> "3.42". For showing a multiplier. */
+export function formatMultiplier(multiplier: number): string {
+  return multiplier.toFixed(2).replace(/\.?0+$/, "");
+}
+
 /** Credits for one finished assignment, rounded so the HUD never shows long decimals. */
-export function payout({ characters, accuracy, length, job, ownedUpgradeIds }: PayoutInput): number {
+export function payout({ characters, accuracy, length, job, ownedUpgradeIds, streak = 0 }: PayoutInput): number {
   const raw =
     BASE_PAYOUT_PER_CHAR *
     characters *
     accuracyMultiplier(accuracy) *
     LENGTH_PAY[length] *
     job.payoutMultiplier *
+    streakMultiplier(streak) *
     upgradeMultiplier(ownedUpgradeIds);
   return Math.round(raw);
 }

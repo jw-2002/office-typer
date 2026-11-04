@@ -4,10 +4,10 @@ import { slots } from "./data/slots";
 import { pick, shuffled, type Rng } from "./random";
 
 export type { DocumentKind };
-export type AssignmentLength = "short" | "standard" | "long";
+export type AssignmentLength = "tiny" | "short" | "standard" | "long";
 
 /** Target character counts. An assignment runs up to one sentence over its target. */
-export const LENGTH_TARGETS = { short: 120, standard: 250, long: 450 } as const satisfies Record<
+export const LENGTH_TARGETS = { tiny: 45, short: 90, standard: 170, long: 300 } as const satisfies Record<
   AssignmentLength,
   number
 >;
@@ -76,7 +76,10 @@ export function generateAssignment(
   const opening = fill(pick(rng, scenario.opening));
   const closing = fill(pick(rng, scenario.closing));
 
-  // Fill the body until the text, including the closing line, reaches the target.
+  // A tiny assignment is just the opening line. Otherwise fill the body until the text, including the closing line,
+  // reaches the target.
+  if (length === "tiny")
+    return { scenarioId: scenario.id, kind: scenario.kind, title: fill(scenario.title), text: opening };
   const sentences = [opening];
   let size = opening.length + closing.length + 1;
   for (const template of shuffled(rng, scenario.body)) {

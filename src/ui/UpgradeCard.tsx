@@ -1,9 +1,8 @@
 // One upgrade in the shop: name, effect, cost and a button to buy it, or to switch to it once owned. Used for every upgrade.
-import { CURRENCY } from "@/game/currency";
-import type { Upgrade } from "@/game/data/upgrades";
-import { formatNumber } from "@/game/economy";
+import { isEquippable, type Upgrade } from "@/game/data/upgrades";
 import type { BuyStatus } from "@/game/progress";
 import Button from "./Button";
+import Money from "./Money";
 import styles from "./UpgradeCard.module.css";
 
 type UpgradeCardProps = {
@@ -26,15 +25,32 @@ export default function UpgradeCard({ upgrade, status, equipped, onBuy, onEquip 
         <span className={styles.effect}>
           {upgrade.assistant
             ? `${upgrade.assistant.wpm} WPM, ${Math.round(upgrade.assistant.accuracy * 100)}% accurate`
-            : `x${upgrade.payoutMultiplier} pay`}
-          {upgrade.cost > 0 && ` - ${CURRENCY.symbol}${formatNumber(upgrade.cost)}`}
+            : upgrade.category === "extra" || upgrade.category === "music"
+              ? "Just for fun"
+              : `x${upgrade.payoutMultiplier} pay`}
+          {upgrade.cost > 0 && (
+            <>
+              {" - "}
+              <Money amount={upgrade.cost} />
+            </>
+          )}
         </span>
       </div>
       {owned ? (
-        // Owned upgrades can be swapped between. Only the best one earns the pay bonus, whichever is in use.
-        <Button aria-pressed={equipped} disabled={equipped} onClick={onEquip}>
-          {equipped ? "In use" : "Use"}
-        </Button>
+        upgrade.category === "music" ? (
+          // A song is chosen to play, and only one plays at a time.
+          <Button aria-pressed={equipped} disabled={equipped} onClick={onEquip}>
+            {equipped ? "Playing" : "Play"}
+          </Button>
+        ) : isEquippable(upgrade.category) ? (
+          // Owned tiers can be swapped between. Only the best one earns the pay bonus, whichever is in use.
+          <Button aria-pressed={equipped} disabled={equipped} onClick={onEquip}>
+            {equipped ? "In use" : "Use"}
+          </Button>
+        ) : (
+          // Extras just sit in the office, so there is nothing to switch.
+          <Button disabled>Owned</Button>
+        )
       ) : (
         <Button disabled={status !== "ok"} onClick={onBuy}>
           {status === "locked" ? "Locked" : "Buy"}

@@ -13,7 +13,7 @@ function Slab({
   color: string;
 }) {
   return (
-    <mesh position={position}>
+    <mesh position={position} receiveShadow>
       <boxGeometry args={size} />
       <meshStandardMaterial color={color} roughness={0.9} />
     </mesh>

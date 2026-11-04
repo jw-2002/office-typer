@@ -1,6 +1,6 @@
 # Office Typer
 
-A short 3D browser game about typing (30 to 80 minutes). The player sits at an office desk, completes typing
+A short 3D browser game about typing (about 20 to 55 minutes). The player sits at an office desk, completes typing
 assignments shown on an in-world monitor, earns currency, and spends it on upgrades (computer, key switches,
 AI assistants that type on their own). Completing enough work earns promotions. The game ends when the top AI
 assistant makes the player redundant. Main goal: **fun**, not teaching typing.

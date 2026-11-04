@@ -2,6 +2,7 @@
 // The same layout is used on the desk (live, with the desktop on the screen) and on the shelf (a model only).
 import type { ComputerLook } from "./computerLooks";
 import Monitor, { MonitorBody } from "./Monitor";
+import LaptopBase from "./LaptopBase";
 import PcCase from "./PcCase";
 
 /** Where the front of every monitor sits, so a deeper (older) one extends further back. */
@@ -22,6 +23,7 @@ export default function ComputerSet({ look, live = false }: ComputerSetProps) {
       <group position={[0, 0, MONITOR_FRONT_Z - look.depth / 2]}>
         {live ? <Monitor look={look} /> : <MonitorBody look={look} />}
       </group>
+      {look.laptop && <LaptopBase look={look} />}
       {look.pcCase && (
         <PcCase look={look.pcCase} position={[caseSpots[look.pcCase.kind][0], 0, caseSpots[look.pcCase.kind][1]]} />
       )}

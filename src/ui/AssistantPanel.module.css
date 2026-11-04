@@ -69,7 +69,7 @@
   margin: 0;
   padding: var(--space-3);
   font-family: var(--font-mono);
-  font-size: var(--assignment-font-size, 1.1rem);
+  font-size: calc(var(--assignment-font-size, 1.1rem) * var(--text-scale, 1));
   line-height: 1.5;
   white-space: pre-wrap;
 }

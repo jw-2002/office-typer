@@ -48,6 +48,8 @@ export default function PostureHint() {
   const view = useViewStore((state) => state.view);
   const setView = useViewStore((state) => state.setView);
   const seated = view === "seated";
+  // During the intro there is nothing to stand up from yet.
+  if (view === "intro") return null;
 
   return (
     <button

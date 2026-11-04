@@ -31,7 +31,7 @@ Done:
   behind an API. Content is written as **scenarios** (`src/game/data/scenarios.ts`): one coherent
   topic each (a jammed printer, a fire drill...) with opening lines, a pool of body sentences
   and closing lines. An assignment is one scenario: an opening, shuffled body sentences up to the
-  length target (Short 120, Standard 250, Long 450 characters), and a closing. `{slot}` values
+  length target (Tiny 45, Short 90, Standard 170, Long 300 characters; Tiny is just the opening line), and a closing. `{slot}` values
   (names, days, things) stay the same across the whole assignment, and `{name2}` gives a
   different value from the same list. Seeded rng, so it is repeatable and testable.
   About 5 microseconds to generate, and a few KB of data.
@@ -220,7 +220,7 @@ tiers with dynamic `import()` so only the current tier is downloaded.
 
 ## Phase 6 - AI assistants and the ending (done)
 
-**The game is now short and finite.** It lasts about 38 minutes for a 100 WPM typist, 50 for 70 WPM and 80 for 40 WPM
+**The game is now short and finite.** It lasts about 31 minutes for a 100 WPM typist, 43 for 70 WPM and 67 for 40 WPM
 (tuned with a simulation: standard assignments, 96% accuracy, buying upgrades as soon as affordable). It ends when you
 buy the best AI assistant and are made redundant. No offline progress, no database, no accounts, no ads: it is a fun
 little single-player game, saved in the browser.
@@ -228,7 +228,7 @@ little single-player game, saved in the browser.
 - **Assistants** are a fourth upgrade category (`category: "assistant"`), so they use the same shop cards, buying in
   order, owned list and Use / In use swapping as everything else. Each has a speed (WPM) and accuracy
   (`AssistantSpec` in `src/game/data/upgrades.ts`). Gippity-1: 8 WPM at 80% (400), Drama Llama 7B: 20 at 88%
-  (3,000), Gemstone Flash: 45 at 94% (25,000), Clyde Octet 5: 100 at 99% (150,000, ends the game).
+  (3,000), Gemstone Flash: 45 at 94% (25,000), Clyde Octet 5: 100 at 99% (100,000, ends the game).
 - **Income** (`assistantIncome` in `economy.ts`): characters per second x 0.25 x accuracy squared x your job
   multiplier x your upgrade multiplier. No length bonus, so a fast typist on Long assignments stays ahead of the
   cheaper assistants. The assistant in use earns, so you can swap back to an older one. Its characters do **not**
@@ -244,17 +244,83 @@ little single-player game, saved in the browser.
   career". Nothing earns or can be bought after that. The fastest run is kept in localStorage (`recordsStore`).
 - **Retuned for a short game**: the promotion ladder is 0.4 of the original 15-hour one (200, 600, 1,275, 2,200,
   3,400, 5,000, 7,000 and 9,600 characters), so promotions come quickly (a 70 WPM typist is promoted at about 1, 2,
-  4, 6, 10, 14, 20 and 27 minutes). The top assistant costs 150,000 to keep the game the same length, which leaves a
-  final stretch of saving up for it. Everything else costs what it did.
+  4, 6, 10, 14, 20 and 27 minutes). The top assistant costs 100,000, which leaves a final stretch of saving up for it
+  (it was 150,000, which made the game about 15% longer). Everything else costs what it did.
 - Save format is version 3 (adds `finale`, `stats.secondsPlayed` and the assistant category).
 - **Scenarios**: now 20 per tier, 60 in all (30 new). Each tier has a goblin one (`goblin-cupboard`,
   `goblin-sighting`, `goblin-policy`), so the goblin habit is not only Gippity-1's. New tests keep it honest:
   body sentences may not be numbered ("Risk 1:") or point at other sentences ("as mentioned"), because they are
   shuffled. That guard found and fixed the same flaw in the older meeting minutes.
 
-## Phase 7 - Scenery shop and polish
+## Phase 7 - Scenery, atmosphere and polish (started)
 
-- Buyable decor, replace primitives with real models, lighting pass, sound pass, balance pass.
+Done so far:
+
+- **Time of day and shadows**: the office has a game clock that runs fast, one real second per clock minute, so a day is
+  24 minutes of play (`src/game/time.ts`; the game starts at 08:00). `daylight.ts` works out the sun (moon at night):
+  where it is, its colour and strength, the ambient light and the sky, fading smoothly between times. `Sun.tsx` feeds
+  that into a shadow-casting directional light, so shadows swing across the desk and go long and orange at dusk. The
+  Canvas has `shadows` on, and the room, desk, monitor, cases, keyboard, name plate and shelf cast or receive them.
+  Tests check the light never jumps between one minute and the next.
+- **Desk extras** (a fifth shop column, just for fun, any order, no pay effect): Gerald the Plant (80), Desk Lamp (200,
+  glows after dark), Desk Clock (300, hands follow the game clock), Tiny Goblin (500, looks around) and Helping Hands
+  (1,500, two white gloves that press whatever keys you type). They are not tiers, so there is nothing to swap
+  (`isEquippable`), and they live in `src/scene/extras/`.
+- **Readable themes**: `themeContrast.test.ts` measures every text and background pairing in all five OS themes against
+  the 4.5:1 contrast standard, and found real problems. A selected "In use" button was grey text on a bright fill in
+  the neon and quantum looks; that is fixed, along with several low-contrast colours in the other themes. The locked
+  shop cards are less faded.
+- **Monitor clearance**: tilting a deep CRT swung its back edge into the flat case under it. `tiltClearance` lifts a
+  tilted monitor by exactly the amount needed (about 2 cm for the CRT).
+- **Game length**: the top assistant now costs 100,000, so a game is 31 / 43 / 67 minutes at 100 / 70 / 40 WPM.
+
+- **Scenery and polish pass**: a rolling office chair (it pushes itself aside when you stand), plank floor with skirting
+  and a rug, a sky window with curtains (its glass shows the real sky colour), a cork board with sticky notes, a goblin
+  poster, desk clutter (steaming mug, paper, pen pot, mouse and mat, cable), dark outlines on the main blocks, bloom,
+  a light vignette and ACES tone mapping (`@react-three/postprocessing`), a hemisphere ambient light, dust motes in
+  daylight, a floating reward number when an assignment is finished, and sounds (office hum, birds by day, crickets at
+  night, chair creak). The Helping Hands have two-segment fingers: the finger for each key (`fingers.ts`) bends onto it.
+  The standing camera is higher and further back so the window and chair show.
+- **Peripherals and laptop**: the keyboard and mouse come with the computer (`keyboard` and `mouse` in
+  `computerLooks.ts`: beige, grey, silver, black with pink light, silver with amber light). The laptop has a real base
+  with a trackpad (`LaptopBase`) and its keyboard sits on it. The mouse slides on its mat as you move the pointer
+  over the screen, and the Helping Hands add a third glove that holds it and clicks. The chair is pushed in under the
+  desk when you stand. The monitor page is hidden when something is in front of it (drei `occlude`).
+- **Funnier assignments**: `scenariosWild.ts` adds 30 stranger scenarios (10 per tier): a pigeon with a desk, a haunted
+  copier, a wizard in accounts, receipts from the future, goblin KPIs, the assistant "not taking your job", a cat
+  chairing a call. Same rules and tests as the others, and all family friendly.
+- **Intro and name**: a new game (or a reset) starts zoomed right up to the monitor, which shows a welcome box asking for
+  your name (`NameDialog`, rules in `cleanPlayerName`). Typing is ignored until you have given one. On "Start work" the
+  camera pans back to the seated view and the name goes on the desk plate above your job title. The name is saved
+  (`player.name`); a save without one shows the intro. `CameraView` gained `intro`, and `viewStore` can jump to a view
+  instantly (used when the game loads).
+- **Monitor in front of objects, fixed**: the monitor page now sits behind the canvas, which has a see-through hole where
+  the glass is (`occlude="blending"` with a zero-blend material). Hands, mugs and dust draw over the screen. The
+  canvas wrapper is `pointer-events: none` and an isolated stacking context so clicks still reach the page.
+- **Shorter game and shorter assignments**: lengths are now Tiny / Short / Standard / Long (45, 90, 170 and 300
+  characters; Tiny pays x0.75). Job thresholds were cut to 150, 450, 950, 1,650, 2,550, 3,700, 5,200 and 7,000 characters
+  and the later upgrades got cheaper (top assistant 55,000). `src/game/simulate.ts` plays a whole game with a steady typist,
+  and `simulate.test.ts` keeps the pacing honest: about 22 minutes at 100 WPM, 33 at 60 WPM and 46 at 40 WPM on
+  Standard assignments.
+- **Clean streak**: `stats.streak` counts assignments finished at 98% accuracy or better in a row (+4% pay each, up to
+  +40%). It is saved (repaired to 0 on old saves).
+- **Music**: the game starts with none. Three songs are bought in the shop (new `music` category: Cubicle Acid 120,
+  Lunch Break Lo-Fi 300, Photocopier Funk 700), each an old-school acid-bass loop made in code: a resonant filtered
+  bass line, kick, hats and claps (`audio/tracks.ts` data, `audio/musicPlayer.ts` scheduler). A bought song starts at
+  once; the Music section in Settings (and the shop) chooses which plays. The choice is in `audioStore`, not the save.
+- **Light from the window**: the sun and moon now shine in from behind the desk (through the window in the back wall), so
+  shadows fall toward you and across the desk. Low graphics turns shadows off completely.
+- **Settings**: volume slider, reduced motion (camera jumps, no dust or
+  steam, no animated screen changes; starts on if the OS asks for it), larger assignment text, and a low graphics
+  mode (no shadows, bloom or edge smoothing, normal pixel density). Display settings live in
+  `displayStore`, sound settings in `audioStore`, both in localStorage. Birds and crickets are quieter and rarer.
+- **Ending recap** names you, counts characters typed and gives a leaving gift.
+- **More scenarios**: `scenarios.ts` is now just the types and pools. The everyday ones are split by tier
+  (`scenariosEveryday1/2/3.ts`), beside `scenariosWild.ts` and the new `scenariosExtra.ts` (15 more odd ones).
+- **Left out on purpose**: the seated camera sway, because the seated view is meant to feel locked.
+
+Still to do: play it start to finish by hand (the pacing so far comes from the simulator), and check performance on a
+real GPU (shadows, bloom and outlines were only tried with software rendering; the low graphics setting is the fallback).
 
 ## Dropped
 
@@ -285,3 +351,25 @@ deploying from git. Saves live in the browser's localStorage behind a small `Sav
   to build the desk at real-world scale in metres and scale the Keyboard group down when it
   is placed on the desk.
 - A final pass on balance once it has been played start to finish.
+
+## Polish ideas (keeping it blocky, primitives only) - all done except the camera sway
+
+Roughly in order of how much they add for how little work:
+
+1. **A chair.** A blocky office chair (seat, backrest, base) behind the desk, so standing up shows an empty chair.
+2. **Room dressing.** Skirting boards, floor planks (strips of boxes in slightly different browns), a rug under the desk, a
+   window with the sky colour in it (so the time of day is visible, not just felt), a curtain, a door, a cork board
+   with sticky notes, and a goblin poster.
+3. **Desk clutter.** A mug that steams, a stack of paper, a pen pot, sticky notes round the monitor edge, a mouse and mat,
+   and cables (thin boxes) running from the monitor to the case.
+4. **Glow.** A little bloom (post-processing) so the lamp, the neon case, the toaster slots and the screen light up
+   properly, plus a very light vignette.
+5. **Richer ambient light.** A hemisphere light (sky colour from above, floor colour from below) instead of flat ambient,
+   so undersides pick up warm bounce light from the floor, and tint the shadows slightly toward the sky.
+6. **Outlines.** A dark outline round each block (an inverted, slightly larger copy), for a toy or board-game look.
+   It is the biggest style change, so try it on a few objects first.
+7. **Small motion.** A "+credits" number that floats up from the monitor when you finish, a pulsing power light, dust
+   motes in the sunbeam, and a very slight breathing sway of the seated camera.
+8. **Sound.** Office hum, birds in the morning and crickets at night, a chair creak when you stand up.
+9. **Palette discipline.** Pick about ten colours and keep every object to them, with small variations, so the room
+   looks designed rather than assembled.
