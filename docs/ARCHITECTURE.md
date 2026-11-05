@@ -45,9 +45,9 @@ logic. Assignment text comes from `assignments.ts` + `data/`.
   `Solid` makes things block clicks, and `canvasEvents.ts` measures the pointer from the canvas. 1 unit = 1 metre.
   Scenery: `Floor` (planks, skirting, rug), `WallDecor` (window, cork board, poster), `Chair` (pushed in under the desk when
   standing), `DeskClutter`, `DustMotes`, `RewardPopups` (floating pay number), and `palette.ts` holds the colours and
-  outline settings. `ui/NameDialog` (the intro), `Peripherals` (keyboard and mouse that match the computer), `Mouse` and `extras/MouseHand`, `LaptopBase`, `keyboard/HelpingHands` and `keyboard/fingers.ts` animate the gloves. `GoblinPoster` is the goblin mode easter egg (poke it), with `ui/GoblinOverlay`, `GoblinText` and `GoblinHint` for the green screen and text. `extras/` also has the click-to-play toys (stress ball, rubber duck, mini fridge, second monitor). `Scene` also adds bloom,
+  outline settings. `ui/NameDialog` (the intro), `Peripherals` (keyboard and mouse that match the computer), `Mouse` and `extras/MouseHand`, `LaptopBase`, `keyboard/HelpingHands` and `keyboard/fingers.ts` animate the gloves. `GoblinPoster` is the goblin mode easter egg (poke it), with `ui/GoblinOverlay`, `GoblinText` and `GoblinHint` for the green screen and text. `extras/` also has the click-to-play toys (stress ball, rubber duck, mini fridge, second monitor), and `QuantumToaster` (the toaster's lever and toast, with its joke in `game/toast.ts`). `Scene` also adds bloom,
   vignette and tone mapping through `EffectComposer`. Ambient sounds are in `src/audio/keyClicker.ts`, chosen by
   `src/game/ambience.ts` and played from `state/KeySounds.tsx`.
-- `src/ui` the DOM overlay. `Desktop` (window + task bar tabs) holds `AssignmentPanel`, `ShopPanel`, `CareerPanel`, `AssistantPanel` and `SettingsPanel`,
+- `src/ui` the DOM overlay. `Desktop` (window + task bar tabs, drawn as `TabIcon` pictures) holds `AssignmentPanel`, `ShopPanel`, `CareerPanel`, `AssistantPanel` and `SettingsPanel`,
   and shows `Dialog`-based messages (`ConfirmDialog`, `PromotionDialog`) over them;
   it appears on the 3D monitor via `MonitorScreen`, or in the HUD on touch. `osThemes.css` restyles it all.

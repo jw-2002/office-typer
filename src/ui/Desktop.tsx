@@ -21,6 +21,7 @@ import ShopPanel from "./ShopPanel";
 import Tray from "./Tray";
 import Window from "./Window";
 import WindowControls from "./WindowControls";
+import TabIcon from "./TabIcon";
 import styles from "./Desktop.module.css";
 
 const tabs = [
@@ -95,12 +96,15 @@ export default function Desktop({ current, typingField }: DesktopProps) {
           <Button
             key={id}
             aria-pressed={open && tab === id}
+            // The button shows only a picture, so the name is given here for screen readers and as a hover tip.
+            aria-label={label}
+            title={label}
             onClick={() => {
               setTab(id);
               setOpen(true);
             }}
           >
-            {label}
+            <TabIcon name={id} />
           </Button>
         ))}
         <Tray current={current} />

@@ -9,7 +9,7 @@ import PcCase from "./PcCase";
 const MONITOR_FRONT_Z = -0.15;
 
 /** Where on the surface (x, z) each kind of case goes. A flat desktop case sits under the monitor, at the back. */
-const caseSpots = { desktop: [0, -0.22], tower: [0.58, -0.12], toaster: [0.52, -0.12] } as const;
+const caseSpots = { desktop: [0, -0.22], tower: [0.58, -0.12], toaster: [0.62, -0.12] } as const;
 
 type ComputerSetProps = {
   look: ComputerLook;
@@ -25,7 +25,11 @@ export default function ComputerSet({ look, live = false }: ComputerSetProps) {
       </group>
       {look.laptop && <LaptopBase look={look} />}
       {look.pcCase && (
-        <PcCase look={look.pcCase} position={[caseSpots[look.pcCase.kind][0], 0, caseSpots[look.pcCase.kind][1]]} />
+        <PcCase
+          live={live}
+          look={look.pcCase}
+          position={[caseSpots[look.pcCase.kind][0], 0, caseSpots[look.pcCase.kind][1]]}
+        />
       )}
     </>
   );

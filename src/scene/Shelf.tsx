@@ -1,23 +1,22 @@
-// A shelf on the back wall holding the computers you own but are not using. Click one to switch to it.
+// A shelf on the back wall holding the computers you own but are not using, together in the middle. Click one to switch to it.
 import { Outlines } from "@react-three/drei";
 import { upgrades } from "@/game/data/upgrades";
 import { useEquipped, useGameStore } from "@/state/gameStore";
 import ComputerSet from "./ComputerSet";
 import { computerLook } from "./computerLooks";
-import { SET_CENTER, outline, palette } from "./palette";
+import { SET_CENTER, SHELF, outline, palette } from "./palette";
 
-const SHELF = { width: 4.4, depth: 0.3, thickness: 0.04, y: 1.1, z: -1.8 } as const;
 // The old computers are shown at a fraction of their real size, so a whole row fits on the shelf.
 const SCALE = 0.3;
 
-// One fixed spot (x position along the shelf) per computer, so each old one always sits in the same place.
-// The middle of the shelf is hidden behind the monitor, so they sit in two groups at the sides.
+// One fixed spot (x position along the shelf) per computer, so each old one always sits in the same place. They share
+// the middle of the shelf; the desk extras that live on the shelf are at the two ends (see `extras/Extras.tsx`).
 const SPOTS: Readonly<Record<string, number>> = {
-  "beige-box": -1.7,
-  "grey-tower": -1.3,
-  "silver-laptop": 1.2,
-  "gaming-rig": 1.5,
-  "quantum-toaster": 1.8,
+  "beige-box": -0.7,
+  "grey-tower": -0.35,
+  "silver-laptop": 0,
+  "gaming-rig": 0.35,
+  "quantum-toaster": 0.7,
 };
 
 const computers = upgrades.filter((upgrade) => upgrade.category === "computer");

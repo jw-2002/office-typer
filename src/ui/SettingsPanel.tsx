@@ -103,15 +103,6 @@ export default function SettingsPanel({ onRequestReset }: SettingsPanelProps) {
             {message}
           </p>
         </section>
-
-        <section>
-          <h3 className={styles.heading}>Start again</h3>
-          <p className={styles.text}>
-            Erases your {CURRENCY.name}, upgrades, promotions and record, and starts over as an Intern. Your game is
-            saved in this browser automatically, so this is the only way to wipe it.
-          </p>
-          <Button onClick={onRequestReset}>Reset game...</Button>
-        </section>
       </div>
 
       <div className={styles.column}>
@@ -174,6 +165,15 @@ export default function SettingsPanel({ onRequestReset }: SettingsPanelProps) {
               Graphics: {display.quality === "low" ? "low" : "high"}
             </Button>
           </div>
+        </section>
+
+        <section>
+          <h3 className={styles.heading}>Start again</h3>
+          <p className={styles.text}>
+            Erases your {CURRENCY.name}, upgrades, promotions and record, and starts over as an Intern. Your game is
+            saved in this browser automatically, so this is the only way to wipe it.
+          </p>
+          <Button onClick={onRequestReset}>Reset game...</Button>
         </section>
       </div>
     </div>

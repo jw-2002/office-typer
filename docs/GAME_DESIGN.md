@@ -81,7 +81,7 @@ redundancy. "Start a new career" begins again. A faster run (better typing, earl
 
 ## Time of day
 
-The office has a day and night. The clock runs fast, one real second per minute, so a day is 24 minutes of play (the
+The office has a day and night. The clock runs fast, three clock minutes per real second, so a day is 8 minutes of play (the
 game starts at 8 in the morning). The sun crosses the sky, its shadows move across the desk, light turns orange at
 dawn and dusk, and the room goes blue at night. The desk lamp glows after dark and the desk clock shows the time.
 

@@ -38,6 +38,8 @@ export type ComputerLook = {
   mouse: MouseLook | null;
   /** A laptop: the screen hinges off a flat base that the keyboard sits in. */
   laptop?: boolean;
+  /** Width of the glass in metres, if not the usual one. A laptop's is smaller, so its keyboard does not look tiny. */
+  screenWidth?: number;
   /** Height of the screen centre above the surface, if not the usual one. */
   screenY?: number;
 };
@@ -47,8 +49,10 @@ export const computerLooks = {
     frameColor: "#d8cfb8",
     bezel: 0.045,
     depth: 0.26,
-    // A flat 90s desktop case with the CRT sitting on top. Its height matches the gap under the CRT.
-    pcCase: { kind: "desktop", color: "#d8cfb8", size: [0.46, 0.075, 0.36] },
+    // A flat 90s desktop case with the CRT sitting on top. Its height matches the gap under the CRT, and both are kept low
+    // so the old computers on the shelf behind can be seen over the top.
+    pcCase: { kind: "desktop", color: "#d8cfb8", size: [0.46, 0.04, 0.36] },
+    screenY: 0.265,
     keyboard: { caseColor: "#cfc6ae", capColor: "#e4dcc4", legendColor: "#4b4636" },
     mouse: { color: "#d8cfb8", matColor: "#7c6f57" },
   },
@@ -69,7 +73,8 @@ export const computerLooks = {
     mouse: null,
     laptop: true,
     // The lid hinges at the back of the base, so the screen sits lower than a monitor on a stand.
-    screenY: 0.215,
+    screenWidth: 0.5,
+    screenY: 0.175,
   },
   "gaming-rig": {
     frameColor: "#111827",

@@ -8,10 +8,9 @@ import { useCurrentAssignment } from "@/state/useCurrentAssignment";
 import MonitorScreen from "@/ui/MonitorScreen";
 import { SCREEN_PX } from "@/ui/screenSize";
 import type { ComputerLook } from "./computerLooks";
-import { tiltClearance } from "./monitorGeometry";
+import { screenSize, tiltClearance } from "./monitorGeometry";
 import { outline, palette } from "./palette";
 
-const SCREEN = { width: 0.64, height: 0.36 } as const;
 // Centre of the glass above the desk. The same for every monitor, so the camera framing never changes.
 const SCREEN_Y = 0.3;
 // How far the screen leans back, in radians (about 11 degrees).
@@ -19,7 +18,7 @@ const TILT = 0.2;
 
 // drei's <Html transform> draws one CSS pixel as (distanceFactor / 400) metres, so this makes the
 // DOM page exactly as wide as the screen.
-const DISTANCE_FACTOR = (SCREEN.width / SCREEN_PX.width) * 400;
+const distanceFactor = (screenWidth: number) => (screenWidth / SCREEN_PX.width) * 400;
 
 // The glass as the 3D scene sees it: a surface that blends to nothing (zero colour, zero opacity), so the canvas is
 // transparent there and the web page behind it shows through. It still hides whatever is behind it.
@@ -41,7 +40,8 @@ type MonitorBodyProps = {
 };
 
 export function MonitorBody({ look, children }: MonitorBodyProps) {
-  const frame = { width: SCREEN.width + look.bezel * 2, height: SCREEN.height + look.bezel * 2, depth: look.depth };
+  const glass = screenSize(look.screenWidth);
+  const frame = { width: glass.width + look.bezel * 2, height: glass.height + look.bezel * 2, depth: look.depth };
   const screenY = look.screenY ?? SCREEN_Y;
   const frameBottom = screenY - frame.height / 2;
   // Leaning back swings the back-bottom edge of a deep monitor down, which would push it into the case under it.
@@ -62,7 +62,7 @@ export function MonitorBody({ look, children }: MonitorBodyProps) {
 
         {/* The dark glass. meshBasicMaterial ignores lights, which is right for something that glows. */}
         <mesh position={[0, 0, screenZ]}>
-          <planeGeometry args={[SCREEN.width, SCREEN.height]} />
+          <planeGeometry args={[glass.width, glass.height]} />
           <meshBasicMaterial color={palette.screenOff} />
         </mesh>
 
@@ -99,7 +99,13 @@ export default function Monitor({ look }: { look: ComputerLook }) {
         // zIndexRange keeps the page beneath the 2D HUD. occlude="blending" puts the page BEHIND the canvas and cuts a
         // see-through hole in the 3D picture where the glass is. Anything in front of the screen (a hand, a mug, the
         // dust) is drawn over the hole, so the page can never appear in front of 3D objects.
-        <Html transform occlude="blending" material={HOLE} distanceFactor={DISTANCE_FACTOR} zIndexRange={[0, 0]}>
+        <Html
+          transform
+          occlude="blending"
+          material={HOLE}
+          distanceFactor={distanceFactor(screenSize(look.screenWidth).width)}
+          zIndexRange={[0, 0]}
+        >
           <MonitorScreen current={current} />
         </Html>
       )}

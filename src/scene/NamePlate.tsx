@@ -12,6 +12,8 @@ const HEIGHT = 0.045;
 const DEPTH = 0.05;
 // The face leans back about 30 degrees, like a real wedge plate, so it reads from above.
 const LEAN = 0.5;
+/** How much of a plate's metalness is used. Full strength renders almost black here, as nothing is reflected. */
+const METAL_SHOWN = 0.3;
 /** How long the pop-in takes, in seconds. */
 const POP_SECONDS = 0.9;
 
@@ -61,9 +63,11 @@ export default function NamePlate({ position, rotationY = 0 }: NamePlateProps) {
             <meshStandardMaterial
               color={look.color}
               roughness={0.35}
-              metalness={look.metalness}
-              emissive={look.glow ?? "#000000"}
-              emissiveIntensity={look.glow ? 0.35 : 0}
+              // Shiny metal looks black without a reflected environment, which would hide the lettering. So the metal is
+              // toned down, and the plate gives off a little of its own colour (emissive) so it always shows its true colour.
+              metalness={look.metalness * METAL_SHOWN}
+              emissive={look.glow ?? look.color}
+              emissiveIntensity={look.glow ? 0.35 : 0.3}
             />
           </mesh>
           {/* The name is the big line and the job title sits under it. Before a name is given only the title shows. */}

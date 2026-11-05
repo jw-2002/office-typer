@@ -12,3 +12,11 @@ export function tiltClearance(frameHeight: number, frameDepth: number, tilt: num
   const untilted = -frameHeight / 2;
   return Math.max(0, untilted - lowest);
 }
+
+/** The visible screen area of every monitor and laptop lid, in metres. The frame around it adds the bezel. */
+export const SCREEN = { width: 0.64, height: 0.36 } as const;
+
+/** The glass size for a screen of this width (16:9), for computers whose screen is not the usual size, like a laptop. */
+export function screenSize(width: number = SCREEN.width): { width: number; height: number } {
+  return { width, height: (width * SCREEN.height) / SCREEN.width };
+}

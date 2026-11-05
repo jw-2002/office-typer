@@ -256,8 +256,8 @@ little single-player game, saved in the browser.
 
 Done so far:
 
-- **Time of day and shadows**: the office has a game clock that runs fast, one real second per clock minute, so a day is
-  24 minutes of play (`src/game/time.ts`; the game starts at 08:00). `daylight.ts` works out the sun (moon at night):
+- **Time of day and shadows**: the office has a game clock that runs fast, three clock minutes per real second, so a day is
+  8 minutes of play (`src/game/time.ts`; the game starts at 08:00). `daylight.ts` works out the sun (moon at night):
   where it is, its colour and strength, the ambient light and the sky, fading smoothly between times. `Sun.tsx` feeds
   that into a shadow-casting directional light, so shadows swing across the desk and go long and orange at dusk. The
   Canvas has `shadows` on, and the room, desk, monitor, cases, keyboard, name plate and shelf cast or receive them.

@@ -1,11 +1,11 @@
-// The time of day in the office. It runs fast: one real second is one minute on the clock, so a whole day takes 24
+// The time of day in the office. It runs fast: one real second is three minutes on the clock, so a whole day takes 8
 // minutes of play. Pure, so it can be tested. The clock only moves while the game is being played.
 
 export const MINUTES_PER_DAY = 1440;
 /** The game starts at eight in the morning. */
 export const START_MINUTES = 8 * 60;
 /** How many clock minutes pass each real second. */
-export const CLOCK_MINUTES_PER_SECOND = 1;
+export const CLOCK_MINUTES_PER_SECOND = 3;
 
 /** The time of day, in minutes since midnight (0 to 1439), after the game has been played for this many seconds. */
 export function timeOfDay(secondsPlayed: number): number {

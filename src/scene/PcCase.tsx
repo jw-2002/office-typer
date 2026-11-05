@@ -3,22 +3,54 @@ import { Outlines, RoundedBox } from "@react-three/drei";
 import { Color } from "three";
 import type { CaseLook } from "./computerLooks";
 import { outline } from "./palette";
+import QuantumToaster from "./QuantumToaster";
 
-export default function PcCase({ look, position }: { look: CaseLook; position: [number, number, number] }) {
+type PcCaseProps = {
+  look: CaseLook;
+  position: [number, number, number];
+  /** True for the computer in use, whose parts can be clicked (the toaster lever). */
+  live?: boolean;
+};
+
+export default function PcCase({ look, position, live = false }: PcCaseProps) {
   const [width, height, depth] = look.size;
   // A colour brighter than white (each channel above 1) is what makes the glow effect light it up.
   const hot = new Color(look.glow ?? "#ffffff").multiplyScalar(10);
+
+  // The box itself, lifted by half its height so its base touches the desk.
+  const body = (
+    <RoundedBox castShadow receiveShadow args={[width, height, depth]} radius={0.01} position={[0, height / 2, 0]}>
+      <meshStandardMaterial
+        color={look.color}
+        roughness={look.kind === "toaster" ? 0.3 : 0.6}
+        metalness={look.kind === "toaster" ? 0.2 : 0}
+      />
+      <Outlines {...outline} />
+    </RoundedBox>
+  );
+
+  if (look.kind === "toaster") {
+    return (
+      // Turned a quarter turn, so its front faces the middle of the desk and it takes less room sideways.
+      <group position={position} rotation={[0, -Math.PI / 2, 0]}>
+        {/* The whole toaster is inside the clickable part, so a click anywhere on it works the levers. */}
+        <QuantumToaster height={height} depth={depth} interactive={live}>
+          {body}
+          {/* Two slots on top, glowing from inside. */}
+          {[-0.07, 0.07].map((x) => (
+            <mesh key={x} position={[x, height + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[0.1, 0.02]} />
+              <meshBasicMaterial color={hot} toneMapped={false} />
+            </mesh>
+          ))}
+        </QuantumToaster>
+      </group>
+    );
+  }
+
   return (
-    // The group sits on the desk; the case is lifted by half its height so its base touches it.
     <group position={position}>
-      <RoundedBox castShadow receiveShadow args={[width, height, depth]} radius={0.01} position={[0, height / 2, 0]}>
-        <meshStandardMaterial
-          color={look.color}
-          roughness={look.kind === "toaster" ? 0.3 : 0.6}
-          metalness={look.kind === "toaster" ? 0.2 : 0}
-        />
-        <Outlines {...outline} />
-      </RoundedBox>
+      {body}
 
       {look.kind === "desktop" && (
         <>
@@ -49,18 +81,6 @@ export default function PcCase({ look, position }: { look: CaseLook; position: [
             <circleGeometry args={[0.012, 16]} />
             <meshStandardMaterial color="#374151" />
           </mesh>
-        </>
-      )}
-
-      {look.kind === "toaster" && (
-        <>
-          {/* Two slots on top, glowing from inside. */}
-          {[-0.07, 0.07].map((x) => (
-            <mesh key={x} position={[x, height + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[0.1, 0.02]} />
-              <meshBasicMaterial color={hot} toneMapped={false} />
-            </mesh>
-          ))}
         </>
       )}
 

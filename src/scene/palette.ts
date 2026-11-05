@@ -41,3 +41,6 @@ export const KEY_UNIT = 0.019;
 
 /** Rough centre (x, z) of a computer set, for placing a scaled copy of it, for example on the shelf. */
 export const SET_CENTER = { x: 0.1, z: -0.25 } as const;
+
+/** The shelf on the back wall: its size and where its top surface is (y), shared by the shelf and what stands on it. */
+export const SHELF = { width: 4.4, depth: 0.3, thickness: 0.04, y: 1.1, z: -1.8 } as const;
