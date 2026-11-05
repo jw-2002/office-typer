@@ -39,6 +39,15 @@ export function streakMultiplier(streak: number): number {
   return 1 + STREAK_BONUS_STEP * Math.min(Math.max(Math.floor(streak), 0), MAX_STREAK);
 }
 
+/** Each career you have finished before this one adds this much pay, up to `MAX_LEGACY` careers. */
+export const LEGACY_BONUS_STEP = 0.1;
+export const MAX_LEGACY = 10;
+
+/** Pay multiplier from earlier careers: 1 on the first, 1.1 on the second, up to 2 on the eleventh and later. */
+export function legacyMultiplier(legacy: number): number {
+  return 1 + LEGACY_BONUS_STEP * Math.min(Math.max(Math.floor(legacy), 0), MAX_LEGACY);
+}
+
 /** The best (highest tier) upgrade owned in a category. Tiers are listed in order in the data. */
 export function bestOwned(ownedIds: readonly string[], category: Upgrade["category"]): Upgrade | undefined {
   const owned: readonly Upgrade[] = upgrades.filter((u) => u.category === category && ownedIds.includes(u.id));
@@ -65,6 +74,8 @@ export type PayoutInput = {
   goblin?: boolean;
   /** The document of the day. */
   featured?: boolean;
+  /** Careers finished before this one. */
+  legacy?: number;
 };
 
 /** Everything that multiplies your pay at once: job, upgrades and clean streak (not length or accuracy). */
@@ -73,11 +84,13 @@ export function overallMultiplier(
   ownedUpgradeIds: readonly string[],
   streak = 0,
   goblinMode = false,
+  legacy = 0,
 ): number {
   return (
     job.payoutMultiplier *
     upgradeMultiplier(ownedUpgradeIds) *
     streakMultiplier(streak) *
+    legacyMultiplier(legacy) *
     (goblinMode ? GOBLIN_MULTIPLIER : 1)
   );
 }
@@ -97,6 +110,7 @@ export function payout({
   streak = 0,
   goblin = false,
   featured = false,
+  legacy = 0,
 }: PayoutInput): number {
   const raw =
     BASE_PAYOUT_PER_CHAR *
@@ -107,6 +121,7 @@ export function payout({
     streakMultiplier(streak) *
     (goblin ? GOBLIN_MULTIPLIER : 1) *
     (featured ? FEATURED_MULTIPLIER : 1) *
+    legacyMultiplier(legacy) *
     upgradeMultiplier(ownedUpgradeIds);
   return Math.round(raw);
 }
@@ -115,13 +130,19 @@ export function payout({
  * Credits an AI assistant earns per second. It uses your job and upgrade multipliers, like your own typing, but gets no
  * length bonus, so a skilled typist on Long assignments stays ahead of the cheaper assistants.
  */
-export function assistantIncome(assistant: AssistantSpec, job: Job, ownedUpgradeIds: readonly string[]): number {
+export function assistantIncome(
+  assistant: AssistantSpec,
+  job: Job,
+  ownedUpgradeIds: readonly string[],
+  legacy = 0,
+): number {
   const charactersPerSecond = (assistant.wpm * 5) / 60;
   return (
     charactersPerSecond *
     BASE_PAYOUT_PER_CHAR *
     accuracyMultiplier(assistant.accuracy) *
     job.payoutMultiplier *
+    legacyMultiplier(legacy) *
     upgradeMultiplier(ownedUpgradeIds)
   );
 }

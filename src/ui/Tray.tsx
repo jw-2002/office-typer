@@ -15,7 +15,8 @@ export default function Tray({ current }: { current: CurrentAssignment }) {
   const owned = useGameStore((state) => state.upgrades);
   const streak = useGameStore((state) => state.stats.streak);
   const goblin = useGameStore(goblinActive);
-  const multiplier = overallMultiplier(job, owned, streak, goblin);
+  const legacy = useGameStore((state) => state.legacy);
+  const multiplier = overallMultiplier(job, owned, streak, goblin, legacy);
 
   return (
     <div className={styles.tray}>

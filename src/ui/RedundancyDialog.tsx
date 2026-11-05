@@ -1,7 +1,7 @@
 // The ending. The top AI assistant can do your job, so you are made redundant. Shows how the run went and offers a new one.
 import { useEffect, useId } from "react";
 import { upgrades, type Upgrade } from "@/game/data/upgrades";
-import { formatDuration, formatNumber } from "@/game/economy";
+import { formatDuration, formatNumber, legacyMultiplier } from "@/game/economy";
 import { currentJob } from "@/game/progress";
 import { useGameStore } from "@/state/gameStore";
 import { useRecordsStore } from "@/state/recordsStore";
@@ -28,7 +28,8 @@ export default function RedundancyDialog() {
   const stats = useGameStore((state) => state.stats);
   const name = useGameStore((state) => state.player.name);
   const job = useGameStore(currentJob);
-  const reset = useGameStore((state) => state.reset);
+  const newCareer = useGameStore((state) => state.newCareer);
+  const legacy = useGameStore((state) => state.legacy);
   const fastest = useRecordsStore((state) => state.fastestSeconds);
   const recordRun = useRecordsStore((state) => state.recordRun);
 
@@ -73,7 +74,9 @@ export default function RedundancyDialog() {
       </dl>
       <GoblinHint />
       <DialogActions>
-        <Button onClick={reset}>Start a new career</Button>
+        <Button onClick={newCareer}>
+          Start a new career (+{Math.round((legacyMultiplier(legacy + 1) - 1) * 100)}% pay)
+        </Button>
       </DialogActions>
     </Dialog>
   );

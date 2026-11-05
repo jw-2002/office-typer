@@ -12,8 +12,12 @@ type WindowProps = {
 
 export default function Window({ title, controls, className, children }: WindowProps) {
   return (
-    <section className={className ? `${styles.window} ${className}` : styles.window} aria-label={title}>
-      <header className={styles.titlebar}>
+    <section
+      className={className ? `${styles.window} ${className}` : styles.window}
+      aria-label={title}
+      data-os-part="window"
+    >
+      <header className={styles.titlebar} data-os-part="titlebar">
         <h2 className={styles.title}>{title}</h2>
         {controls && <span className={styles.controls}>{controls}</span>}
       </header>

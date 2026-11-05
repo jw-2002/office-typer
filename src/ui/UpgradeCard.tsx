@@ -48,8 +48,10 @@ export default function UpgradeCard({ upgrade, status, equipped, onBuy, onEquip 
             {equipped ? "In use" : "Use"}
           </Button>
         ) : (
-          // Extras just sit in the office, so there is nothing to switch.
-          <Button disabled>Owned</Button>
+          // A desk extra can be put away (and brought back) without losing it.
+          <Button aria-pressed={equipped} onClick={onEquip}>
+            {equipped ? "Put away" : "Put out"}
+          </Button>
         )
       ) : (
         <Button disabled={status !== "ok"} onClick={onBuy}>

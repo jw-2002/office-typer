@@ -6,6 +6,7 @@ import {
   BASE_PAYOUT_PER_CHAR,
   accuracyMultiplier,
   LENGTH_PAY,
+  legacyMultiplier,
   formatMultiplier,
   overallMultiplier,
   MAX_STREAK,
@@ -227,5 +228,15 @@ describe("overallMultiplier", () => {
     expect(formatMultiplier(3)).toBe("3");
     expect(formatMultiplier(4.5)).toBe("4.5");
     expect(formatMultiplier(3.4204)).toBe("3.42");
+  });
+});
+
+describe("legacy", () => {
+  it("adds ten percent per finished career, up to ten careers", () => {
+    expect(legacyMultiplier(0)).toBe(1);
+    expect(legacyMultiplier(3)).toBeCloseTo(1.3);
+    expect(legacyMultiplier(10)).toBeCloseTo(2);
+    expect(legacyMultiplier(50)).toBeCloseTo(2);
+    expect(overallMultiplier(jobs[0], [], 0, false, 2)).toBeCloseTo(1.2);
   });
 });

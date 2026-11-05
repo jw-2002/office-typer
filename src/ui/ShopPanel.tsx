@@ -1,6 +1,6 @@
 // The upgrade shop, shown as a program in the desktop window: every upgrade grouped by category.
 import { categoryLabels, isEquippable, upgradeCategories, upgrades } from "@/game/data/upgrades";
-import { buyStatus } from "@/game/progress";
+import { buyStatus, isOnDesk } from "@/game/progress";
 import { useAudioStore } from "@/state/audioStore";
 import { useGameStore } from "@/state/gameStore";
 import UpgradeCard from "./UpgradeCard";
@@ -11,6 +11,7 @@ export default function ShopPanel() {
   const progress = useGameStore();
   const buy = useGameStore((state) => state.buy);
   const equip = useGameStore((state) => state.equip);
+  const toggleStowed = useGameStore((state) => state.toggleStowed);
   const track = useAudioStore((state) => state.track);
   const setTrack = useAudioStore((state) => state.setTrack);
 
@@ -30,10 +31,18 @@ export default function ShopPanel() {
                   equipped={
                     upgrade.category === "music"
                       ? track === upgrade.id
-                      : isEquippable(upgrade.category) && progress.equipped[upgrade.category] === upgrade.id
+                      : upgrade.category === "extra"
+                        ? isOnDesk(progress, upgrade.id)
+                        : isEquippable(upgrade.category) && progress.equipped[upgrade.category] === upgrade.id
                   }
                   onBuy={() => buy(upgrade.id)}
-                  onEquip={() => (upgrade.category === "music" ? setTrack(upgrade.id) : equip(upgrade.id))}
+                  onEquip={() =>
+                    upgrade.category === "music"
+                      ? setTrack(upgrade.id)
+                      : upgrade.category === "extra"
+                        ? toggleStowed(upgrade.id)
+                        : equip(upgrade.id)
+                  }
                 />
               ))}
           </ul>

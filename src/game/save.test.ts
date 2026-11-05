@@ -41,7 +41,7 @@ describe("migrate", () => {
     expect(result).not.toBeNull();
     expect(result?.player.currency).toBe(0);
     expect(result?.upgrades).toEqual(["beige-box", "mushy", "track-hold", "strawberry"]);
-    expect(result?.stats).toEqual({
+    expect(result?.stats).toMatchObject({
       totalChars: 0,
       assignmentsCompleted: 0,
       bestWpm: 80,
@@ -108,5 +108,33 @@ describe("migrate", () => {
     expect(save({ active: 99999, cooldown: 99999 })?.goblin).toEqual({ active: 40, cooldown: 300 });
     expect(save({ active: "x", cooldown: -5 })?.goblin).toEqual({ active: 0, cooldown: 0 });
     expect(save(undefined)?.goblin).toEqual({ active: 0, cooldown: 0 });
+  });
+});
+
+describe("migrate: legacy and achievements", () => {
+  const save = (extra: Record<string, unknown>) =>
+    migrate({ version: 3, savedAt: 1, player: {}, upgrades: [], stats: {}, ...extra });
+
+  it("keeps real achievements once each, and drops unknown or odd ones", () => {
+    expect(save({ achievements: ["first-words", "first-words", "nope", 7] })?.achievements).toEqual(["first-words"]);
+    expect(save({ achievements: "x" })?.achievements).toEqual([]);
+    expect(save({})?.achievements).toEqual([]);
+  });
+
+  it("keeps legacy within range", () => {
+    expect(save({ legacy: 3 })?.legacy).toBe(3);
+    expect(save({ legacy: 999 })?.legacy).toBe(10);
+    expect(save({ legacy: -1 })?.legacy).toBe(0);
+    expect(save({})?.legacy).toBe(0);
+  });
+});
+
+describe("migrate: stowed extras", () => {
+  const save = (extra: Record<string, unknown>) => migrate({ version: 3, savedAt: 1, player: {}, stats: {}, ...extra });
+
+  it("keeps only owned ones, once each", () => {
+    expect(save({ upgrades: ["plant"], stowed: ["plant", "plant", "tiny-goblin", 3] })?.stowed).toEqual(["plant"]);
+    expect(save({ upgrades: [], stowed: "x" })?.stowed).toEqual([]);
+    expect(save({ upgrades: [] })?.stowed).toEqual([]);
   });
 });

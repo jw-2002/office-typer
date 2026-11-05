@@ -1,0 +1,26 @@
+/* The achievement pop-up: a small raised card in the top corner of the desktop. It never takes the pointer. */
+.toast {
+  composes: raised from "./surface.module.css";
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 14rem;
+  padding: var(--space-2);
+  pointer-events: none;
+  font-size: 0.85rem;
+}
+
+.label {
+  color: var(--color-muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.more {
+  color: var(--color-muted);
+}

@@ -10,6 +10,7 @@ import { equippedUpgrade } from "@/game/progress";
 import { timeOfDay } from "@/game/time";
 import { useAudioStore } from "./audioStore";
 import { useGameStore } from "./gameStore";
+import { useSoundCueStore } from "./soundCueStore";
 import { useKeyInput } from "./useKeyInput";
 import { useViewStore } from "./viewStore";
 
@@ -63,6 +64,15 @@ export default function KeySounds() {
       if (state.volume !== previous.volume) clicker.setVolume(state.volume);
     });
   }, [clicker]);
+
+  // Sounds asked for by other parts of the app: the desk toys, office events and achievements.
+  useEffect(
+    () =>
+      useSoundCueStore.subscribe((state) => {
+        if (state.cue && !useAudioStore.getState().muted) clicker[state.cue.name]();
+      }),
+    [clicker],
+  );
 
   // A promotion gets a fanfare, once, when the reward that carries it arrives. Being made redundant gets a sad tune.
   useEffect(

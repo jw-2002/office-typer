@@ -19,6 +19,9 @@ import {
   MAX_NAME_LENGTH,
   cleanPlayerName,
   setPlayerName,
+  startNewCareer,
+  isOnDesk,
+  toggleStowed,
   GOBLIN_COOLDOWN_SECONDS,
   GOBLIN_SECONDS,
   goblinActive,
@@ -36,7 +39,7 @@ describe("completeAssignment", () => {
     const { progress, reward } = completeAssignment(newProgress(), perfect(120));
     expect(reward.payout).toBe(30);
     expect(progress.player.currency).toBe(30);
-    expect(progress.stats).toEqual({
+    expect(progress.stats).toMatchObject({
       totalChars: 120,
       assignmentsCompleted: 1,
       bestWpm: 60,
@@ -353,5 +356,57 @@ describe("goblin mode", () => {
   it("does nothing once made redundant", () => {
     const over: Progress = { ...newProgress(), finale: { stage: "redundant", seconds: 0 } };
     expect(startGoblinMode(over)).toBe(over);
+  });
+});
+
+describe("new careers and stats", () => {
+  it("keeps the name, achievements and a growing legacy, and wipes the rest", () => {
+    const old: Progress = {
+      ...withCredits(500),
+      player: { name: "Bo", currency: 500 },
+      upgrades: ["beige-box", "mushy", "strawberry"],
+      achievements: ["first-words"],
+      legacy: 1,
+    };
+    const next = startNewCareer(old);
+    expect(next.player).toEqual({ name: "Bo", currency: 0 });
+    expect(next.legacy).toBe(2);
+    expect(next.achievements).toEqual(["first-words"]);
+    expect(next.upgrades).toEqual(newProgress().upgrades);
+    expect(next.stats.totalChars).toBe(0);
+  });
+
+  it("pays more in a later career", () => {
+    const first = completeAssignment(newProgress(), perfect(400)).reward.payout;
+    const second = completeAssignment({ ...newProgress(), legacy: 3 }, perfect(400)).reward.payout;
+    expect(second).toBe(Math.round(first * 1.3));
+  });
+
+  it("tracks the best streak and perfect Long assignments", () => {
+    const clean = { characters: 100, accuracy: 1, wpm: 60, length: "long" as const };
+    let progress = completeAssignment(newProgress(), clean).progress;
+    progress = completeAssignment(progress, clean).progress;
+    progress = completeAssignment(progress, { ...clean, accuracy: 0.5 }).progress;
+    expect(progress.stats).toMatchObject({ streak: 0, bestStreak: 2, perfectLongs: 2 });
+  });
+});
+
+describe("putting desk extras away", () => {
+  const owning = (ids: string[]): Progress => ({ ...newProgress(), upgrades: [...newProgress().upgrades, ...ids] });
+
+  it("puts an owned extra away and back out again, and it stays owned", () => {
+    const start = owning(["plant"]);
+    expect(isOnDesk(start, "plant")).toBe(true);
+    const away = toggleStowed(start, "plant");
+    expect(isOnDesk(away, "plant")).toBe(false);
+    expect(away.upgrades).toContain("plant");
+    expect(isOnDesk(toggleStowed(away, "plant"), "plant")).toBe(true);
+  });
+
+  it("only works for extras you own", () => {
+    const start = owning(["plant"]);
+    expect(toggleStowed(start, "tiny-goblin")).toBe(start);
+    expect(toggleStowed(start, "grey-tower")).toBe(start);
+    expect(toggleStowed(start, "nope")).toBe(start);
   });
 });

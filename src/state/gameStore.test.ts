@@ -80,11 +80,14 @@ describe("game store", () => {
 
   it("progressOf leaves out actions and the last reward", () => {
     expect(Object.keys(progressOf(useGameStore.getState())).sort()).toEqual([
+      "achievements",
       "equipped",
       "finale",
       "goblin",
+      "legacy",
       "player",
       "stats",
+      "stowed",
       "upgrades",
     ]);
   });

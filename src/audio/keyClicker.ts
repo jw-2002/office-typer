@@ -20,6 +20,14 @@ export type KeyClicker = {
   creak: () => void;
   /** A gravelly goblin cackle, for the start of goblin mode. */
   goblin: () => void;
+  /** A squeaky toy, for the stress ball. */
+  squeak: () => void;
+  /** A rubber duck. */
+  quack: () => void;
+  /** A heavy door shutting or opening, for the mini fridge. */
+  clunk: () => void;
+  /** A two-note ping, for an office event or an achievement. */
+  ping: () => void;
   /** A little rising ping for a clean streak. The longer the streak, the higher it sounds. */
   streak: (count: number) => void;
   /** Plays a song on a loop (replacing any that is playing), or stops the music with null. Needs a first sound before it can start. */
@@ -55,6 +63,26 @@ function fadingGain({ ctx, master }: Audio, gain: number, seconds: number, delay
   node.gain.exponentialRampToValueAtTime(0.0001, start + seconds);
   node.connect(master);
   return node;
+}
+
+/** A tone that slides from one pitch to another, played from `delay` seconds from now and faded out over `seconds`. */
+function glide(
+  audio: Audio,
+  type: OscillatorType,
+  from: number,
+  to: number,
+  gain: number,
+  seconds: number,
+  delay: number,
+) {
+  const oscillator = audio.ctx.createOscillator();
+  oscillator.type = type;
+  const start = audio.ctx.currentTime + delay;
+  oscillator.frequency.setValueAtTime(from, start);
+  oscillator.frequency.exponentialRampToValueAtTime(to, start + seconds * 0.8);
+  oscillator.connect(fadingGain(audio, gain, seconds, delay));
+  oscillator.start(start);
+  oscillator.stop(start + seconds + 0.02);
 }
 
 /** A tone of one pitch, played from `delay` seconds from now and faded out over `seconds`. */
@@ -200,6 +228,37 @@ export function createKeyClicker(): KeyClicker {
         tone(ready, "sawtooth", 150 + index * 18, 0.22, last ? 0.35 : 0.09, index * 0.11);
         tone(ready, "square", 300 + index * 36, 0.08, last ? 0.35 : 0.09, index * 0.11);
       });
+    },
+
+    squeak() {
+      const ready = start();
+      if (!ready) return;
+      glide(ready, "sine", 900, 1700, 0.2, 0.1, 0);
+      glide(ready, "sine", 1300, 2200, 0.16, 0.09, 0.1);
+    },
+
+    quack() {
+      const ready = start();
+      if (!ready) return;
+      // Two short nasal honks, each sliding down a little.
+      [0, 0.16].forEach((delay) => {
+        glide(ready, "sawtooth", 520, 330, 0.16, 0.12, delay);
+        glide(ready, "square", 1040, 660, 0.04, 0.12, delay);
+      });
+    },
+
+    clunk() {
+      const ready = start();
+      if (!ready) return;
+      glide(ready, "sine", 140, 60, 0.4, 0.2, 0);
+      tone(ready, "triangle", 900, 0.05, 0.03, 0);
+    },
+
+    ping() {
+      const ready = start();
+      if (!ready) return;
+      tone(ready, "triangle", 880, 0.2, 0.18, 0);
+      tone(ready, "triangle", 1320, 0.2, 0.3, 0.1);
     },
 
     streak(count) {

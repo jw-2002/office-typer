@@ -1,5 +1,7 @@
 // The save file format: one versioned object, how to build it, and how to read old or damaged ones safely.
+import { achievements } from "./data/achievements";
 import { startingUpgradeIds, upgrades } from "./data/upgrades";
+import { MAX_LEGACY } from "./economy";
 import { GOBLIN_COOLDOWN_SECONDS, GOBLIN_SECONDS, cleanPlayerName, normaliseEquipped, type Progress } from "./progress";
 
 export const SAVE_VERSION = 3;
@@ -30,6 +32,8 @@ const migrations: Readonly<Record<number, (old: Record<string, unknown>) => Reco
   // 2 -> 3 added the AI assistant category, `finale` and `stats.secondsPlayed`. All are filled in by validation below.
   2: (old) => old,
 };
+
+const knownAchievements = new Set(achievements.map((achievement) => achievement.id));
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -84,6 +88,17 @@ export function migrate(raw: unknown): SaveData | null {
       stage: finale.stage === "pending" || finale.stage === "redundant" ? finale.stage : "none",
       seconds: count(finale.seconds),
     },
+    stowed: Array.isArray(current.stowed)
+      ? [...new Set(current.stowed.filter((id): id is string => typeof id === "string" && ownedIds.includes(id)))]
+      : [],
+    legacy: Math.min(Math.floor(count(current.legacy)), MAX_LEGACY),
+    achievements: Array.isArray(current.achievements)
+      ? [
+          ...new Set(
+            current.achievements.filter((id): id is string => typeof id === "string" && knownAchievements.has(id)),
+          ),
+        ]
+      : [],
     // The timers are capped, so editing a save cannot give a longer goblin mode or a cooldown that never ends.
     goblin: {
       active: Math.min(count(goblin.active), GOBLIN_SECONDS),
@@ -97,6 +112,11 @@ export function migrate(raw: unknown): SaveData | null {
       secondsPlayed: count(stats.secondsPlayed),
       streak: Math.floor(count(stats.streak)),
       goblinUses: Math.floor(count(stats.goblinUses)),
+      bestStreak: Math.floor(count(stats.bestStreak)),
+      perfectLongs: Math.floor(count(stats.perfectLongs)),
+      presents: Math.floor(count(stats.presents)),
+      cardsSigned: Math.floor(count(stats.cardsSigned)),
+      eventsHandled: Math.floor(count(stats.eventsHandled)),
     },
   };
 }

@@ -11,7 +11,7 @@ const LIFETIME_SECONDS = 1.8;
 const RISE = 0.28;
 
 /** One floating number. It is created fresh for each finished assignment (see the key below), so it starts at zero age. */
-function Popup({ text }: { text: string }) {
+function Popup({ text, goblin }: { text: string; goblin: boolean }) {
   const label = useRef<{ fillOpacity: number; outlineOpacity: number; position: { y: number } } | null>(null);
   const age = useRef(0);
 
@@ -31,10 +31,10 @@ function Popup({ text }: { text: string }) {
       ref={label as never}
       raycast={() => null}
       position={[0.3, DESK_HEIGHT + 0.12, 0.04]}
-      fontSize={0.06}
-      color="#fde047"
+      fontSize={goblin ? 0.075 : 0.06}
+      color={goblin ? "#39ff14" : "#fde047"}
       outlineWidth={0.006}
-      outlineColor="#22160e"
+      outlineColor={goblin ? "#04200a" : "#22160e"}
       anchorX="center"
       anchorY="middle"
     >
@@ -48,5 +48,6 @@ export default function RewardPopups() {
   // A new key for every finished assignment makes React start a new popup, so each one animates from the beginning.
   const finished = useGameStore((state) => state.stats.assignmentsCompleted);
   if (!reward || reward.payout <= 0) return null;
-  return <Popup key={finished} text={`+${CURRENCY.symbol}${formatNumber(reward.payout)}`} />;
+  const amount = `+${CURRENCY.symbol}${formatNumber(reward.payout)}`;
+  return <Popup key={finished} text={reward.goblin ? `GOBBLE! ${amount}` : amount} goblin={reward.goblin} />;
 }

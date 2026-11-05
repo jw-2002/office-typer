@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Outlines, RoundedBox, Text } from "@react-three/drei";
 import { BoxGeometry, Color, MathUtils, MeshStandardMaterial, type Group } from "three";
+import { isOnDesk } from "@/game/progress";
 import { useEquipped, useGameStore } from "@/state/gameStore";
 import { useKeyInput } from "@/state/useKeyInput";
 import HelpingHands from "./HelpingHands";
@@ -97,7 +98,7 @@ export default function Keyboard() {
   const look: KeyboardLook = computerLook(useEquipped("computer")?.id).keyboard;
   const restColor = useMemo(() => new Color(look.capColor), [look.capColor]);
   const switchId = useEquipped("switches")?.id;
-  const hasHands = useGameStore((state) => state.upgrades.includes("helping-hands"));
+  const hasHands = useGameStore((state) => isOnDesk(state, "helping-hands"));
   const colorHex = (switchId && switchColors[switchId]) || DEFAULT_SWITCH_COLOR;
 
   // Built once per switch colour and shared by every key. We create these ourselves, so we also dispose them.

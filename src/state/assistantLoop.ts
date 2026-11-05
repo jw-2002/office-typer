@@ -1,6 +1,7 @@
-// The game clock: about once a second it moves the game on, so the AI assistant earns and the redundancy countdown runs.
+// The game clock: about once a second it moves the game on, so the AI assistant earns, the redundancy countdown runs and office events come round.
 // One loop for everything that happens by itself, not a timer per feature. It never runs while the tab is hidden, and a
 // long gap (a slept laptop) counts for at most a couple of seconds, so there is no earning while you are away.
+import { useEventStore } from "./eventStore";
 import { useGameStore } from "./gameStore";
 
 const TICK_MS = 1000;
@@ -16,7 +17,9 @@ export function startAssistantLoop(): () => void {
     const elapsed = (now - last) / 1000;
     last = now;
     if (document.hidden) return;
-    useGameStore.getState().tick(Math.min(elapsed, MAX_STEP_SECONDS));
+    const seconds = Math.min(elapsed, MAX_STEP_SECONDS);
+    useGameStore.getState().tick(seconds);
+    useEventStore.getState().tick(seconds);
   }, TICK_MS);
 
   return () => clearInterval(id);

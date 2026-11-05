@@ -332,6 +332,27 @@ Done so far:
 - **Sun, moon and stars**: the window shows the sun by day and the moon by night, crossing the window on the same path as
   the light, so the shadows agree (sun on the right means shadows fall left). Stars twinkle at night
   (`skySpot` and `nightness` in `daylight.ts`). The floating sparkles (dust) now only appear at night.
+- **Achievements**: 17 small goals in the Career tab (`data/achievements.ts`, checked by `achievements.ts` after anything that
+  could earn one). Earned ones are saved and kept through a new career, and show a pop-up and a ping.
+- **Office events**: every 2.5 to 5 minutes (the first after 90 seconds) the office interrupts with a few choices
+  (`data/events.ts`, rules in `events.ts`, on screen via `eventStore` and `EventDialog`): a birthday card to sign (and chip in
+  for the present), a leaving collection, a cake sale, a vending machine windfall and a fire drill. What generosity costs
+  is the base amount times your overall pay multiplier, so it keeps up with how well you are doing. Typing is paused while
+  one is open, and none comes during goblin mode or the intro.
+- **New careers**: after being made redundant, "Start a new career" keeps your name and achievements and adds +10% pay for
+  each finished career (up to +100%, `legacy`). The Settings reset still wipes everything.
+- **Four more desk extras**: a stress ball (squeaks), a rubber duck (quacks), a mini fridge (door opens) and a second
+  monitor (scrolling green lines). Clicking works through the `soundCueStore`, which lets 3D objects ask for a sound.
+- **Desk extras can be put away**: owned extras have a "Put away" / "Put out" button in the shop (`stowed` in the save).
+  Their spots are in one table in `extras/Extras.tsx`, laid out so none of them overlap each other or the monitor,
+  case, keyboard, mat, name plate, paper, mug or pen pot (with the tower case, the toaster, the CRT and the laptop).
+- **GOBBLE!** goblin assignments show a green "GOBBLE!" popup with the payout.
+- **Gaming rig uses Wundows 11** (the old neon look is gone): light frosted panels, a blue accent, rounded corners, window
+  buttons on the right and a four-square logo on the task bar. **Quantum OS** is livelier: a drifting aurora wallpaper with
+  floating sparkles, a border of light that runs around the window, a shimmering title bar and glowing buttons
+  (`data-os-part` hooks in `osThemes.css`).
+- **Dev helpers**: `officeTyper.give(n)` and `officeTyper.event()` in the browser console (dev server only), instead of
+  editing the starting balance.
 - **Document of the day**: the first assignment of each in-game day is marked and pays +50% (`FEATURED_MULTIPLIER`). It is
   not saved, so reloading can show one again.
 - **Settings layout**: the left column is your record and "Start again"; sound, music and display are on the right.

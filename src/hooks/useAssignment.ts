@@ -4,6 +4,7 @@ import { generateAssignment, rememberScenario, type Assignment, type AssignmentL
 import { assignmentResult, goblinActive } from "@/game/progress";
 import { dayNumber } from "@/game/time";
 import { applyKey, createTyping, isFinished, shiftTime, type TypingState } from "@/game/typing";
+import { useEventStore } from "@/state/eventStore";
 import { useGameStore } from "@/state/gameStore";
 import { useKeyInput } from "@/state/useKeyInput";
 import { useNow } from "./useNow";
@@ -89,6 +90,8 @@ export function useAssignment(tier: number) {
   const onKey = useEffectEvent((key: string) => {
     // Nothing is typed into the assignment until the player has given their name.
     if (useGameStore.getState().player.name === "") return;
+    // Nor while an office event is waiting for an answer.
+    if (useEventStore.getState().current !== null) return;
     if (!finished) dispatch({ type: "key", key, now: performance.now() });
     else if (key === "Enter") start(game.length);
   });

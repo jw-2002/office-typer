@@ -79,6 +79,17 @@ export const slots: Readonly<Record<string, readonly string[]>> = {
     "the filing project",
     "the visitor badges",
   ],
+  // Always phrased to follow "bought" or "chose" ("bought a succulent called Kevin"), for the card and present events.
+  gift: [
+    "a succulent called Kevin",
+    "a very large mug",
+    "a desk fan with opinions",
+    "a tiny gong",
+    "a calendar of famous staplers",
+    "a box of assorted pens",
+    "a rubber duck in a tie",
+    "a voucher for one (1) hug",
+  ],
   day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
   n: ["3", "7", "12", "25", "40", "65", "90"],
   q: ["1", "2", "3", "4"],

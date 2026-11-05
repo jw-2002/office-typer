@@ -26,6 +26,15 @@ export type Stats = {
   streak: number;
   /** How many times goblin mode has been started. */
   goblinUses: number;
+  /** The longest clean streak this career. */
+  bestStreak: number;
+  /** Long assignments finished with no mistakes at all. */
+  perfectLongs: number;
+  /** Presents chipped in for, and cards signed, in office events. */
+  presents: number;
+  cardsSigned: number;
+  /** Office events dealt with. */
+  eventsHandled: number;
 };
 
 /**
@@ -56,6 +65,12 @@ export type Progress = {
   equipped: Readonly<Record<EquippableCategory, string>>;
   finale: Finale;
   goblin: Goblin;
+  /** How many careers have been finished before this one. Each one adds a little permanent pay. */
+  legacy: number;
+  /** Ids of the achievements earned. They are kept through a new career. */
+  achievements: readonly string[];
+  /** Desk extras that are owned but put away, so they are not on the desk. */
+  stowed: readonly string[];
   stats: Stats;
 };
 
@@ -114,6 +129,8 @@ export type Reward = {
   /** The clean streak after this assignment, and how many were in it before (which set the bonus paid). */
   streak: number;
   bonusStreak: number;
+  /** Whether it was a goblin assignment, for the popup. */
+  goblin: boolean;
 };
 
 export function newProgress(): Progress {
@@ -123,6 +140,9 @@ export function newProgress(): Progress {
     equipped: normaliseEquipped(startingUpgradeIds, {}),
     finale: { stage: "none", seconds: 0 },
     goblin: { active: 0, cooldown: 0 },
+    legacy: 0,
+    achievements: [],
+    stowed: [],
     stats: {
       totalChars: 0,
       assignmentsCompleted: 0,
@@ -131,12 +151,41 @@ export function newProgress(): Progress {
       secondsPlayed: 0,
       streak: 0,
       goblinUses: 0,
+      bestStreak: 0,
+      perfectLongs: 0,
+      presents: 0,
+      cardsSigned: 0,
+      eventsHandled: 0,
     },
+  };
+}
+
+/** A new career after being made redundant: everything starts again, but you keep your name, achievements and a permanent pay bonus. */
+export function startNewCareer(progress: Progress): Progress {
+  return {
+    ...newProgress(),
+    player: { name: progress.player.name, currency: 0 },
+    legacy: progress.legacy + 1,
+    achievements: progress.achievements,
   };
 }
 
 export function currentJob(progress: Progress): Job {
   return jobFor(progress.stats.totalChars);
+}
+
+/** Whether a desk extra is owned and out on the desk (not put away). */
+export const isOnDesk = (progress: Pick<Progress, "upgrades" | "stowed">, id: string): boolean =>
+  progress.upgrades.includes(id) && !progress.stowed.includes(id);
+
+/** Puts an owned desk extra away, or back out on the desk. Anything else changes nothing. */
+export function toggleStowed(progress: Progress, id: string): Progress {
+  const upgrade: Upgrade | undefined = upgrades.find((candidate) => candidate.id === id);
+  if (!upgrade || upgrade.category !== "extra" || !progress.upgrades.includes(id)) return progress;
+  return {
+    ...progress,
+    stowed: progress.stowed.includes(id) ? progress.stowed.filter((other) => other !== id) : [...progress.stowed, id],
+  };
 }
 
 /** Whether goblin mode is on right now. */
@@ -171,19 +220,22 @@ export function completeAssignment(
     streak: progress.stats.streak,
     goblin: result.goblin,
     featured: result.featured,
+    legacy: progress.legacy,
   });
   const streak = result.accuracy >= CLEAN_ACCURACY ? progress.stats.streak + 1 : 0;
   const next: Progress = {
     ...progress,
     player: { ...progress.player, currency: progress.player.currency + credits },
     stats: {
+      ...progress.stats,
       totalChars: progress.stats.totalChars + result.characters,
       assignmentsCompleted: progress.stats.assignmentsCompleted + 1,
       bestWpm: Math.max(progress.stats.bestWpm, result.wpm),
       totalEarned: progress.stats.totalEarned + credits,
       secondsPlayed: progress.stats.secondsPlayed,
       streak,
-      goblinUses: progress.stats.goblinUses,
+      bestStreak: Math.max(progress.stats.bestStreak, streak),
+      perfectLongs: progress.stats.perfectLongs + (result.length === "long" && result.accuracy >= 1 ? 1 : 0),
     },
   };
   // The assignment after buying the top assistant is the player's last.
@@ -197,6 +249,7 @@ export function completeAssignment(
       promotedTo: after.id === before.id ? null : after,
       streak,
       bonusStreak: progress.stats.streak,
+      goblin: result.goblin === true,
     },
   };
 }
@@ -249,7 +302,7 @@ export function progressChanged(before: Progress, after: Progress): boolean {
 /** Credits per second from the assistant in use. 0 with none. */
 export function assistantRate(progress: Progress): number {
   const assistant = equippedUpgrade(progress, "assistant")?.assistant;
-  return assistant ? assistantIncome(assistant, currentJob(progress), progress.upgrades) : 0;
+  return assistant ? assistantIncome(assistant, currentJob(progress), progress.upgrades, progress.legacy) : 0;
 }
 
 /**

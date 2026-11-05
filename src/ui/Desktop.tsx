@@ -3,13 +3,16 @@
 import { useState, type ReactNode } from "react";
 import { osNames } from "@/game/data/os";
 import { useOs } from "@/hooks/useOsTheme";
+import { useEventStore } from "@/state/eventStore";
 import { useGameStore } from "@/state/gameStore";
 import type { CurrentAssignment } from "@/state/useCurrentAssignment";
+import AchievementToast from "./AchievementToast";
 import AssignmentPanel from "./AssignmentPanel";
 import AssistantPanel from "./AssistantPanel";
 import Button from "./Button";
 import CareerPanel from "./CareerPanel";
 import ConfirmDialog from "./ConfirmDialog";
+import EventDialog from "./EventDialog";
 import NameDialog from "./NameDialog";
 import PromotionDialog from "./PromotionDialog";
 import RedundancyDialog from "./RedundancyDialog";
@@ -46,6 +49,7 @@ export default function Desktop({ current, typingField }: DesktopProps) {
   const promotion = useGameStore((state) => state.lastReward?.promotedTo ?? null);
   const dismissPromotion = useGameStore((state) => state.dismissPromotion);
   const redundant = useGameStore((state) => state.finale.stage === "redundant");
+  const eventOpen = useEventStore((state) => state.current !== null);
   const introduced = useGameStore((state) => state.player.name !== "");
   const os = useOs();
 
@@ -60,7 +64,7 @@ export default function Desktop({ current, typingField }: DesktopProps) {
   };
 
   return (
-    <div className={styles.desktop} data-maximised={maximised}>
+    <div className={styles.desktop} data-maximised={maximised} data-os-part="desktop">
       {open ? (
         <Window
           title={title ?? ""}
@@ -86,7 +90,7 @@ export default function Desktop({ current, typingField }: DesktopProps) {
         <p className={styles.hint}>Nothing is open. Pick a program from the task bar.</p>
       )}
 
-      <nav className={styles.taskbar} aria-label="Programs">
+      <nav className={styles.taskbar} aria-label="Programs" data-os-part="taskbar">
         {tabs.map(({ id, label }) => (
           <Button
             key={id}
@@ -106,6 +110,10 @@ export default function Desktop({ current, typingField }: DesktopProps) {
       {promotion && !redundant && <PromotionDialog job={promotion} onClose={dismissPromotion} />}
 
       {redundant && <RedundancyDialog />}
+
+      {eventOpen && !redundant && introduced && <EventDialog />}
+
+      <AchievementToast />
 
       {!introduced && <NameDialog />}
 

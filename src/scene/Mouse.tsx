@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Outlines } from "@react-three/drei";
 import { Color, MathUtils, type Group } from "three";
+import { isOnDesk } from "@/game/progress";
 import { useGameStore } from "@/state/gameStore";
 import type { MouseLook } from "./computerLooks";
 import MouseHand from "./extras/MouseHand";
@@ -14,7 +15,7 @@ const REACH = { x: 0.06, z: 0.04 } as const;
 
 export default function Mouse({ look, position }: { look: MouseLook; position: [number, number, number] }) {
   const mouse = useRef<Group>(null!);
-  const hasHands = useGameStore((state) => state.upgrades.includes("helping-hands"));
+  const hasHands = useGameStore((state) => isOnDesk(state, "helping-hands"));
   // The glow colour is brighter than white, which is what makes the bloom effect light it up.
   const hot = look.glow ? new Color(look.glow).multiplyScalar(8) : null;
 
