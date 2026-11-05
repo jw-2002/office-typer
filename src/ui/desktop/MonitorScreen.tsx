@@ -1,13 +1,20 @@
 // What appears on the 3D monitor screen: the desktop, at a fixed pixel size the 3D scene maps onto the glass.
+import type { ReactNode } from "react";
 import type { CurrentAssignment } from "@/state/assignment/useCurrentAssignment";
 import Desktop from "./Desktop";
 import styles from "./MonitorScreen.module.css";
 import { SCREEN_PX } from "./screenSize";
 
-export default function MonitorScreen({ current }: { current: CurrentAssignment }) {
+export default function MonitorScreen({
+  current,
+  typingField,
+}: {
+  current: CurrentAssignment;
+  typingField?: ReactNode;
+}) {
   return (
     <div className={styles.screen} style={SCREEN_PX}>
-      <Desktop current={current} />
+      <Desktop current={current} typingField={typingField} />
     </div>
   );
 }

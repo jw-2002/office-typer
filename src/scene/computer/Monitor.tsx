@@ -3,9 +3,12 @@
 import type { ReactNode } from "react";
 import { Html, Outlines, RoundedBox } from "@react-three/drei";
 import { CustomBlending, DoubleSide, ZeroFactor } from "three";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useHudScreen } from "@/hooks/useHudScreen";
+import { KeyInputContext, useKeyInput } from "@/state/input/useKeyInput";
 import { useCurrentAssignment } from "@/state/assignment/useCurrentAssignment";
 import MonitorScreen from "@/ui/desktop/MonitorScreen";
+import TypingSink from "@/ui/programs/TypingSink";
 import { SCREEN_PX } from "@/ui/desktop/screenSize";
 import type { ComputerLook } from "./computerLooks";
 import { screenSize, tiltClearance } from "./monitorGeometry";
@@ -90,8 +93,11 @@ export function MonitorBody({ look, children }: MonitorBodyProps) {
 export default function Monitor({ look }: { look: ComputerLook }) {
   const current = useCurrentAssignment();
   // On a phone the desktop is in the HUD while it fills the screen, so the glass stays dark then. When the player
-  // looks around the office instead, the monitor shows it (to read; typing is done on the full-screen one).
+  // looks around the office instead, the monitor shows it (tapping the assignment still opens the keyboard).
   const inHud = useHudScreen();
+  const touch = useCoarsePointer();
+  // <Html> draws its DOM in a separate React root, which does not see our contexts, so pass the key input across.
+  const keyInput = useKeyInput();
 
   return (
     <MonitorBody look={look}>
@@ -107,7 +113,9 @@ export default function Monitor({ look }: { look: ComputerLook }) {
           distanceFactor={distanceFactor(screenSize(look.screenWidth).width)}
           zIndexRange={[0, 0]}
         >
-          <MonitorScreen current={current} />
+          <KeyInputContext value={keyInput}>
+            <MonitorScreen current={current} typingField={touch ? <TypingSink /> : undefined} />
+          </KeyInputContext>
         </Html>
       )}
     </MonitorBody>
