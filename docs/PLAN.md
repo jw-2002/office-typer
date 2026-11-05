@@ -22,12 +22,12 @@ Build a playable prototype first, then layer on. Each phase should leave the gam
 
 Done:
 
-- `src/game/typing.ts`: pure typing state machine (`applyKey`), accuracy, final and live WPM.
+- `src/game/text/typing.ts`: pure typing state machine (`applyKey`), accuracy, final and live WPM.
   Rule (TypeRacer style): keys keep being accepted after a mistake, but everything typed from
   the first mistake is wrong (shown red) and must be removed with Backspace. Backspace cannot
   undo correct characters. At most 10 wrong characters pile up.
-- `src/game/wpm.ts`: WPM maths and the rolling window.
-- `src/game/assignments.ts`: `generateAssignment(tier, length, rng)`. Text lives in the app, not
+- `src/game/text/wpm.ts`: WPM maths and the rolling window.
+- `src/game/text/assignments.ts`: `generateAssignment(tier, length, rng)`. Text lives in the app, not
   behind an API. Content is written as **scenarios** (`src/game/data/scenarios.ts`): one coherent
   topic each (a jammed printer, a fire drill...) with opening lines, a pool of body sentences
   and closing lines. An assignment is one scenario: an opening, shuffled body sentences up to the
@@ -35,9 +35,9 @@ Done:
   (names, days, things) stay the same across the whole assignment, and `{name2}` gives a
   different value from the same list. Seeded rng, so it is repeatable and testable.
   About 5 microseconds to generate, and a few KB of data.
-- `src/state/keyInput.ts` plus `KeyInputProvider`: one window key listener shared by the 3D keyboard
+- `src/state/input/keyInput.ts` plus `KeyInputProvider`: one window key listener shared by the 3D keyboard
   (held keys) and the typing game (typed characters). Ignores auto-repeat and Ctrl/Meta shortcuts.
-- `src/hooks/useAssignment.ts` and `src/ui/Hud.tsx`: a plain 2D overlay with live WPM, accuracy,
+- `src/state/assignment/useAssignment.ts` and `src/ui/hud/Hud.tsx`: a plain 2D overlay with live WPM, accuracy,
   time, Short/Standard/Long buttons, and Enter for the next assignment. A "You typed" box shows
   the real keys pressed, with mistakes in red. This moves onto the in-world monitor in Phase 3.
 
@@ -63,19 +63,19 @@ tiers with dynamic `import()` so only the current tier is downloaded.
 
 ## Phase 2 - Economy and saving (done)
 
-- **Store**: `src/state/gameStore.ts` (Zustand) holds `player.currency`, owned `upgrades` and
+- **Store**: `src/state/game/gameStore.ts` (Zustand) holds `player.currency`, owned `upgrades` and
   `stats` (total chars, assignments, best WPM, total earned), with `finishAssignment`, `buy` and
-  `load` actions. The rules are pure functions in `src/game/progress.ts`.
+  `load` actions. The rules are pure functions in `src/game/progress/progress.ts`.
 - **Data**: `src/game/data/upgrades.ts` (computers and key switches, tiers that must be bought in
   order) and `src/game/data/jobs.ts` (9 jobs). One generic `buy(id)` and one `UpgradeCard`.
-- **Economy** (`src/game/economy.ts`): payout = 0.25 per correct char x accuracy squared x job
+- **Economy** (`src/game/economy/economy.ts`): payout = 0.25 per correct char x accuracy squared x job
   multiplier x upgrade multiplier (best owned upgrade per category, multiplied across categories).
   Costs and multipliers are placeholders to balance later.
 - **Promotions** come from total correct characters, not assignment count, so choosing Short,
   Standard or Long cannot game it. A job also sets which scenario tier is used.
-- **Saving**: `src/game/save.ts` (versioned object, `migrate` repairs bad fields and rejects
-  unusable saves) and `src/state/localSaveRepository.ts` (async `SaveRepository`, backs up a
-  damaged save). `src/state/autosave.ts` loads on start, saves 5 seconds after a change, and on
+- **Saving**: `src/game/progress/save.ts` (versioned object, `migrate` repairs bad fields and rejects
+  unusable saves) and `src/state/game/localSaveRepository.ts` (async `SaveRepository`, backs up a
+  damaged save). `src/state/game/autosave.ts` loads on start, saves 5 seconds after a change, and on
   tab hide.
 - **UI**: HUD shows credits, job, characters to promotion and best WPM; a Shop button opens a
   simple panel. The shop moves to the monitor or room in Phase 4.
@@ -112,29 +112,29 @@ tiers with dynamic `import()` so only the current tier is downloaded.
 
 ## Phase 4 - Upgrades you can see and hear (done)
 
-- **Shop is a tab on the monitor** (decided). The monitor shows a fake desktop (`src/ui/Desktop.tsx`):
+- **Shop is a tab on the monitor** (decided). The monitor shows a fake desktop (`src/ui/desktop/Desktop.tsx`):
   one window with a title bar, and a task bar with Assignment and Shop tabs. On touch devices the
   same desktop sits in the HUD. The old floating shop panel and Shop button are gone.
 - **OS themes**: each computer upgrade has an `os` (`src/game/data/upgrades.ts`). The best computer
-  owned sets `<html data-os="...">` (`useOsTheme`), and `src/ui/osThemes.css` restyles everything
+  owned sets `<html data-os="...">` (`useOsTheme`), and `src/ui/desktop/osThemes.css` restyles everything
   through CSS tokens: HUD tiles, buttons, text boxes, the window, title bar, task bar and wallpaper.
   Beige Box = grey bevelled 90s style ("Wundows 95"), Grey Tower = blue and green ("Wundows XQ", id
   `sky`), Silver Laptop = light and rounded with traffic-light buttons and a top menu bar ("Pear OS"),
   Gaming Rig = dark with cyan and magenta glow ("Neon OS"), Quantum Toaster = glassy, warm and
   pill-shaped ("Quantum OS"). A test checks every theme sets the same tokens. Adding an OS means a
   new block in that file plus an entry in `src/game/data/os.ts`.
-- **3D computers**: `src/scene/computerLooks.ts` (keyed by computer id, so a new computer will not
+- **3D computers**: `src/scene/computer/computerLooks.ts` (keyed by computer id, so a new computer will not
   compile without a look) sets the monitor frame (a deep CRT for the Beige Box, slim for later
   ones) and the PC case beside it (beige tower, grey tower, black tower with a glow strip, a toaster;
   laptops have none).
-- **Key sounds**: `src/audio/switchSounds.ts` has a synthesis recipe per switch (clack, thock, and
+- **Key sounds**: `src/audio/sfx/switchSounds.ts` has a synthesis recipe per switch (clack, thock, and
   a click for tactile and clicky ones) and `keyClicker.ts` plays it with Web Audio, with random pitch
   jitter, so there are no sound files. `AudioProvider` plays it for every typed key using the best
   switches owned, and holds the mute setting (a Sound button in the HUD, remembered in localStorage).
   Checked in a headless browser that sounds are created, Shift is silent, and mute works. **How it
   actually sounds has not been heard yet.**
 - Also fixed: the Time readout showed a negative number just after the first keystroke.
-- **Switch colours** (`src/scene/keyboard/switchColors.ts`): the switch housing shows under each
+- **Switch colours** (`src/scene/computer/keyboard/switchColors.ts`): the switch housing shows under each
   keycap, and a pressed key flashes the same colour (Mushy yellow, Strawberry red, Chestnut brown,
   Blueberry blue).
 - **Swapping**: the player can switch between any computers and switches they own (the shop shows
@@ -146,7 +146,7 @@ tiers with dynamic `import()` so only the current tier is downloaded.
   the neon one glitches, the glassy one comes into focus. Turned off for `prefers-reduced-motion`.
 - **HUD corners** follow `--hud-radius`, which is square for the first two looks.
 - The first computer is now a flat 90s desktop case under a CRT (not a tower).
-- **Shelf** (`src/scene/Shelf.tsx`): the computers you own but are not using sit on a shelf on the
+- **Shelf** (`src/scene/room/Shelf.tsx`): the computers you own but are not using sit on a shelf on the
   back wall at 30% size, each in a fixed spot at the sides of the monitor. Click one to swap to it.
   This needed the monitor split into `MonitorBody` (model) and `Monitor` (adds the live screen), and a
   shared `ComputerSet` layout used by both the desk and the shelf. A plain scenery shelf is easy to
@@ -233,7 +233,7 @@ little single-player game, saved in the browser.
   multiplier x your upgrade multiplier. No length bonus, so a fast typist on Long assignments stays ahead of the
   cheaper assistants. The assistant in use earns, so you can swap back to an older one. Its characters do **not**
   count toward promotions: those stay about your own typing.
-- **Game clock** (`src/state/assistantLoop.ts`): one loop, once a second, calling `tick` on the store (pure rules in
+- **Game clock** (`src/state/game/assistantLoop.ts`): one loop, once a second, calling `tick` on the store (pure rules in
   `tickGame`). It skips hidden tabs and caps long gaps, so nothing earns while you are away.
 - **Assistant tab** (`AssistantPanel`): the assistant's speed, accuracy and income, and a live view of it typing
   (`useAssistantTyping`). The tray shows its income as a "+0.2/s" chip.
@@ -257,7 +257,7 @@ little single-player game, saved in the browser.
 Done so far:
 
 - **Time of day and shadows**: the office has a game clock that runs fast, three clock minutes per real second, so a day is
-  8 minutes of play (`src/game/time.ts`; the game starts at 08:00). `daylight.ts` works out the sun (moon at night):
+  8 minutes of play (`src/game/office/time.ts`; the game starts at 08:00). `daylight.ts` works out the sun (moon at night):
   where it is, its colour and strength, the ambient light and the sky, fading smoothly between times. `Sun.tsx` feeds
   that into a shadow-casting directional light, so shadows swing across the desk and go long and orange at dusk. The
   Canvas has `shadows` on, and the room, desk, monitor, cases, keyboard, name plate and shelf cast or receive them.
@@ -299,7 +299,7 @@ Done so far:
   canvas wrapper is `pointer-events: none` and an isolated stacking context so clicks still reach the page.
 - **Shorter game and shorter assignments**: lengths are now Tiny / Short / Standard / Long (45, 90, 170 and 300
   characters; Tiny pays x0.75). Job thresholds were cut to 150, 450, 950, 1,650, 2,550, 3,700, 5,200 and 7,000 characters
-  and the later upgrades got cheaper (top assistant 55,000). `src/game/simulate.ts` plays a whole game with a steady typist,
+  and the later upgrades got cheaper (top assistant 55,000). `src/game/economy/simulate.ts` plays a whole game with a steady typist,
   and `simulate.test.ts` keeps the pacing honest: about 22 minutes at 100 WPM, 33 at 60 WPM and 46 at 40 WPM on
   Standard assignments.
 - **Clean streak**: `stats.streak` counts assignments finished at 98% accuracy or better in a row (+4% pay each, up to

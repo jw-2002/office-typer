@@ -1,7 +1,7 @@
 // The things you can buy just for fun, placed on the desk or the shelf. Each appears once it is owned. (The helping hands
 // belong to the keyboard, so they are drawn there.)
 import type { ReactElement } from "react";
-import { useGameStore } from "@/state/gameStore";
+import { useGameStore } from "@/state/game/gameStore";
 import { DESK_HEIGHT, SHELF } from "../palette";
 import DeskClock from "./DeskClock";
 import DeskLamp from "./DeskLamp";

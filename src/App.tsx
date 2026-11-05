@@ -1,12 +1,12 @@
 // Top-level layout: the 3D <Canvas> holding the scene, with the 2D HUD layered over it.
 import { Canvas } from "@react-three/fiber";
-import { cameraPoses } from "@/scene/cameraViews";
-import { createCanvasEvents } from "@/scene/canvasEvents";
+import { cameraPoses } from "@/scene/camera/cameraViews";
+import { createCanvasEvents } from "@/scene/camera/canvasEvents";
 import Scene from "@/scene/Scene";
 import { useDisplayTheme, useOsTheme } from "@/hooks/useOsTheme";
-import { useDisplayStore } from "@/state/displayStore";
-import GoblinOverlay from "@/ui/GoblinOverlay";
-import Hud from "@/ui/Hud";
+import { useDisplayStore } from "@/state/view/displayStore";
+import GoblinOverlay from "@/ui/goblin/GoblinOverlay";
+import Hud from "@/ui/hud/Hud";
 
 export default function App() {
   useOsTheme();

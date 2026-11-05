@@ -1,0 +1,41 @@
+/* Styles for dialogs: a dimmed backdrop over the whole desktop, with a small window in the middle. */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: var(--space-3);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.dialog {
+  width: min(24rem, 100%);
+}
+
+.text {
+  margin: 0 0 var(--space-3);
+  line-height: 1.4;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* A full-screen dialog: no backdrop gap, and the window stretches to fill the whole desktop. */
+.full {
+  padding: 0;
+  background: none;
+}
+
+.full .dialog {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.full .dialog > section {
+  flex: 1;
+}

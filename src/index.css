@@ -1,6 +1,6 @@
 /* Global styles: design tokens (colours, spacing, fonts) as CSS variables, plus the reset. */
 /* The tokens below are the defaults. osThemes.css overrides them per operating system. */
-@import "./ui/osThemes.css";
+@import "@/ui/desktop/osThemes.css";
 
 :root {
   --color-bg: #111827;

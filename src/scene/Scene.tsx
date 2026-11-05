@@ -2,14 +2,14 @@
 import { OrbitControls } from "@react-three/drei";
 import { Bloom, EffectComposer, ToneMapping, Vignette } from "@react-three/postprocessing";
 import { ToneMappingMode } from "postprocessing";
-import CameraRig from "./CameraRig";
-import { cameraPoses } from "./cameraViews";
-import DustMotes from "./DustMotes";
+import CameraRig from "@/scene/camera/CameraRig";
+import { cameraPoses } from "@/scene/camera/cameraViews";
+import DustMotes from "@/scene/effects/DustMotes";
 import Office from "./Office";
-import RewardPopups from "./RewardPopups";
-import Sun from "./Sun";
-import { useDisplayStore } from "@/state/displayStore";
-import { useFitCamera } from "./useFitCamera";
+import RewardPopups from "@/scene/effects/RewardPopups";
+import Sun from "@/scene/light/Sun";
+import { useDisplayStore } from "@/state/view/displayStore";
+import { useFitCamera } from "@/scene/camera/useFitCamera";
 
 export default function Scene() {
   useFitCamera();

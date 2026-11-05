@@ -3,7 +3,7 @@
 // even through a new career.
 import { jobs } from "./jobs";
 import { upgrades } from "./upgrades";
-import type { Progress } from "../progress";
+import { type Progress } from "@/game/progress/progress";
 
 export type Achievement = {
   id: string;

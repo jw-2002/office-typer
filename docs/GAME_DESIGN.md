@@ -14,7 +14,7 @@ fast you type, ending when an AI assistant takes your job.
 ## Currency
 
 Placeholder: **Credits**. Candidate: **Billable Hours**. Defined in one constant
-(`src/game/currency.ts`) so renaming is a one-line change.
+(`src/game/economy/currency.ts`) so renaming is a one-line change.
 
 ## Assignments
 

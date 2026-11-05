@@ -52,12 +52,12 @@ TypeScript should error if an upgrade has no visual.
 - Costs scale geometrically (about 1.15x to 1.5x per level); put the growth factor in data.
 - Numbers are plain JS numbers for now. Always display through one `formatNumber()` helper
   (1.2K, 3.4M). Revisit big-number libraries only if values approach 1e15.
-- The currency name comes from `src/game/currency.ts`. Never hard-code it in UI strings.
+- The currency name comes from `src/game/economy/currency.ts`. Never hard-code it in UI strings.
 
 ## Time and the ending
 
 - Everything that happens by itself (AI assistants earning, the redundancy countdown) runs from one game clock
-  (`src/state/assistantLoop.ts`, once a second, calling the pure `tickGame`). Do not tie game logic to render frames or
+  (`src/state/game/assistantLoop.ts`, once a second, calling the pure `tickGame`). Do not tie game logic to render frames or
   add a timer per feature. The clock skips hidden tabs and caps long gaps.
 - **No offline progress**, by design. Nothing earns while the tab is hidden or the game is closed.
 - The game ends through `Progress.finale` (`none`, `pending`, `redundant`). Once redundant, `tickGame`, buying and
@@ -65,9 +65,9 @@ TypeScript should error if an upgrade has no visual.
 
 ## Persistence
 
-- One versioned JSON object (see `src/game/save.ts`): `version`, `savedAt`, `player`, `upgrades`, `equipped`, `finale` and
+- One versioned JSON object (see `src/game/progress/save.ts`): `version`, `savedAt`, `player`, `upgrades`, `equipped`, `finale` and
   `stats`. Bump `SAVE_VERSION` and add a `migrations` entry whenever the shape changes.
-- `src/game/save.ts` owns the schema, validation and `migrate(oldSave) -> latest`. Unknown or
+- `src/game/progress/save.ts` owns the schema, validation and `migrate(oldSave) -> latest`. Unknown or
   corrupt data falls back to a fresh save without crashing, and keeps a backup copy.
 - Access storage only through the async `SaveRepository` interface (`load`, `save`). The implementation is
   localStorage. There is no cloud save planned.

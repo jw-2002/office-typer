@@ -38,5 +38,6 @@ readable code over clever code.
   Use the parody names in `docs/GAME_DESIGN.md`. The currency name is a single constant.
 - There is no backend, accounts, leaderboard, ads or offline earnings, by design (see `docs/PLAN.md`). Do not add them.
 - Every source file starts with a one-line comment saying what it is for (`//` in .ts/.tsx, `/* */` in .css).
-  Add one to every new file and update it if the file's job changes. Code map: `docs/ARCHITECTURE.md`.
+  Add one to every new file and update it if the file's job changes. Code map: `docs/ARCHITECTURE.md`. Put new files in the subfolder
+  for their topic (for example `scene/computer/`, `ui/dialogs/`), not loose in `src/<area>/`, with tests beside the file.
 - Keep this file short. Detail goes in `docs/` and the skills.

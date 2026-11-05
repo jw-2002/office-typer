@@ -1,0 +1,84 @@
+/* Styles for the assistant program: its name and numbers on top, and a screen showing it typing. */
+.assistant {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  line-height: 1.4;
+}
+
+.empty p {
+  margin: 0;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.name {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.description {
+  margin: var(--space-1) 0 0;
+  color: var(--color-muted);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0 var(--space-3);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.facts dt {
+  color: var(--color-muted);
+}
+
+.facts dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 700;
+}
+
+.warning {
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius);
+  color: var(--color-error);
+  font-weight: 700;
+}
+
+/* A small sunken screen that the assistant types into. */
+.screen {
+  composes: sunken from "@/ui/shared/surface.module.css";
+  min-height: 5.5rem;
+  margin: 0;
+  padding: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: calc(var(--assignment-font-size, 1.1rem) * var(--text-scale, 1));
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: var(--color-accent);
+}

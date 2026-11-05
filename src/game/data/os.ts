@@ -1,4 +1,4 @@
-// The fake operating systems the computers run. Each one restyles the whole UI (see src/ui/osThemes.css).
+// The fake operating systems the computers run. Each one restyles the whole UI (see src/ui/desktop/osThemes.css).
 // Names are parodies: no real product names in the game.
 
 export type OsId = "classic" | "sky" | "pear" | "eleven" | "quantum";

@@ -52,7 +52,7 @@ and the content shown on the in-world monitor via `<Html>`.
 
 ## OS themes (the whole UI restyles per computer)
 
-- `<html data-os="...">` is set from the best computer owned, and `src/ui/osThemes.css` has one block
+- `<html data-os="...">` is set from the best computer owned, and `src/ui/desktop/osThemes.css` has one block
   per OS that only overrides tokens. Components must style through tokens (`--color-*`,
   `--button-*`, `--surface-*`, `--titlebar-*`, `--taskbar-*`, `--wallpaper`, `--radius`, fonts),
   never hard-coded colours, or they will look wrong in some OS.
@@ -60,7 +60,7 @@ and the content shown on the in-world monitor via `<Html>`.
   instead of repeating border and shadow rules. Buttons use the shared `Button` component.
 - A new token must be added to **every** OS block (a test enforces this). A new OS is a new block,
   an id in `src/game/data/os.ts`, and a computer that points at it.
-- Every theme must pass `src/ui/themeContrast.test.ts` (4.5:1 for each text and background pair). Run it when you
+- Every theme must pass `src/ui/desktop/themeContrast.test.ts` (4.5:1 for each text and background pair). Run it when you
   change a colour token. Disabled but selected buttons keep their selected colours.
 - Four-value `border-color` tokens (top right bottom left) make bevels. Use `border: <width> solid`
   plus a separate `border-color`.

@@ -78,7 +78,7 @@ that loop.
   desk) is invisible to clicks, so a click passes through to objects behind it. Wrap solid things in
   `<Solid>` (`src/scene/Solid.tsx`), which stops clicks and hover.
 - **DOM inside the canvas container** (drei `<Html>`) makes `event.offsetX/Y` relative to the clicked element, so R3F
-  computes a wrong pointer. The Canvas uses `createCanvasEvents` (`src/scene/canvasEvents.ts`) to measure from
+  computes a wrong pointer. The Canvas uses `createCanvasEvents` (`src/scene/camera/canvasEvents.ts`) to measure from
   `clientX/Y` against the canvas instead. Keep it, or clicks on the monitor will hit random 3D objects.
 
 - Use `onPointerDown/Up/Over/Out/Click` on meshes. Call `e.stopPropagation()` so objects

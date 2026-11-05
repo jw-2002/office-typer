@@ -2,9 +2,9 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { MathUtils, type MeshStandardMaterial, type PointLight } from "three";
-import { timeOfDay } from "@/game/time";
-import { useGameStore } from "@/state/gameStore";
-import { isDark } from "../daylight";
+import { timeOfDay } from "@/game/office/time";
+import { useGameStore } from "@/state/game/gameStore";
+import { isDark } from "@/scene/light/daylight";
 
 export default function DeskLamp({ position }: { position: [number, number, number] }) {
   const bulb = useRef<MeshStandardMaterial>(null!);

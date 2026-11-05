@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { Outlines } from "@react-three/drei";
 import { MathUtils, type Group } from "three";
 import { outline } from "../palette";
-import { clicked, hoverHand } from "./clickable";
+import { clicked, hoverHand } from "@/scene/clickable";
 
 export default function StressBall({ position }: { position: [number, number, number] }) {
   const ball = useRef<Group>(null!);

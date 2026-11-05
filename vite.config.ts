@@ -4,6 +4,8 @@ import { defineConfig } from "vitest/config";
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Relative paths so the build works from any URL, such as https://<user>.github.io/office-typer/.
+  base: "./",
   plugins: [react()],
   resolve: {
     // Keep in sync with "paths" in tsconfig.app.json.

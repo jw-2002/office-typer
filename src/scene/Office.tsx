@@ -1,17 +1,17 @@
 // Assembles the office: the room, the desk, the computer, the shelf of old computers, the keyboard and mouse in their places.
-import Chair from "./Chair";
-import DeskClutter from "./DeskClutter";
-import Desk from "./Desk";
-import Floor from "./Floor";
-import Computer from "./Computer";
+import Chair from "@/scene/room/Chair";
+import DeskClutter from "@/scene/room/DeskClutter";
+import Desk from "@/scene/room/Desk";
+import Floor from "@/scene/room/Floor";
+import Computer from "@/scene/computer/Computer";
 import Extras from "./extras/Extras";
-import NamePlate from "./NamePlate";
+import NamePlate from "@/scene/room/NamePlate";
 import { DESK_HEIGHT } from "./palette";
-import Peripherals from "./Peripherals";
-import Room from "./Room";
-import Shelf from "./Shelf";
+import Peripherals from "@/scene/computer/Peripherals";
+import Room from "@/scene/room/Room";
+import Shelf from "@/scene/room/Shelf";
 import Solid from "./Solid";
-import WallDecor from "./WallDecor";
+import WallDecor from "@/scene/room/WallDecor";
 
 export default function Office() {
   return (

@@ -3,8 +3,8 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Outlines } from "@react-three/drei";
 import { MathUtils, type Group } from "three";
-import { CLOCK_MINUTES_PER_SECOND, START_MINUTES } from "@/game/time";
-import { useGameStore } from "@/state/gameStore";
+import { CLOCK_MINUTES_PER_SECOND, START_MINUTES } from "@/game/office/time";
+import { useGameStore } from "@/state/game/gameStore";
 import { outline } from "../palette";
 
 const FACE_RADIUS = 0.06;

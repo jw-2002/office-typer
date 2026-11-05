@@ -1,0 +1,81 @@
+/* The Mac style look (os id pear): the token block and its tab animation. */
+
+/* A soft, light, rounded look: traffic-light window buttons on the left and a menu bar on top. */
+:root[data-os="pear"] {
+  --color-bg: #cfd3e6;
+  --color-surface: #f5f5f7;
+  --color-surface-raised: #e8e8ed;
+  --color-field: #ffffff;
+  --color-text: #1d1d1f;
+  --color-muted: #6e6e73;
+  --color-accent: #0066d6;
+  --color-on-accent: #ffffff;
+  --color-correct: #14803a;
+  --color-error: #d70015;
+  --radius: 0.75rem;
+  --hud-radius: 0.75rem;
+  --font-ui: system-ui, "Helvetica Neue", Helvetica, sans-serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+
+  --surface-border-width: 1px;
+  --surface-border-color: rgba(0, 0, 0, 0.08);
+  --surface-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  --field-border-color: rgba(0, 0, 0, 0.12);
+
+  --button-bg: #ffffff;
+  --button-border-width: 1px;
+  --button-border-color: rgba(0, 0, 0, 0.15);
+  --button-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  --button-radius: 0.5rem;
+  --button-pressed-bg: #0066d6;
+  --button-pressed-text: #ffffff;
+  --button-pressed-border-color: #0066d6;
+
+  --titlebar-bg: linear-gradient(#ececec, #d6d6d6);
+  --titlebar-text: #3a3a3c;
+  --titlebar-radius: 0.75rem 0.75rem 0 0;
+  --control-size: 0.75rem;
+  --control-radius: 50%;
+  --control-min: #febc2e;
+  --control-max: #28c840;
+  --control-close: #ff5f57;
+  --control-order-min: 2;
+  --control-order-max: 3;
+  --control-order-close: 1;
+  --control-glyph: transparent;
+  --control-glyph-hover: rgba(0, 0, 0, 0.55);
+  --control-border-color: rgba(0, 0, 0, 0.15);
+  --controls-order: -1;
+
+  --taskbar-bg: rgba(255, 255, 255, 0.6);
+  --taskbar-text: #1d1d1f;
+  --taskbar-shadow: none;
+  --taskbar-order: -1;
+
+  --wallpaper: linear-gradient(135deg, #b9c6e8, #e8c9e0 60%, #f4dcc8);
+
+  /* A soft springy rise, as if the window settles into place. */
+  --tab-animation: os-pear-settle 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+
+  /* The mouse pointer for this OS: an arrow, and a hand over things you can click. */
+  --cursor-default:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M1 1 L1 17 L5 13.3 L7.9 20 L10.6 18.8 L7.8 12.4 L13 12.4 Z' fill='%23111111' stroke='%23ffffff' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E")
+      1 1,
+    default;
+  --cursor-pointer:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M7 1.5 C7 0.6 8.8 0.6 8.8 1.5 L8.8 9 L9.3 9 C9.3 8 11.2 8 11.2 9 L11.3 9.6 C11.5 8.7 13.3 8.8 13.3 9.9 L13.5 10.6 C13.8 9.8 15.5 10 15.5 11 L15.5 16 C15.5 19 13.5 21 11 21 L9.4 21 C7.6 21 6.6 20 5.4 18.2 L2.4 13.4 C1.9 12.4 3.4 11.6 4.3 12.4 L7 14.6 Z' fill='%23ffffff' stroke='%23111111' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E")
+      7 1,
+    pointer;
+}
+
+@keyframes os-pear-settle {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

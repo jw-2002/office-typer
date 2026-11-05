@@ -1,8 +1,8 @@
 // The operating system of the computer in use, and hooks that apply it and the display settings to the whole page.
 import { useEffect } from "react";
 import type { OsId } from "@/game/data/os";
-import { useDisplayStore } from "@/state/displayStore";
-import { useEquipped, useGameStore } from "@/state/gameStore";
+import { useDisplayStore } from "@/state/view/displayStore";
+import { useEquipped, useGameStore } from "@/state/game/gameStore";
 
 /** The OS for the computer currently in use. */
 export function useOs(): OsId {

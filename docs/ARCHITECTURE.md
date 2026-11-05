@@ -18,36 +18,53 @@ one-line comment saying what it does.
 
 There is no central game loop. Flow is event driven:
 
-`key press` -> `keyInput` (src/state) -> `useAssignment` (src/hooks) subscribes and dispatches ->
-`typing.ts` (src/game) applies the rules and returns new state -> `Hud` renders it.
+`key press` -> `keyInput` (src/state/input) -> `useAssignment` (src/state/assignment) subscribes and dispatches ->
+`typing.ts` (src/game/text) applies the rules and returns new state -> `Hud` renders it.
 
 When an assignment finishes, `useAssignment` calls `finishAssignment` on the game store
-(`src/state/gameStore.ts`), which uses `src/game/progress.ts` and `economy.ts` to pay out, update
+(`src/state/game/gameStore.ts`), which uses `src/game/progress/gameplay.ts` and `economy.ts` to pay out, update
 stats and promote. Buying goes the same way (`ShopPanel` -> `buy` -> `buyUpgrade`). Autosave
-(`src/state/autosave.ts`) watches the store and writes through a `SaveRepository`.
+(`src/state/game/autosave.ts`) watches the store and writes through a `SaveRepository`.
 
 The 3D `Keyboard` reads the same `keyInput` for which keys are held, so keys animate with no game
 logic. Assignment text comes from `assignments.ts` + `data/`.
 
 ## Folders
 
-- `src/game` pure rules and data (no React or three.js), with tests beside them. `simulate.ts` plays a whole game with a steady typist to check the pacing. `data/scenarios.ts` holds the types and pools; the scenario text is in `scenariosEveryday1/2/3`, `scenariosWild` and `scenariosExtra`. `Progress` has the
-  upgrades owned and which one is `equipped` per category; looks and sounds follow the equipped one.
-- `src/state` providers, the key input, the game store and save repository, and the sound and display settings stores (`audioStore`, `displayStore`).
-- `src/game/saveCode.ts` turns a save into a copy-and-paste text code and back (Settings > Back up your save), using `migrate` to repair it.
-- `scripts/smoke.mjs` (`npm run smoke`) drives the dev server in a real browser: name, an assignment, a purchase, a save code and an office event. It needs Playwright's Chromium (`npx playwright install chromium`) and is not part of `npm test`.
-- `src/hooks` hooks shared by UI.
-- `src/audio` key sound recipes, the Web Audio player and the song sequencer (`tracks.ts` data, `musicPlayer.ts`); impure. The sound settings are in `src/state`.
-- `src/scene` everything inside `<Canvas>`: `Scene` (lights, controls) holds `Office`, which places
-  `Room`, `Desk`, the live `Computer`, the `Shelf` of old computers, the job `NamePlate`, the desk extras
-  (`extras/`) and the keyboard. `Sun` is the day and night light, driven by `daylight.ts` and the game clock in
-  `src/game/time.ts`. `CameraRig` moves the camera between the seated and standing views in `cameraViews.ts`, and locks it while seated.
-  `Solid` makes things block clicks, and `canvasEvents.ts` measures the pointer from the canvas. 1 unit = 1 metre.
-  Scenery: `Floor` (planks, skirting, rug), `WallDecor` (window, cork board, poster), `Chair` (pushed in under the desk when
-  standing), `DeskClutter`, `DustMotes`, `RewardPopups` (floating pay number), and `palette.ts` holds the colours and
-  outline settings. `ui/NameDialog` (the intro), `Peripherals` (keyboard and mouse that match the computer), `Mouse` and `extras/MouseHand`, `LaptopBase`, `keyboard/HelpingHands` and `keyboard/fingers.ts` animate the gloves. `GoblinPoster` is the goblin mode easter egg (poke it), with `ui/GoblinOverlay`, `GoblinText` and `GoblinHint` for the green screen and text. `extras/` also has the click-to-play toys (stress ball, rubber duck, mini fridge, second monitor), and `QuantumToaster` (the toaster's lever and toast, with its joke in `game/toast.ts`). `Scene` also adds bloom,
-  vignette and tone mapping through `EffectComposer`. Ambient sounds are in `src/audio/keyClicker.ts`, chosen by
-  `src/game/ambience.ts` and played from `state/KeySounds.tsx`.
-- `src/ui` the DOM overlay. `Desktop` (window + task bar tabs, drawn as `TabIcon` pictures) holds `AssignmentPanel`, `ShopPanel`, `CareerPanel`, `AssistantPanel` and `SettingsPanel`,
-  and shows `Dialog`-based messages (`ConfirmDialog`, `PromotionDialog`) over them;
-  it appears on the 3D monitor via `MonitorScreen`, or in the HUD on touch. `osThemes.css` restyles it all.
+Each folder under `src` is split into subfolders of related files, with each file's test beside it.
+
+- `src/game` pure rules and data (no React or three.js). Subfolders: `text/` (the typing engine `typing.ts`, `wpm.ts`, `assignments.ts`,
+  `assistantText.ts`, `random.ts`), `economy/` (`economy.ts`, `currency.ts`, and `simulate.ts`, which plays a whole game with a steady
+  typist to check the pacing), `progress/` (`progress.ts` is the shape of the save plus a fresh start, careers and the name; `gameplay.ts` finishes assignments and ticks the clock; `shop.ts` buys, equips and puts away; `goblin.ts` is goblin mode; plus `achievements.ts`, `save.ts`, and `saveCode.ts`, the copy-and-paste save code),
+  `office/` (`events.ts`, `ambience.ts`, `time.ts` for the game clock, `toast.ts` for the toaster joke) and `data/` (jobs, upgrades,
+  scenarios, events, achievements). `utils/math.ts` holds `clamp01`. `data/scenarios.ts` has the types and pools; the scenario text is in
+  `scenariosEveryday1/2/3`, `scenariosWild` and `scenariosExtra`. `Progress` has the upgrades owned and which one is `equipped` per
+  category; looks and sounds follow the equipped one.
+- `src/state` Zustand stores and providers. `game/` (`gameStore`, `eventStore`, `recordsStore`, `assistantLoop`, `autosave`,
+  `localSaveRepository`, `devTools`), `input/` (`keyInput`, `KeyInputProvider`, `useKeyInput`, `diffToKeys`), `assignment/`
+  (`AssignmentProvider`, `useCurrentAssignment`, `useAssignment`, `useAssistantTyping`), `sound/` (`audioStore`, `soundCueStore`,
+  `KeySounds`), `view/` (`displayStore`, `viewStore`). `AppProviders` composes them, and `storage.ts` reads and writes localStorage safely.
+- `src/hooks` small hooks shared by the UI (`useNow`, `useCapsLock`, `useCoarsePointer`, `useKeyboardInset`, `useOsTheme`).
+- `src/audio` impure Web Audio code. `sfx/` has the key sound recipes (`keyClicker.ts`, `switchSounds.ts`) and `music/` has the song
+  data (`tracks.ts`) and sequencer (`musicPlayer.ts`). The sound settings are in `src/state/sound`.
+- `src/scene` everything inside `<Canvas>`. `Scene` (lights, controls) holds `Office`, which places the room and computer. 1 unit = 1 metre.
+  `Solid` makes things block clicks, `clickable.ts` has the pointing-hand and click helpers, and `palette.ts` holds the colours and outline
+  settings. Subfolders:
+  - `camera/` `CameraRig` and `cameraViews` (seated and standing), `useFitCamera`, and `canvasEvents` (measures the pointer from the canvas).
+  - `computer/` every computer model: `Computer` (the one in use) and `ComputerSet`, `computerLooks`, `Monitor` and `monitorGeometry`,
+    `PcCase`, `LaptopBase` and `laptopSize`, `QuantumToaster` (lever, toast and its joke), `Peripherals`, `Mouse` and `keyboard/` (the keys,
+    switch colours, gloved `HelpingHands` and `fingers.ts`).
+  - `room/` the scenery: `Room`, `Floor`, `WallDecor` (window, cork board), `Desk`, `DeskClutter`, `Chair`, `Shelf` (old computers),
+    `NamePlate` and `nameplateLooks`, and `GoblinPoster` (the goblin mode easter egg).
+  - `light/` `Sun` and `daylight.ts`, driven by the game clock in `src/game/office/time.ts`.
+  - `effects/` `DustMotes` and `RewardPopups` (the floating pay number).
+  - `extras/` the desk and shelf toys you can buy: where each goes is in `Extras.tsx`.
+    `Scene` also adds bloom, vignette and tone mapping through `EffectComposer`. Ambient sounds are in `src/audio/sfx/keyClicker.ts`, chosen by
+    `src/game/office/ambience.ts` and played from `state/sound/KeySounds.tsx`.
+- `src/ui` the DOM overlay. Subfolders: `desktop/` (`Desktop` window and task bar with `TabIcon` pictures, `Window`, `WindowControls`, `Tray`,
+  `MonitorScreen`, and `osThemes.css`, which just imports one file per OS from `themes/` and restyles it all, with its tests), `programs/` (what the task bar opens: `AssignmentPanel`,
+  `ShopPanel`, `CareerPanel`, `AssistantPanel`, `SettingsPanel`, and their parts), `dialogs/` (`Dialog` and the messages built on it, plus
+  `AchievementToast`), `goblin/` (the green goblin mode screen and text), `hud/` (`Hud`, `PostureHint`) and `shared/` (`Button`, `Money`,
+  `ProgressBar`, `surface.module.css`). It appears on the 3D monitor via `MonitorScreen`, or in the HUD on touch.
+- `scripts/smoke.mjs` (`npm run smoke`) drives the dev server in a real browser: name, an assignment, a purchase, a save code and an office
+  event. It needs Playwright's Chromium (`npx playwright install chromium`) and is not part of `npm test`.

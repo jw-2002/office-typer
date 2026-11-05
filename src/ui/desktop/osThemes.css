@@ -1,0 +1,7 @@
+/* The operating-system looks: one file per OS in themes/. Each overrides the tokens in index.css, and <html data-os="..."> picks one.
+   The page is styled only through these tokens, so a new OS is one new file and one line here. */
+@import "./themes/classic.css";
+@import "./themes/sky.css";
+@import "./themes/pear.css";
+@import "./themes/eleven.css";
+@import "./themes/quantum.css";

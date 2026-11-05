@@ -1,0 +1,35 @@
+/* Styles for one upgrade card in the shop. */
+.card {
+  composes: raised from "@/ui/shared/surface.module.css";
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+}
+
+.card[data-status="locked"] {
+  opacity: 0.72;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.description {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.effect {
+  font-size: 0.75rem;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}

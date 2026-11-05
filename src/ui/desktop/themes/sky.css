@@ -1,0 +1,81 @@
+/* The XP style look (os id sky): the token block and its tab animation. */
+
+/* A bright blue and green desktop: rounded blue title bars, creamy panels, glossy buttons. */
+:root[data-os="sky"] {
+  --color-bg: #3a6ea5;
+  --color-surface: #ece9d8;
+  --color-surface-raised: #f5f4ea;
+  --color-field: #ffffff;
+  --color-text: #111111;
+  --color-muted: #555555;
+  --color-accent: #2a5cb0;
+  --color-on-accent: #ffffff;
+  --color-correct: #1a7f1a;
+  --color-error: #bf1a1a;
+  --radius: 0.4rem;
+  --hud-radius: 0;
+  --font-ui: Tahoma, Verdana, sans-serif;
+  --font-mono: "Lucida Console", Consolas, monospace;
+
+  --surface-border-width: 1px;
+  --surface-border-color: #7f9db9;
+  --surface-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --field-border-color: #7f9db9;
+
+  --button-bg: linear-gradient(#ffffff, #ecebe5 85%, #d6d0c5);
+  --button-border-width: 1px;
+  --button-border-color: #003c74;
+  --button-shadow: none;
+  --button-radius: 3px;
+  --button-pressed-bg: linear-gradient(#ffefc4, #f8b330);
+  --button-pressed-text: #111111;
+  --button-pressed-border-color: #e68b2c;
+
+  --titlebar-bg: linear-gradient(#0a5fd8, #1f6fe5 8%, #0a5fd8 40%, #0553cc 88%, #0a4fc0);
+  --titlebar-text: #ffffff;
+  --titlebar-radius: 0.5rem 0.5rem 0 0;
+  --control-size: 1.2rem;
+  --control-radius: 3px;
+  --control-min: #3a7bf5;
+  --control-max: #3a7bf5;
+  --control-close: #d9462b;
+  --control-order-min: 1;
+  --control-order-max: 2;
+  --control-order-close: 3;
+  --control-glyph: #ffffff;
+  --control-glyph-hover: #ffffff;
+  --control-border-color: #ffffff;
+  --controls-order: 1;
+
+  --taskbar-bg: linear-gradient(#245edb, #2a6ee6 10%, #245edb 40%, #1941a5);
+  --taskbar-text: #ffffff;
+  --taskbar-shadow: none;
+  --taskbar-order: 1;
+
+  --wallpaper: radial-gradient(ellipse at 50% 135%, #4f9a22 0 38%, transparent 39%), linear-gradient(#2a6fd6, #9ccbf7);
+
+  /* The window pops open with a quick fade and zoom. */
+  --tab-animation: os-sky-open 0.2s ease-out both;
+
+  /* The mouse pointer for this OS: an arrow, and a hand over things you can click. */
+  --cursor-default:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M1 1 L1 17 L5 13.3 L7.9 20 L10.6 18.8 L7.8 12.4 L13 12.4 Z' fill='%23ffffff' stroke='%23000000' stroke-width='1' stroke-linejoin='miter'/%3E%3C/svg%3E")
+      1 1,
+    default;
+  --cursor-pointer:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M7 1.5 C7 0.6 8.8 0.6 8.8 1.5 L8.8 9 L9.3 9 C9.3 8 11.2 8 11.2 9 L11.3 9.6 C11.5 8.7 13.3 8.8 13.3 9.9 L13.5 10.6 C13.8 9.8 15.5 10 15.5 11 L15.5 16 C15.5 19 13.5 21 11 21 L9.4 21 C7.6 21 6.6 20 5.4 18.2 L2.4 13.4 C1.9 12.4 3.4 11.6 4.3 12.4 L7 14.6 Z' fill='%23ffffff' stroke='%23000000' stroke-width='1' stroke-linejoin='miter'/%3E%3C/svg%3E")
+      7 1,
+    pointer;
+}
+
+@keyframes os-sky-open {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
