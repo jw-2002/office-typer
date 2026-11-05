@@ -1,5 +1,8 @@
-/* Sits over the canvas. Only the posture hint and the touch desktop take pointer events, so the 3D scene stays draggable. */
+/* Sits over the canvas. Only the hints and the touch desktop take pointer events, so the 3D scene stays draggable. */
 .hud {
+  /* Height of the slim strip that holds the hints when the desktop fills a phone screen. */
+  --hint-strip: 2.5rem;
+
   position: fixed;
   inset: 0;
   display: flex;
@@ -13,9 +16,39 @@
   pointer-events: none;
 }
 
+/* The hints sit low and central, and on a phone (where the bottom is the desktop) at the top. */
+.hints {
+  position: absolute;
+  bottom: var(--space-2);
+  left: 50%;
+  display: flex;
+  gap: var(--space-3);
+  transform: translateX(-50%);
+}
+
+@media (pointer: coarse) {
+  .hints {
+    top: var(--space-2);
+    bottom: auto;
+  }
+}
+
+/* The desktop fills the phone: a dark strip across the top for the hints, then the desktop to the edges. */
+.hud[data-screen="true"] {
+  padding: var(--hint-strip) 0 var(--keyboard-inset, 0px);
+  background: #000000;
+}
+
+.hud[data-screen="true"] .hints {
+  /* Centred in the strip. */
+  top: 0;
+  height: var(--hint-strip);
+  align-items: center;
+}
+
 .desktop {
-  /* A fixed height for the window, so switching tabs does not make the HUD jump. */
-  height: min(75dvh, 34rem);
+  /* Fills the space under the strip, so switching tabs does not make the HUD jump. */
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
-  border-radius: var(--hud-radius);
 }

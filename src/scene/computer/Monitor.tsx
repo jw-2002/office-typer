@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { Html, Outlines, RoundedBox } from "@react-three/drei";
 import { CustomBlending, DoubleSide, ZeroFactor } from "three";
-import { useCoarsePointer } from "@/hooks/useCoarsePointer";
+import { useHudScreen } from "@/hooks/useHudScreen";
 import { useCurrentAssignment } from "@/state/assignment/useCurrentAssignment";
 import MonitorScreen from "@/ui/desktop/MonitorScreen";
 import { SCREEN_PX } from "@/ui/desktop/screenSize";
@@ -89,12 +89,13 @@ export function MonitorBody({ look, children }: MonitorBodyProps) {
 /** The monitor in use, showing the desktop. */
 export default function Monitor({ look }: { look: ComputerLook }) {
   const current = useCurrentAssignment();
-  // On touch devices the desktop is in the HUD instead, so the screen stays dark.
-  const touch = useCoarsePointer();
+  // On a phone the desktop is in the HUD while it fills the screen, so the glass stays dark then. When the player
+  // looks around the office instead, the monitor shows it (to read; typing is done on the full-screen one).
+  const inHud = useHudScreen();
 
   return (
     <MonitorBody look={look}>
-      {!touch && (
+      {!inHud && (
         // transform makes the DOM follow the 3D object, tilting and shrinking with the camera. A low
         // zIndexRange keeps the page beneath the 2D HUD. occlude="blending" puts the page BEHIND the canvas and cuts a
         // see-through hole in the 3D picture where the glass is. Anything in front of the screen (a hand, a mug, the

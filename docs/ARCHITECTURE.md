@@ -64,7 +64,7 @@ Each folder under `src` is split into subfolders of related files, with each fil
 - `src/ui` the DOM overlay. Subfolders: `desktop/` (`Desktop` window and task bar with `TabIcon` pictures, `Window`, `WindowControls`, `Tray`,
   `MonitorScreen`, and `osThemes.css`, which just imports one file per OS from `themes/` and restyles it all, with its tests), `programs/` (what the task bar opens: `AssignmentPanel`,
   `ShopPanel`, `CareerPanel`, `AssistantPanel`, `SettingsPanel`, and their parts), `dialogs/` (`Dialog` and the messages built on it, plus
-  `AchievementToast`), `goblin/` (the green goblin mode screen and text), `hud/` (`Hud`, `PostureHint`) and `shared/` (`Button`, `Money`,
-  `ProgressBar`, `surface.module.css`). It appears on the 3D monitor via `MonitorScreen`, or in the HUD on touch.
+  `AchievementToast`), `goblin/` (the green goblin mode screen and text), `hud/` (`Hud`, `HintButton`, `PostureHint`, `ScreenToggle`) and `shared/` (`Button`, `Money`,
+  `ProgressBar`, `surface.module.css`). It appears on the 3D monitor via `MonitorScreen`, or, on touch, full screen in the HUD with a button to switch to the 3D office.
 - `scripts/smoke.mjs` (`npm run smoke`) drives the dev server in a real browser: name, an assignment, a purchase, a save code and an office
   event. It needs Playwright's Chromium (`npx playwright install chromium`) and is not part of `npm test`.

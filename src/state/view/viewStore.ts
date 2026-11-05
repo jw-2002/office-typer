@@ -8,13 +8,18 @@ type ViewStore = {
   view: CameraView;
   /** True when the last change should jump straight to the new view, with no camera move (used when the game loads). */
   instant: boolean;
+  /** Phones only: whether the desktop fills the screen (true) or the 3D office shows (false). */
+  screenOpen: boolean;
   setView: (view: CameraView) => void;
   setViewInstantly: (view: CameraView) => void;
+  toggleScreen: () => void;
 };
 
 export const useViewStore = create<ViewStore>()((set) => ({
   view: "seated",
   instant: false,
+  screenOpen: true,
   setView: (view) => set({ view, instant: false }),
   setViewInstantly: (view) => set({ view, instant: true }),
+  toggleScreen: () => set((state) => ({ screenOpen: !state.screenOpen })),
 }));

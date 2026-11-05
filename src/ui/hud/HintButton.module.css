@@ -1,8 +1,5 @@
-/* Styles for the stand up / sit down hint: no box, just soft text with a small icon, low on the screen. */
+/* Styles for the faint hint buttons (stand up, look around...): no box, just soft text with a small icon. */
 .hint {
-  position: absolute;
-  bottom: var(--space-2);
-  left: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -15,13 +12,13 @@
   font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  white-space: nowrap;
   /* Legible over both bright walls and dark floors. */
   text-shadow:
     0 0 4px rgba(0, 0, 0, 0.7),
     0 1px 2px rgba(0, 0, 0, 0.6);
   cursor: var(--cursor-pointer);
   opacity: 0.5;
-  transform: translateX(-50%);
   /* The HUD ignores the pointer so the scene stays draggable; the hint opts back in. */
   pointer-events: auto;
 }
@@ -42,17 +39,17 @@
   outline-offset: 2px;
 }
 
-/* The shoe or chair, drawn in the text colour with a soft shadow like the text. The size of one drawing unit is set
+/* The icon, drawn in the text colour with a soft shadow like the text. The size of one drawing unit is set
    here, so every icon is the same scale. */
 .icon {
   --icon-unit: 0.045rem;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
 }
 
-/* On a phone the bottom of the screen is the desktop, so the hint sits at the top instead. */
+/* On a phone the hints sit in a slim strip, so the icon goes beside the text. */
 @media (pointer: coarse) {
   .hint {
-    top: var(--space-2);
-    bottom: auto;
+    flex-direction: row;
+    gap: var(--space-2);
   }
 }
