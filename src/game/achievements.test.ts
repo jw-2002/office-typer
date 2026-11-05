@@ -34,6 +34,7 @@ describe("achievement data", () => {
         totalChars: jobs[jobs.length - 1].minChars,
         assignmentsCompleted: 99,
         bestWpm: 150,
+        bestDocument: "A Note",
         totalEarned: 1_000_000,
         secondsPlayed: 1000,
         streak: 10,

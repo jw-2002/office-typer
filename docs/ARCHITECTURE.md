@@ -34,6 +34,8 @@ logic. Assignment text comes from `assignments.ts` + `data/`.
 - `src/game` pure rules and data (no React or three.js), with tests beside them. `simulate.ts` plays a whole game with a steady typist to check the pacing. `data/scenarios.ts` holds the types and pools; the scenario text is in `scenariosEveryday1/2/3`, `scenariosWild` and `scenariosExtra`. `Progress` has the
   upgrades owned and which one is `equipped` per category; looks and sounds follow the equipped one.
 - `src/state` providers, the key input, the game store and save repository, and the sound and display settings stores (`audioStore`, `displayStore`).
+- `src/game/saveCode.ts` turns a save into a copy-and-paste text code and back (Settings > Back up your save), using `migrate` to repair it.
+- `scripts/smoke.mjs` (`npm run smoke`) drives the dev server in a real browser: name, an assignment, a purchase, a save code and an office event. It needs Playwright's Chromium (`npx playwright install chromium`) and is not part of `npm test`.
 - `src/hooks` hooks shared by UI.
 - `src/audio` key sound recipes, the Web Audio player and the song sequencer (`tracks.ts` data, `musicPlayer.ts`); impure. The sound settings are in `src/state`.
 - `src/scene` everything inside `<Canvas>`: `Scene` (lights, controls) holds `Office`, which places

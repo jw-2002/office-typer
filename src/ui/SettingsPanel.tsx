@@ -1,10 +1,12 @@
 // The settings program: your record, sound and display settings, and the reset (which asks for confirmation first).
+import { useState } from "react";
 import { CURRENCY } from "@/game/currency";
 import { upgrades } from "@/game/data/upgrades";
 import { formatDuration, formatNumber } from "@/game/economy";
 import { useAudioStore } from "@/state/audioStore";
 import { useDisplayStore } from "@/state/displayStore";
-import { useGameStore } from "@/state/gameStore";
+import { decodeSave, encodeSave } from "@/game/saveCode";
+import { progressOf, useGameStore } from "@/state/gameStore";
 import Button from "./Button";
 import GoblinHint from "./GoblinHint";
 import GoblinText from "./GoblinText";
@@ -26,6 +28,27 @@ export default function SettingsPanel({ onRequestReset }: SettingsPanelProps) {
   const volume = useAudioStore((state) => state.volume);
   const setVolume = useAudioStore((state) => state.setVolume);
   const display = useDisplayStore();
+  const load = useGameStore((state) => state.load);
+  const [code, setCode] = useState("");
+  const [message, setMessage] = useState("");
+
+  const copySave = async () => {
+    const text = encodeSave(progressOf(useGameStore.getState()), Date.now());
+    setCode(text);
+    try {
+      await navigator.clipboard.writeText(text);
+      setMessage("Copied. Keep it somewhere safe.");
+    } catch {
+      setMessage("Select the code in the box and copy it yourself.");
+    }
+  };
+  const loadSave = () => {
+    const save = decodeSave(code);
+    if (!save) return setMessage("That is not a valid save code.");
+    load(save);
+    setCode("");
+    setMessage("Save loaded.");
+  };
 
   // Songs are bought in the shop. Only the ones owned can be chosen here.
   const songs = upgrades.filter((upgrade) => upgrade.category === "music" && owned.includes(upgrade.id));
@@ -55,6 +78,30 @@ export default function SettingsPanel({ onRequestReset }: SettingsPanelProps) {
             </dd>
           </dl>
           <GoblinHint className={styles.hint} />
+        </section>
+
+        <section>
+          <h3 className={styles.heading}>Back up your save</h3>
+          <p className={styles.text}>
+            Copy your game as a line of text to keep or move to another browser. Loading one replaces this game.
+          </p>
+          <textarea
+            className={styles.code}
+            rows={3}
+            value={code}
+            placeholder="Paste a save code here"
+            aria-label="Save code"
+            onChange={(event) => setCode(event.target.value)}
+          />
+          <div className={styles.buttons}>
+            <Button onClick={copySave}>Copy save</Button>
+            <Button onClick={loadSave} disabled={code.trim() === ""}>
+              Load save
+            </Button>
+          </div>
+          <p className={styles.text} role="status">
+            {message}
+          </p>
         </section>
 
         <section>

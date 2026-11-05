@@ -18,6 +18,8 @@ export type Stats = {
   assignmentsCompleted: number;
   /** Best whole-assignment WPM, from finished assignments only. */
   bestWpm: number;
+  /** The title of the assignment typed at the best WPM this career, for the ending recap. */
+  bestDocument: string;
   /** Credits earned over the whole game, spending not subtracted. */
   totalEarned: number;
   /** Seconds the game has been open and running. How long a run took. */
@@ -107,6 +109,8 @@ export type AssignmentResult = {
   accuracy: number;
   wpm: number;
   length: AssignmentLength;
+  /** The document's title. */
+  title?: string;
   /** A goblin assignment (typed in goblin mode) pays much more. */
   goblin?: boolean;
   /** The document of the day pays a bit more. */
@@ -118,7 +122,7 @@ export function assignmentResult(
   typing: TypingState,
   now: number,
   length: AssignmentLength,
-  bonuses: { goblin?: boolean; featured?: boolean } = {},
+  bonuses: { goblin?: boolean; featured?: boolean; title?: string } = {},
 ): AssignmentResult {
   return { characters: typing.cursor, accuracy: accuracy(typing), wpm: finalWpm(typing, now), length, ...bonuses };
 }
@@ -147,6 +151,7 @@ export function newProgress(): Progress {
       totalChars: 0,
       assignmentsCompleted: 0,
       bestWpm: 0,
+      bestDocument: "",
       totalEarned: 0,
       secondsPlayed: 0,
       streak: 0,
@@ -168,6 +173,14 @@ export function startNewCareer(progress: Progress): Progress {
     legacy: progress.legacy + 1,
     achievements: progress.achievements,
   };
+}
+
+/** A title for experienced players, from how many careers they have finished. Empty on the first career. */
+export function careerRank(legacy: number): string {
+  if (legacy >= 10) return "Fixture";
+  if (legacy >= 6) return "Office Legend";
+  if (legacy >= 3) return "Old Hand";
+  return legacy >= 1 ? "Veteran" : "";
 }
 
 export function currentJob(progress: Progress): Job {
@@ -231,6 +244,7 @@ export function completeAssignment(
       totalChars: progress.stats.totalChars + result.characters,
       assignmentsCompleted: progress.stats.assignmentsCompleted + 1,
       bestWpm: Math.max(progress.stats.bestWpm, result.wpm),
+      bestDocument: result.wpm > progress.stats.bestWpm && result.title ? result.title : progress.stats.bestDocument,
       totalEarned: progress.stats.totalEarned + credits,
       secondsPlayed: progress.stats.secondsPlayed,
       streak,

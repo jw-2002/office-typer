@@ -60,6 +60,12 @@ export default function RedundancyDialog() {
         <dd>
           <Money amount={stats.totalEarned} />
         </dd>
+        {stats.bestDocument !== "" && (
+          <>
+            <dt>Favourite document</dt>
+            <dd>{stats.bestDocument}</dd>
+          </>
+        )}
         <dt>Goblin mode used</dt>
         <dd>
           <GoblinText>{stats.goblinUses} times</GoblinText>

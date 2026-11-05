@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Outlines, Text } from "@react-three/drei";
 import type { Group } from "three";
-import { currentJob } from "@/game/progress";
+import { careerRank, currentJob } from "@/game/progress";
 import { useGameStore } from "@/state/gameStore";
 import { nameplateLook } from "./nameplateLooks";
 import { outline } from "./palette";
@@ -27,6 +27,8 @@ type NamePlateProps = { position: [number, number, number]; rotationY?: number }
 export default function NamePlate({ position, rotationY = 0 }: NamePlateProps) {
   const job = useGameStore(currentJob);
   const name = useGameStore((state) => state.player.name);
+  const rank = careerRank(useGameStore((state) => state.legacy));
+  const title = rank === "" ? job.title : `${rank} ${job.title}`;
   const look = nameplateLook(job.id);
 
   // The pop-in is animation state, not something React draws, so it lives in refs and is applied in useFrame.
@@ -80,14 +82,14 @@ export default function NamePlate({ position, rotationY = 0 }: NamePlateProps) {
           )}
           <Text
             position={[0, name !== "" ? -0.009 : 0, 0.0045]}
-            fontSize={name !== "" ? 0.0075 : 0.0125}
+            fontSize={(name !== "" ? 0.0075 : 0.0125) * (title.length > 20 ? 0.8 : 1)}
             maxWidth={look.width - 0.02}
             textAlign="center"
             anchorX="center"
             anchorY="middle"
             color={look.textColor}
           >
-            {job.title}
+            {title}
           </Text>
         </group>
       </group>

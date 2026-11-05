@@ -101,7 +101,11 @@ export function useAssignment(tier: number) {
   const finishedAt = game.typing.finishedAt;
   const report = useEffectEvent(() =>
     finishAssignment(
-      assignmentResult(game.typing, performance.now(), game.length, { goblin: game.goblin, featured: game.featured }),
+      assignmentResult(game.typing, performance.now(), game.length, {
+        goblin: game.goblin,
+        featured: game.featured,
+        title: game.assignment.title,
+      }),
     ),
   );
   useEffect(() => {

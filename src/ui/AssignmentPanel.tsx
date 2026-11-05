@@ -46,6 +46,7 @@ export default function AssignmentPanel({ current, children }: AssignmentPanelPr
   const { typing, now, length, goblin, featured, finished, capsLock, chooseLength, next } = current;
   const lastReward = useGameStore((state) => state.lastReward);
   const streak = useGameStore((state) => state.stats.streak);
+  const firstTime = useGameStore((state) => state.stats.assignmentsCompleted === 0);
 
   const hint =
     finished && lastReward
@@ -53,7 +54,9 @@ export default function AssignmentPanel({ current, children }: AssignmentPanelPr
         (lastReward.promotedTo ? ` Promoted to ${lastReward.promotedTo.title}!` : "")
       : typing.wrong !== ""
         ? "Mistake. Press Backspace to remove the red text."
-        : "";
+        : firstTime && typing.cursor === 0
+          ? "Type the text above. Backspace fixes mistakes."
+          : "";
 
   return (
     <section className={styles.panel}>

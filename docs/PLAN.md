@@ -415,3 +415,9 @@ Roughly in order of how much they add for how little work:
 8. **Sound.** Office hum, birds in the morning and crickets at night, a chair creak when you stand up.
 9. **Palette discipline.** Pick about ten colours and keep every object to them, with small variations, so the room
    looks designed rather than assembled.
+
+## Later additions
+
+Done after the polish list: save export and import (a copy-and-paste code), a first-assignment hint, a browser smoke
+test (`npm run smoke`), veteran titles on the name plate (`careerRank`) and a favourite document on the ending recap.
+Ideas left for after a full playtest: a goal beyond career 11 (the career bonus stops at +100%).

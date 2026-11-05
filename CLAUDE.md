@@ -13,7 +13,7 @@ starting significant work, and update them when decisions change.
 Vite, React 19, TypeScript (strict), three.js via @react-three/fiber (R3F) and @react-three/drei.
 Package manager: npm. Dev server: `npm run dev`. Imports across folders use the `@/` alias
 (`src/`). Before finishing a change run `npx tsc -b`, `npm run lint`, `npm test`,
-`npm run format:check` and `npm run build`. `npm run format` fixes formatting.
+`npm run format:check` and `npm run build`. `npm run smoke` is a slower browser check; run it after UI changes. `npm run format` fixes formatting.
 
 ## The user
 

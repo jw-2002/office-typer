@@ -1,5 +1,6 @@
 // The career program: your job, how far you are from the next promotion, and the whole ladder of jobs.
 import { achievements } from "@/game/data/achievements";
+import { careerRank } from "@/game/progress";
 import { assignmentTierNames, jobs } from "@/game/data/jobs";
 import { LEGACY_BONUS_STEP, formatNumber, legacyMultiplier, promotionProgress } from "@/game/economy";
 import { useGameStore } from "@/state/gameStore";
@@ -24,7 +25,8 @@ export default function CareerPanel() {
 
         {legacy > 0 && (
           <p className={styles.detail}>
-            Career number {legacy + 1}: +{Math.round((legacyMultiplier(legacy) - 1) * 100)}% pay for your experience (+
+            {careerRank(legacy)}, career number {legacy + 1}: +{Math.round((legacyMultiplier(legacy) - 1) * 100)}% pay
+            for your experience (+
             {Math.round(LEGACY_BONUS_STEP * 100)}% for each career, up to ten).
           </p>
         )}

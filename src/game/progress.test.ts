@@ -27,12 +27,19 @@ import {
   goblinActive,
   goblinReady,
   startGoblinMode,
+  careerRank,
 } from "./progress";
 import { upgradeMultiplier } from "./economy";
 
 const perfect = (characters: number) => ({ characters, accuracy: 1, wpm: 60, length: "short" as const });
 const upgrade = (id: string) => upgrades.find((candidate) => candidate.id === id)!;
 const withCredits = (currency: number): Progress => ({ ...newProgress(), player: { name: "", currency: currency } });
+
+describe("careerRank", () => {
+  it("is empty on the first career and grows with experience", () => {
+    expect([0, 1, 3, 6, 10].map(careerRank)).toEqual(["", "Veteran", "Old Hand", "Office Legend", "Fixture"]);
+  });
+});
 
 describe("completeAssignment", () => {
   it("pays out and updates stats", () => {
@@ -60,6 +67,14 @@ describe("completeAssignment", () => {
     }).progress;
     const slow = completeAssignment(fast, { characters: 120, accuracy: 1, wpm: 40, length: "short" as const }).progress;
     expect(slow.stats.bestWpm).toBe(90);
+  });
+
+  it("remembers the title of the fastest document, and keeps it when a slower one follows", () => {
+    const run = (progress: Progress, wpm: number, title: string) =>
+      completeAssignment(progress, { characters: 50, accuracy: 1, wpm, length: "short", title }).progress;
+    const fast = run(run(newProgress(), 50, "Slow Memo"), 90, "Fast Memo");
+    expect(fast.stats.bestDocument).toBe("Fast Memo");
+    expect(run(fast, 40, "Later Memo").stats.bestDocument).toBe("Fast Memo");
   });
 
   it("promotes when total characters cross a threshold, once", () => {

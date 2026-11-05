@@ -108,6 +108,7 @@ export function migrate(raw: unknown): SaveData | null {
       totalChars: count(stats.totalChars),
       assignmentsCompleted: count(stats.assignmentsCompleted),
       bestWpm: count(stats.bestWpm),
+      bestDocument: typeof stats.bestDocument === "string" ? stats.bestDocument.slice(0, 80) : "",
       totalEarned: count(stats.totalEarned),
       secondsPlayed: count(stats.secondsPlayed),
       streak: Math.floor(count(stats.streak)),
